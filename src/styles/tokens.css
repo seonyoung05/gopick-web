@@ -1,0 +1,61 @@
+/* src/styles/tokens.css
+   Figma Foundations 페이지 값과 1:1로 맞춘 디자인 토큰 */
+:root {
+  /* ---------- Color: brand ---------- */
+  --blue: #1a73e8;
+  --blue-deep: #1557b0;
+  --blue-soft: #e8f0fe;
+  --red: #d93025;
+  --red-soft: #fce8e6;
+  --yellow: #f9ab00;
+  --yellow-soft: #fef7e0;
+  --yellow-ink: #a06500;
+  --green: #188038;
+  --green-soft: #e6f4ea;
+  --violet: #7c4dff;
+  --violet-soft: #f1ecff;
+  --orange: #e8710a; /* 아바타 전용 */
+
+  /* ---------- Color: background ---------- */
+  --canvas: #f5f7fa;
+  --surface: #ffffff;
+  --surface-2: #f0f3f7;
+
+  /* ---------- Color: line ---------- */
+  --line: #dfe4eb;
+  --line-strong: #c6ceda;
+
+  /* ---------- Color: text ---------- */
+  --ink: #1b2230;
+  --sub: #5a6476;
+  --faint: #8a93a3;
+  --on-color: #ffffff;
+
+  /* ---------- Radius ---------- */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+
+  /* ---------- Spacing ---------- */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+
+  /* ---------- Elevation ---------- */
+  --shadow-card: 0 1px 2px rgba(27, 34, 48, 0.04), 0 4px 16px rgba(27, 34, 48, 0.05);
+  --shadow-modal: 0 10px 40px rgba(0, 0, 0, 0.2);
+  --focus-ring: 0 0 0 3px var(--blue-soft);
+
+  /* ---------- Typography ---------- */
+  --font: Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+  'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  
+  /* ---------- Layout ---------- */
+  --sidebar-w: 248px;
+  --topbar-h: 64px;
+}
