@@ -17,6 +17,8 @@ import { Checkbox } from './components/ui/Checkbox';
 import { Stepper } from './components/ui/Stepper';
 import { LevelSelect } from './components/ui/LevelSelect';
 import { TECH_LEVELS, REQUIRED_LEVELS, type TechLevel, type RequiredLevel } from './constants/levels';
+import { FilterPanel, createFilterValues } from './components/common/FilterPanel';
+import { PEOPLE_FILTERS, PROJECT_FILTERS } from './constants/filters';
 
 const colors = [
   'blue', 'blue-deep', 'blue-soft', 'red', 'red-soft', 'yellow', 'yellow-soft',
@@ -53,6 +55,8 @@ export default function App() {
   const [javaLevel, setJavaLevel] = useState<TechLevel | null>('실전 경험');
   const [pythonLevel, setPythonLevel] = useState<TechLevel | null>(null);
   const [reactRequired, setReactRequired] = useState<RequiredLevel | null>('기초 경험 이상');
+  const [peopleFilters, setPeopleFilters] = useState(() => createFilterValues(PEOPLE_FILTERS));
+  const [projectFilters, setProjectFilters] = useState(() => createFilterValues(PROJECT_FILTERS));
   return (
     <div style={{ padding: 40, display: 'grid', gap: 40 }}>
       <section>
@@ -272,6 +276,21 @@ export default function App() {
           onChange={setReactRequired}
           aria-label="React 요구 수준"
         />
+      </section>
+      <section>
+        <h1 className="t-h1">FilterPanel</h1>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          <FilterPanel groups={PEOPLE_FILTERS} values={peopleFilters} onChange={setPeopleFilters} />
+          <FilterPanel
+            groups={PROJECT_FILTERS}
+            values={projectFilters}
+            onChange={setProjectFilters}
+            extraAction={<Button variant="ghost" size="sm" block>내 프로필로 채우기</Button>}
+          />
+          <pre className="t-caption" style={{ background: 'var(--surface)', padding: 16, borderRadius: 12 }}>
+            {JSON.stringify(peopleFilters, null, 2)}
+          </pre>
+        </div>
       </section>
     </div>
   );
