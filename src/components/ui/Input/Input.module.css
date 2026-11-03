@@ -1,0 +1,66 @@
+/* src/components/ui/Input/Input.module.css */
+.field {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 15px;
+  line-height: 1.55;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field::placeholder {
+  color: var(--faint);
+}
+
+.field:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: var(--focus-ring);
+}
+
+.field:disabled {
+  background: var(--surface-2);
+  color: var(--faint);
+  cursor: not-allowed;
+}
+
+/* ---------- Error ---------- */
+.invalid,
+.invalid:focus {
+  border-color: var(--red);
+}
+.invalid:focus {
+  box-shadow: 0 0 0 3px var(--red-soft);
+}
+
+/* ---------- Textarea ---------- */
+.textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+/* ---------- Select ---------- */
+.selectWrap {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+}
+
+.select {
+  appearance: none;          /* 브라우저 기본 화살표 숨기기 */
+  padding-right: 38px;
+  cursor: pointer;
+}
+
+.chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--sub);
+  pointer-events: none;      /* 화살표를 눌러도 select가 열리게 */
+}

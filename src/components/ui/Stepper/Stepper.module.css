@@ -1,0 +1,50 @@
+/* src/components/ui/Stepper/Stepper.module.css */
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.btn:first-child { border-radius: var(--r-sm) 0 0 var(--r-sm); }
+.btn:last-child  { border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.btn:disabled {
+  color: var(--faint);
+  cursor: not-allowed;
+}
+
+.value {
+  min-width: 42px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums; /* 숫자가 바뀌어도 너비 흔들림 방지 */
+}

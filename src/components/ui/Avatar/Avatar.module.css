@@ -1,0 +1,33 @@
+/* src/components/ui/Avatar/Avatar.module.css */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--on-color);
+  font-weight: 700;
+  overflow: hidden;
+  user-select: none;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- Size ---------- */
+.sm  { width: 26px; height: 26px; font-size: 12px; }
+.top { width: 36px; height: 36px; font-size: 14px; }
+.md  { width: 38px; height: 38px; font-size: 14px; }
+.lg  { width: 56px; height: 56px; font-size: 19px; }
+.xl  { width: 84px; height: 84px; font-size: 26px; }
+
+/* ---------- Color ---------- */
+.blue   { background: var(--blue); }
+.red    { background: var(--red); }
+.orange { background: var(--orange); }
+.green  { background: var(--green); }
+.violet { background: var(--violet); }
+.muted  { background: var(--faint); }

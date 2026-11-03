@@ -1,0 +1,64 @@
+/* src/components/ui/Chip/Chip.module.css */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--sub);
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.chip:hover:not(.selected) {
+  border-color: var(--sub);
+  color: var(--ink);
+}
+
+.chip:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ---------- Size ---------- */
+.md {
+  padding: 7px 14px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.compact {
+  padding: 5px 11px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* ---------- Selected ---------- */
+.selected {
+  font-weight: 700;
+}
+
+.soft {
+  background: var(--blue-soft);
+  border-color: var(--blue);
+  color: var(--blue-deep);
+}
+
+.filled {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: var(--on-color);
+}
+
+/* ---------- Group ---------- */
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.groupCompact {
+  gap: 6px;
+}

@@ -1,0 +1,88 @@
+/* src/components/ui/Button/Button.module.css */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- Size ---------- */
+.md {
+  padding: 11px 20px;
+  border-radius: 10px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.sm {
+  padding: 7px 12px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.md .icon svg { width: 18px; height: 18px; }
+.sm .icon svg { width: 16px; height: 16px; }
+
+/* ---------- Variant ---------- */
+.primary {
+  background: var(--blue);
+  color: var(--on-color);
+}
+.primary:hover:not(:disabled) {
+  background: var(--blue-deep);
+}
+
+.ghost {
+  background: var(--surface);
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+.ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.ai {
+  background: var(--violet);
+  color: var(--on-color);
+}
+.ai:hover:not(:disabled) {
+  background: #6a3cf0;
+}
+
+.saved {
+  background: var(--yellow-soft);
+  border-color: var(--yellow);
+  color: var(--yellow-ink);
+}
+
+.active {
+  background: var(--blue-soft);
+  border-color: var(--blue);
+  color: var(--blue-deep);
+}
+
+/* ---------- 가로 꽉 채우기 ---------- */
+.block {
+  width: 100%;
+}

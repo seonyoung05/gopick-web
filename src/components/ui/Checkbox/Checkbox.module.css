@@ -1,0 +1,55 @@
+/* src/components/ui/Checkbox/Checkbox.module.css */
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* 진짜 체크박스는 숨기고(접근성용으로만 유지) 모양은 .box로 그림 */
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--on-color);
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.box svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 3;
+}
+
+.input:checked + .box {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.input:focus-visible + .box {
+  box-shadow: var(--focus-ring);
+}
+
+.input:disabled + .box {
+  opacity: 0.45;
+}
+
+.disabled {
+  cursor: not-allowed;
+}
