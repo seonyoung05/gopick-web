@@ -11,6 +11,12 @@ import {
   CONTACT_INPUT_TYPE,
   type ContactType,
 } from './constants/contact';
+import { Segment } from './components/ui/Segment';
+import { Tabs } from './components/ui/Tabs';
+import { Checkbox } from './components/ui/Checkbox';
+import { Stepper } from './components/ui/Stepper';
+import { LevelSelect } from './components/ui/LevelSelect';
+import { TECH_LEVELS, REQUIRED_LEVELS, type TechLevel, type RequiredLevel } from './constants/levels';
 
 const colors = [
   'blue', 'blue-deep', 'blue-soft', 'red', 'red-soft', 'yellow', 'yellow-soft',
@@ -34,6 +40,19 @@ export default function App() {
   const [contactType, setContactType] = useState<ContactType>('디스코드');
   const [contactValue, setContactValue] = useState('');
   const [intro, setIntro] = useState('');
+  const [visibility, setVisibility] = useState<'공개' | '비공개'>('공개');
+  const [techCondition, setTechCondition] = useState<'상관없음' | '우대' | '필수'>('상관없음');
+  const [searchMode, setSearchMode] = useState<'사람' | '프로젝트'>('사람');
+  const [inboxTab, setInboxTab] = useState<'received' | 'sent'>('received');
+  const [tasks, setTasks] = useState([
+    { title: 'DB 및 개발 환경 구축', done: true },
+    { title: '프로필 입력 화면 구현', done: false },
+    { title: '추천 로직 구현', done: false },
+  ]);
+  const [backendCount, setBackendCount] = useState(2);
+  const [javaLevel, setJavaLevel] = useState<TechLevel | null>('실전 경험');
+  const [pythonLevel, setPythonLevel] = useState<TechLevel | null>(null);
+  const [reactRequired, setReactRequired] = useState<RequiredLevel | null>('기초 경험 이상');
   return (
     <div style={{ padding: 40, display: 'grid', gap: 40 }}>
       <section>
@@ -149,6 +168,47 @@ export default function App() {
         />
         <Input placeholder="비활성 상태" disabled />
       </section>
+      <section style={{ display: 'grid', gap: 16 }}>
+        <h1 className="t-h1">Segment</h1>
+        <div>
+          <Segment
+            options={['공개', '비공개']}
+            value={visibility}
+            onChange={setVisibility}
+            aria-label="프로필 공개 설정"
+          />
+          <p className="t-caption">선택: {visibility}</p>
+        </div>
+        <Segment
+          options={['상관없음', '우대', '필수']}
+          value={techCondition}
+          onChange={setTechCondition}
+          aria-label="기술 조건"
+        />
+        <Segment
+          size="lg"
+          options={['사람', '프로젝트']}
+          value={searchMode}
+          onChange={setSearchMode}
+          aria-label="검색 대상"
+        />
+      </section>
+
+      <section>
+        <h1 className="t-h1">Tabs</h1>
+        <Tabs
+          aria-label="제안·지원"
+          value={inboxTab}
+          onChange={setInboxTab}
+          items={[
+            { value: 'received', label: '받은 내역' },
+            { value: 'sent', label: '보낸 내역' },
+          ]}
+        />
+        <p className="t-body-s" style={{ marginTop: 16 }}>
+          지금 선택된 탭: {inboxTab}
+        </p>
+      </section>
       <section>
         <h1 className="t-h1">Color</h1>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
@@ -167,6 +227,51 @@ export default function App() {
             {label} · 함께할 팀원을 찾아보세요
           </p>
         ))}
+      </section>
+      <section style={{ display: 'grid', gap: 12 }}>
+        <h1 className="t-h1">Checkbox</h1>
+        {tasks.map((task, i) => (
+          <Checkbox
+            key={task.title}
+            checked={task.done}
+            onChange={(checked) =>
+              setTasks(tasks.map((t, j) => (j === i ? { ...t, done: checked } : t)))
+            }
+            label={task.title}
+          />
+        ))}
+        <p className="t-caption">
+          완료 {tasks.filter((t) => t.done).length} / {tasks.length}
+        </p>
+      </section>
+
+      <section style={{ display: 'grid', gap: 12 }}>
+        <h1 className="t-h1">Stepper</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span className="t-body-strong">Backend</span>
+          <Stepper
+            value={backendCount}
+            onChange={setBackendCount}
+            min={1}
+            max={5}
+            aria-label="Backend 모집 인원"
+          />
+        </div>
+      </section>
+
+      <section style={{ display: 'grid', gap: 12, maxWidth: 760 }}>
+        <h1 className="t-h1">Level select</h1>
+        <p className="t-body-strong">Java (프로필 · 4단계)</p>
+        <LevelSelect options={TECH_LEVELS} value={javaLevel} onChange={setJavaLevel} aria-label="Java 활용 수준" />
+        <p className="t-body-strong">Python (아직 선택 안 함)</p>
+        <LevelSelect options={TECH_LEVELS} value={pythonLevel} onChange={setPythonLevel} aria-label="Python 활용 수준" />
+        <p className="t-body-strong">React 요구 수준 (등록 폼 · 2단계)</p>
+        <LevelSelect
+          options={REQUIRED_LEVELS}
+          value={reactRequired}
+          onChange={setReactRequired}
+          aria-label="React 요구 수준"
+        />
       </section>
     </div>
   );

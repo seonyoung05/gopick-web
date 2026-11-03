@@ -1,0 +1,48 @@
+/* src/components/ui/Segment/Segment.module.css */
+.segment {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.item {
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--sub);
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.item:hover:not(.selected) {
+  color: var(--ink);
+}
+
+.item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.selected {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(27, 34, 48, 0.12);
+}
+
+/* ---------- Size ---------- */
+.md .item {
+  padding: 7px 16px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.lg .item {
+  padding: 10px 22px;
+  font-size: 15px;
+  line-height: 1.4;
+}

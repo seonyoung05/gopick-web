@@ -1,0 +1,53 @@
+/* src/components/ui/LevelSelect/LevelSelect.module.css */
+.group {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);  /* 옵션 수와 상관없이 같은 너비 */
+  grid-auto-flow: column;
+  gap: 6px;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.option:hover:not(.selected) {
+  border-color: var(--blue);
+}
+
+.option:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.title {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.desc {
+  color: var(--faint);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.selected {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+.selected .title,
+.selected .desc {
+  color: var(--on-color);
+}
