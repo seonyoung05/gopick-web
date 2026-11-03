@@ -1,0 +1,84 @@
+/* src/components/ui/Label/Label.module.css */
+
+/* ---------- Tag ---------- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.gray { background: var(--surface-2); color: var(--sub); }
+.blue { background: var(--blue-soft); color: var(--blue-deep); }
+
+/* ---------- Status ---------- */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor; /* 글자색과 같은 색 점 */
+}
+.recruit { background: var(--green-soft); color: var(--green); }
+.ongoing { background: var(--blue-soft); color: var(--blue-deep); }
+.done    { background: var(--surface-2); color: var(--sub); }
+
+/* ---------- Pill ---------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.pending  { background: var(--yellow-soft); color: var(--yellow-ink); }
+.accepted { background: var(--green-soft); color: var(--green); }
+.declined,
+.canceled { background: var(--surface-2); color: var(--sub); }
+.apply { background: var(--violet-soft); color: var(--violet); }
+.offer { background: var(--blue-soft); color: var(--blue-deep); }
+
+/* ---------- Badge ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--red);
+  color: var(--on-color);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ---------- 내 프로젝트 ---------- */
+.mine {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: var(--green);
+  color: var(--on-color);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
