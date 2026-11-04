@@ -1,0 +1,25 @@
+/* src/components/common/FormSection/FormSection.module.css */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 21px;
+  padding: 29px 0;
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: calc(var(--topbar-h) + 20px); /* 목차 클릭 시 상단바에 가리지 않게 */
+}
+
+.section:first-child { padding-top: 0; }
+.section:last-child { border-bottom: none; }
+
+.head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.head p {
+  margin: 5px 0 0;
+  color: var(--sub);
+  font-size: 14px;
+}

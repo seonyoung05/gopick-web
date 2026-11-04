@@ -1,0 +1,80 @@
+/* src/pages/profile/ProfilePage.module.css */
+.page {
+  max-width: 1128px;
+  padding: 32px 32px 64px;
+}
+
+.head h1 { margin: 0; }
+.head p { margin: 4px 0 26px; color: var(--sub); }
+.head strong { color: var(--red); }
+
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 26px;
+}
+
+.card {
+  flex: 1;
+  min-width: 0;
+  padding: 29px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.contactRow {
+  display: flex;
+  gap: 8px;
+  max-width: 540px;
+}
+
+/* ---------- 왼쪽 진행도 카드 ---------- */
+.side {
+  position: sticky;
+  top: calc(var(--topbar-h) + 20px);
+  width: 270px;
+  flex-shrink: 0;
+  padding: 25px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.sideName { margin: 14px 0 0; font-size: 19px; font-weight: 700; }
+.sideMajor { margin: 0; color: var(--sub); font-size: 14px; }
+.sideParts { display: flex; gap: 6px; padding: 10px 0 19px; }
+
+.meterRow { display: flex; justify-content: space-between; font-size: 14px; }
+.meterBar { height: 8px; margin-top: 6px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.meterFill { height: 100%; border-radius: 4px; background: var(--green); transition: width 0.3s; }
+
+.toc {
+  display: flex;
+  flex-direction: column;
+  margin-top: 19px;
+  padding-top: 13px;
+  border-top: 1px solid var(--line);
+}
+
+.tocItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 8px;
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.tocItem:hover { background: var(--surface-2); }
+.tocDone { color: var(--green); font-size: 12px; font-weight: 700; }
+.tocTodo { color: var(--faint); font-size: 12px; }

@@ -20,3 +20,7 @@ export const COLLAB_PREFERENCES = [
 /** 검색 필터용: 끝의 '기타'는 필터에서 의미가 없어서 뺀 버전 */
 export const withoutEtc = <T extends string>(list: readonly T[]) =>
   list.filter((v) => v !== '기타');
+
+/** 프로필 전용 */
+export const PARTS = ['AI', 'Dev', 'Design'] as const;
+export const TEAM_TENDENCIES = ['Lead', 'Follow', '상관없음'] as const;
