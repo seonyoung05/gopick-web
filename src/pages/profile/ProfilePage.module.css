@@ -78,3 +78,54 @@
 .tocItem:hover { background: var(--surface-2); }
 .tocDone { color: var(--green); font-size: 12px; font-weight: 700; }
 .tocTodo { color: var(--faint); font-size: 12px; }
+
+/* ---------- 기술별 수준 ---------- */
+.levelList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.levelRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.levelRow[data-missing] {
+  border-color: var(--red);
+  background: var(--red-soft);
+}
+
+.levelName {
+  width: 130px;
+  flex-shrink: 0;
+  font-size: 15px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.levelOptions {
+  flex: 1;
+  min-width: 0;
+}
+
+.emptyLevel {
+  margin: 0;
+  padding: 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 10px;
+  color: var(--faint);
+  font-size: 14px;
+  text-align: center;
+}
+
+.etcInput {
+  max-width: 320px;
+}

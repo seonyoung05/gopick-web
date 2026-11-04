@@ -11,10 +11,13 @@ import {
   CONTACT_INPUT_TYPE,
   type ContactType,
 } from '../../constants/contact';
-import { PARTS } from '../../constants/options';
+import { PARTS, TECH_STACKS, FIELDS, ROLES, TEAM_TENDENCIES } from '../../constants/options';
+import type { TechLevel } from '../../constants/levels';
 import { EMPTY_PROFILE, type ProfileForm } from '../../types/profile';
 import { ProfileSide, type TocItem } from './ProfileSide';
+import { TechLevelList } from './TechLevelList';
 import styles from './ProfilePage.module.css';
+import { EtcChipGroup } from '../../components/common/EtcChipGroup';
 
 export default function ProfilePage() {
   const [form, setForm] = useState<ProfileForm>(EMPTY_PROFILE);
@@ -23,14 +26,50 @@ export default function ProfilePage() {
   const update = <K extends keyof ProfileForm>(key: K, value: ProfileForm[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  // 4단계에서 자동 계산으로 바꿀 예정 — 지금은 기본 정보만 계산
-  const basicDone = !!(form.name && form.major && form.contactValue && form.parts.length);
+  /* ---------- 기술 스택 ↔ 수준 연결 ---------- */
+  const handleStacksChange = (nextStacks: string[]) => {
+    setForm((prev) => {
+      const nextLevels: Record<string, TechLevel | null> = {};
+      // 선택된 기술만 남기고, 새로 고른 기술은 아직 수준 없음(null)
+      for (const stack of nextStacks) nextLevels[stack] = prev.levels[stack] ?? null;
+      return {
+        ...prev,
+        stacks: nextStacks,
+        levels: nextLevels,
+        stackEtc: nextStacks.includes('기타') ? prev.stackEtc : '', // 기타 해제 시 입력값 비우기
+      };
+    });
+  };
+
+  const handleLevelChange = (stack: string, level: TechLevel) =>
+    setForm((prev) => ({ ...prev, levels: { ...prev.levels, [stack]: level } }));
+
+  /* ---------- 필수 항목 진행도 ---------- */
+  const hasEtcStack = form.stacks.includes('기타');
+  const required = {
+    name: form.name.trim() !== '',
+    major: form.major.trim() !== '',
+    contact: form.contactValue.trim() !== '',
+    parts: form.parts.length > 0,
+    stacks: form.stacks.length > 0 && (!hasEtcStack || form.stackEtc.trim() !== ''),
+    levels: form.stacks.length > 0 && form.stacks.every((s) => form.levels[s]),
+    fields:
+      form.fields.length > 0 && (!form.fields.includes('기타') || form.fieldEtc.trim() !== ''),
+    roles:
+      form.wantedRoles.length > 0 && (!form.wantedRoles.includes('기타') || form.roleEtc.trim() !== ''),
+  };
+  const requiredDone = Object.values(required).filter(Boolean).length;
+  const requiredTotal = Object.keys(required).length;
+
+  const basicDone = required.name && required.major && required.contact && required.parts;
+  const skillDone = required.stacks && required.levels;
+
   const toc: TocItem[] = [
     { id: 'basic', label: '기본 정보', status: basicDone ? '완료' : '입력 필요', done: basicDone },
-    { id: 'skill', label: '역량', status: '입력 필요', done: false },
-    { id: 'field', label: '관심 분야', status: '입력 필요', done: false },
+    { id: 'skill', label: '역량', status: skillDone ? '완료' : '입력 필요', done: skillDone },
+    { id: 'field', label: '관심 분야', status: required.fields ? '완료' : '입력 필요', done: required.fields },
     { id: 'experience', label: '프로젝트 경험', status: '선택', done: false },
-    { id: 'role', label: '희망 역할', status: '입력 필요', done: false },
+    { id: 'role', label: '희망 역할', status: required.roles ? '완료' : '입력 필요', done: required.roles },
     { id: 'collab', label: '협업 성향', status: '선택', done: false },
     { id: 'intro', label: '소개', status: '선택', done: false },
   ];
@@ -46,7 +85,7 @@ export default function ProfilePage() {
       </div>
 
       <div className={styles.layout}>
-        <ProfileSide form={form} requiredDone={basicDone ? 1 : 0} requiredTotal={8} toc={toc} />
+        <ProfileSide form={form} requiredDone={requiredDone} requiredTotal={requiredTotal} toc={toc} />
 
         <div className={styles.card}>
           {/* ---------- 기본 정보 ---------- */}
@@ -119,19 +158,93 @@ export default function ProfilePage() {
             </Field>
           </FormSection>
 
-          {/* 2~3단계에서 채울 섹션들 */}
-          <FormSection id="skill" title="역량" description="사용할 수 있는 기술을 고르면 기술별 활용 수준을 선택하는 칸이 생겨요.">
-            <p className="t-body-s">2단계에서 만들어요.</p>
+          {/* ---------- 역량 ---------- */}
+          <FormSection
+            id="skill"
+            title="역량"
+            description="사용할 수 있는 기술을 고르면 기술별 활용 수준을 선택하는 칸이 생겨요."
+          >
+            <Field label="기술 스택" req="필수" hint="복수 선택">
+              <ChipGroup
+                multiple
+                options={TECH_STACKS}
+                value={form.stacks}
+                onChange={handleStacksChange}
+                aria-label="기술 스택"
+              />
+              {hasEtcStack && (
+                <Input
+                  className={styles.etcInput}
+                  placeholder="기타 기술 이름 (예: Kotlin)"
+                  value={form.stackEtc}
+                  onChange={(e) => update('stackEtc', e.target.value)}
+                  aria-label="기타 기술 이름"
+                />
+              )}
+            </Field>
+
+            <Field
+              label="기술 스택별 활용 수준"
+              req="조건부 필수"
+              hint="선택한 기술마다 하나씩. 설명을 보고 가장 가까운 수준을 골라 주세요"
+            >
+              <TechLevelList
+                stacks={form.stacks}
+                stackEtc={form.stackEtc}
+                levels={form.levels}
+                onChange={handleLevelChange}
+              />
+            </Field>
           </FormSection>
+
+          {/* ---------- 관심 분야 ---------- */}
           <FormSection id="field" title="관심 분야" description="해보고 싶은 프로젝트 분야를 골라 주세요.">
-            <p className="t-body-s">2단계에서 만들어요.</p>
+            <Field label="관심 분야" req="필수" hint="복수 선택">
+              <EtcChipGroup
+                options={FIELDS}
+                value={form.fields}
+                onChange={(v) => update('fields', v)}
+                etcValue={form.fieldEtc}
+                onEtcChange={(v) => update('fieldEtc', v)}
+                etcPlaceholder="관심 분야 직접 입력 (예: 블록체인)"
+                aria-label="관심 분야"
+              />
+            </Field>
           </FormSection>
-          <FormSection id="experience" title="프로젝트 경험" description="참여했던 프로젝트를 하나씩 추가해 주세요. 입력하지 않아도 괜찮아요.">
+
+          {/* 3단계에서 채울 섹션 */}
+          <FormSection
+            id="experience"
+            title="프로젝트 경험"
+            description="참여했던 프로젝트를 하나씩 추가해 주세요. 입력하지 않아도 괜찮아요."
+          >
             <p className="t-body-s">3단계에서 만들어요.</p>
           </FormSection>
+
+          {/* ---------- 희망 역할 ---------- */}
           <FormSection id="role" title="희망 역할" description="다음 프로젝트에서 맡고 싶은 역할이에요.">
-            <p className="t-body-s">2단계에서 만들어요.</p>
+            <Field label="담당 역할" req="필수" hint="복수 선택">
+              <EtcChipGroup
+                options={ROLES}
+                value={form.wantedRoles}
+                onChange={(v) => update('wantedRoles', v)}
+                etcValue={form.roleEtc}
+                onEtcChange={(v) => update('roleEtc', v)}
+                etcPlaceholder="희망 역할 직접 입력 (예: PM, QA)"
+                aria-label="희망 역할"
+              />
+            </Field>
+            <Field label="팀 내 성향" hint="하나만 선택">
+              <ChipGroup
+                options={TEAM_TENDENCIES}
+                value={form.teamTendency}
+                onChange={(v) => update('teamTendency', v)}
+                aria-label="팀 내 성향"
+              />
+            </Field>
           </FormSection>
+
+          {/* 3단계에서 채울 섹션들 */}
           <FormSection id="collab" title="협업 성향" description="비슷한 방식으로 일하는 팀원을 찾는 데 쓰여요.">
             <p className="t-body-s">3단계에서 만들어요.</p>
           </FormSection>

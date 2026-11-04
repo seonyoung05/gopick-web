@@ -30,16 +30,19 @@ export interface ProfileForm {
 
   // 역량
   stacks: string[];
+  stackEtc: string; // '기타'를 골랐을 때 직접 입력한 기술 이름
   levels: Record<string, TechLevel | null>; // { Java: '실전 경험', Python: null }
 
   // 관심 분야
   fields: string[];
+  fieldEtc: string; // '기타'를 골랐을 때 직접 입력한 분야
 
   // 프로젝트 경험
   experiences: Experience[];
 
   // 희망 역할
   wantedRoles: string[];
+  roleEtc: string; // '기타'를 골랐을 때 직접 입력한 역할
   teamTendency: string | null;
 
   // 협업 성향
@@ -59,8 +62,10 @@ export const EMPTY_PROFILE: ProfileForm = {
   stacks: [],
   levels: {},
   fields: [],
+  fieldEtc: '',
   experiences: [],
   wantedRoles: [],
+  roleEtc: '',
   teamTendency: null,
   collab: { preferences: [], styles: [], strengths: [], tendencies: [], communication: [] },
   intro: '',
