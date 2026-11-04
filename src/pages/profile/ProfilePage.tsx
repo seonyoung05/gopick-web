@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Field } from '../../components/common/Field';
 import { FormSection } from '../../components/common/FormSection';
-import { Input, Select } from '../../components/ui/Input';
+import { Input, Select, Textarea } from '../../components/ui/Input'; // Textarea 추가
 import { Segment } from '../../components/ui/Segment';
 import { ChipGroup } from '../../components/ui/Chip';
 import {
@@ -11,13 +11,22 @@ import {
   CONTACT_INPUT_TYPE,
   type ContactType,
 } from '../../constants/contact';
-import { PARTS, TECH_STACKS, FIELDS, ROLES, TEAM_TENDENCIES } from '../../constants/options';
+import {
+  PARTS, TECH_STACKS, FIELDS, ROLES, TEAM_TENDENCIES, COLLAB_GROUPS, // COLLAB_GROUPS 추가
+} from '../../constants/options';
 import type { TechLevel } from '../../constants/levels';
-import { EMPTY_PROFILE, type ProfileForm } from '../../types/profile';
+import {
+  EMPTY_PROFILE,
+  createEmptyExperience,
+  type Experience,
+  type ProfileForm,
+  type CollabPreference,
+} from '../../types/profile';
 import { ProfileSide, type TocItem } from './ProfileSide';
 import { TechLevelList } from './TechLevelList';
 import styles from './ProfilePage.module.css';
 import { EtcChipGroup } from '../../components/common/EtcChipGroup';
+import { ExperienceCard } from './ExperienceCard';
 
 export default function ProfilePage() {
   const [form, setForm] = useState<ProfileForm>(EMPTY_PROFILE);
@@ -44,6 +53,29 @@ export default function ProfilePage() {
   const handleLevelChange = (stack: string, level: TechLevel) =>
     setForm((prev) => ({ ...prev, levels: { ...prev.levels, [stack]: level } }));
 
+  /* ---------- 프로젝트 경험 ---------- */
+  const addExperience = () =>
+    setForm((prev) => ({ ...prev, experiences: [...prev.experiences, createEmptyExperience()] }));
+
+  const updateExperience = (id: string, patch: Partial<Experience>) =>
+    setForm((prev) => ({
+      ...prev,
+      experiences: prev.experiences.map((e) => (e.id === id ? { ...e, ...patch } : e)),
+    }));
+
+  const removeExperience = (exp: Experience) => {
+    // 내용을 적어 둔 카드면 한 번 더 확인
+    const hasContent = exp.types.length || exp.fields.length || exp.roles.length || exp.stacks.length || exp.detail;
+    if (hasContent && !window.confirm('이 경험을 삭제할까요? 입력한 내용이 사라져요.')) return;
+    setForm((prev) => ({ ...prev, experiences: prev.experiences.filter((e) => e.id !== exp.id) }));
+  };
+
+  /* ---------- 협업 성향 ---------- */
+  const updateCollab = (key: keyof CollabPreference, value: string[]) =>
+    setForm((prev) => ({ ...prev, collab: { ...prev.collab, [key]: value } }));
+
+  const collabCount = Object.values(form.collab).reduce((sum, list) => sum + list.length, 0);
+
   /* ---------- 필수 항목 진행도 ---------- */
   const hasEtcStack = form.stacks.includes('기타');
   const required = {
@@ -68,10 +100,15 @@ export default function ProfilePage() {
     { id: 'basic', label: '기본 정보', status: basicDone ? '완료' : '입력 필요', done: basicDone },
     { id: 'skill', label: '역량', status: skillDone ? '완료' : '입력 필요', done: skillDone },
     { id: 'field', label: '관심 분야', status: required.fields ? '완료' : '입력 필요', done: required.fields },
-    { id: 'experience', label: '프로젝트 경험', status: '선택', done: false },
+    {
+      id: 'experience',
+      label: '프로젝트 경험',
+      status: form.experiences.length ? `${form.experiences.length}개` : '선택',
+      done: false,
+    },
     { id: 'role', label: '희망 역할', status: required.roles ? '완료' : '입력 필요', done: required.roles },
-    { id: 'collab', label: '협업 성향', status: '선택', done: false },
-    { id: 'intro', label: '소개', status: '선택', done: false },
+    { id: 'collab', label: '협업 성향', status: collabCount ? `${collabCount}개 선택` : '선택', done: false },
+    { id: 'intro', label: '소개', status: form.intro.trim() ? '작성함' : '선택', done: false },
   ];
 
   return (
@@ -212,13 +249,27 @@ export default function ProfilePage() {
             </Field>
           </FormSection>
 
-          {/* 3단계에서 채울 섹션 */}
           <FormSection
             id="experience"
             title="프로젝트 경험"
             description="참여했던 프로젝트를 하나씩 추가해 주세요. 입력하지 않아도 괜찮아요."
           >
-            <p className="t-body-s">3단계에서 만들어요.</p>
+            {form.experiences.length > 0 && (
+              <div className={styles.expList}>
+                {form.experiences.map((exp, i) => (
+                  <ExperienceCard
+                    key={exp.id}
+                    index={i}
+                    experience={exp}
+                    onChange={(patch) => updateExperience(exp.id, patch)}
+                    onRemove={() => removeExperience(exp)}
+                  />
+                ))}
+              </div>
+            )}
+            <button type="button" className={styles.addButton} onClick={addExperience}>
+              + 프로젝트 경험 추가
+            </button>
           </FormSection>
 
           {/* ---------- 희망 역할 ---------- */}
@@ -244,12 +295,40 @@ export default function ProfilePage() {
             </Field>
           </FormSection>
 
-          {/* 3단계에서 채울 섹션들 */}
-          <FormSection id="collab" title="협업 성향" description="비슷한 방식으로 일하는 팀원을 찾는 데 쓰여요.">
-            <p className="t-body-s">3단계에서 만들어요.</p>
+          <FormSection
+            id="collab"
+            title="협업 성향"
+            description="비슷한 방식으로 일하는 팀원을 찾는 데 쓰여요. 해당하는 것을 모두 골라 주세요."
+          >
+            {COLLAB_GROUPS.map((group) => (
+              <Field key={group.key} label={group.label}>
+                <ChipGroup
+                  multiple
+                  options={group.options}
+                  value={form.collab[group.key]}
+                  onChange={(v) => updateCollab(group.key, v)}
+                  aria-label={group.label}
+                />
+              </Field>
+            ))}
           </FormSection>
-          <FormSection id="intro" title="소개" description="자신의 강점, 경험, 하고 싶은 일 등을 자유롭게 적어 주세요.">
-            <p className="t-body-s">3단계에서 만들어요.</p>
+
+          <FormSection
+            id="intro"
+            title="소개"
+            description="자신의 강점, 경험, 하고 싶은 일 등을 자유롭게 적어 주세요."
+          >
+            <Field label="소개" htmlFor="intro">
+              <Textarea
+                id="intro"
+                placeholder="예: Spring Boot와 MySQL 기반 REST API 설계에 자신 있어요. 끝까지 완주하는 프로젝트를 해보고 싶어요."
+                value={form.intro}
+                maxLength={500}
+                onChange={(e) => update('intro', e.target.value)}
+                style={{ minHeight: 110 }}
+              />
+              <p className={styles.counter}>{form.intro.length} / 500</p>
+            </Field>
           </FormSection>
         </div>
       </div>

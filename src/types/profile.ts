@@ -5,9 +5,13 @@ import type { TechLevel } from '../constants/levels';
 export interface Experience {
   id: string;
   types: string[];      // 개인 프로젝트, 팀 프로젝트 ...
+  typeEtc: string;
   fields: string[];     // AI, 데이터, 웹 ...
+  fieldEtc: string;
   roles: string[];      // 기획, Frontend ...
+  roleEtc: string;
   stacks: string[];     // Python, Java ...
+  stackEtc: string;
   detail: string;
 }
 
@@ -31,7 +35,7 @@ export interface ProfileForm {
   // 역량
   stacks: string[];
   stackEtc: string; // '기타'를 골랐을 때 직접 입력한 기술 이름
-  levels: Record<string, TechLevel | null>; // { Java: '실전 경험', Python: null }
+  levels: Record<string, TechLevel | null>;
 
   // 관심 분야
   fields: string[];
@@ -60,6 +64,7 @@ export const EMPTY_PROFILE: ProfileForm = {
   isPublic: true,
   parts: [],
   stacks: [],
+  stackEtc: '',
   levels: {},
   fields: [],
   fieldEtc: '',
@@ -70,3 +75,19 @@ export const EMPTY_PROFILE: ProfileForm = {
   collab: { preferences: [], styles: [], strengths: [], tendencies: [], communication: [] },
   intro: '',
 };
+
+/** "+ 프로젝트 경험 추가"를 누를 때 새로 만드는 빈 경험 */
+export function createEmptyExperience(): Experience {
+  return {
+    id: crypto.randomUUID(),
+    types: [],
+    typeEtc: '',
+    fields: [],
+    fieldEtc: '',
+    roles: [],
+    roleEtc: '',
+    stacks: [],
+    stackEtc: '',
+    detail: '',
+  };
+}
