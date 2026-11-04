@@ -191,3 +191,23 @@
   font-size: 12px;
   text-align: right;
 }
+
+/* ---------- 저장 바 ---------- */
+.saveBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.noticeOk,
+.noticeError {
+  margin: 0 auto 0 0;  /* 왼쪽으로 붙이고 버튼은 오른쪽 */
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.noticeOk { color: var(--green); }
+.noticeError { color: var(--red); }
