@@ -1,0 +1,54 @@
+/* src/components/common/PersonCard/PersonCard.module.css */
+.card {
+  display: flex;
+  gap: 14px;
+  padding: 18px 19px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.info {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nameRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.major {
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skills {
+  margin: 0;
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 128px;
+  flex-shrink: 0;
+}
