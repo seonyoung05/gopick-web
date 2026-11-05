@@ -1,0 +1,43 @@
+/* src/pages/saved/SavedPage.module.css */
+.page {
+  max-width: 1128px;
+  padding: 32px 32px 64px;
+}
+
+.head h1 { margin: 0; }
+.head p { margin: 4px 0 22px; color: var(--sub); }
+
+.panel {
+  padding-top: 20px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.meta {
+  margin: 0 0 4px;
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.empty {
+  padding: 48px 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 14px;
+  color: var(--sub);
+  text-align: center;
+}
+
+.empty strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.emptyAction {
+  margin-top: 16px;
+}

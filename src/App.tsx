@@ -3,6 +3,7 @@ import DevPage from './pages/dev/DevPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import PeopleSearchPage from './pages/people/PeopleSearchPage';
 import RecommendPage from './pages/recommend/RecommendPage';
+import SavedPage from './pages/saved/SavedPage';
 
 export default function App() {
   // 임시: 라우팅 생기면 삭제
@@ -10,5 +11,6 @@ export default function App() {
   if (page === 'profile') return <ProfilePage />;
   if (page === 'people') return <PeopleSearchPage />;
   if (page === 'recommend') return <RecommendPage />;
+  if (page === 'saved') return <SavedPage />;
   return <DevPage />;
 }

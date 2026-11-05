@@ -18,6 +18,33 @@ interface PersonCardProps {
 }
 
 export function PersonCard({ person, skillText, saved, onToggleSave, onViewProfile, action }: PersonCardProps) {
+  if (!person.isPublic) {
+    return (
+      <article className={`${styles.card} ${styles.private}`}>
+        <Avatar name={person.name} color="muted" />
+        <div className={styles.info}>
+          <div className={styles.nameRow}>
+            <h3 className={styles.name}>{person.name}</h3>
+            <span className={styles.privateLabel}>비공개 프로필</span>
+          </div>
+          <p className={styles.skills}>
+            저장한 뒤 프로필이 비공개로 바뀌었어요. 다시 공개되면 정보를 볼 수 있어요.
+          </p>
+        </div>
+        <div className={styles.actions}>
+          <Button
+            variant={saved ? 'saved' : 'ghost'}
+            size="sm"
+            block
+            onClick={onToggleSave}
+            aria-pressed={saved}
+          >
+            {saved ? '★ 저장됨' : '☆ 저장'}
+          </Button>
+        </div>
+      </article>
+    );
+  }
   return (
     <article className={styles.card}>
       <Avatar name={person.name} seed={person.id} />
