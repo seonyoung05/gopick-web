@@ -29,7 +29,7 @@ export function RelationAction({ relation, offered, onOffer, onViewApplication }
         <Button variant="ghost" size="sm" block disabled>
           제안 불가
         </Button>
-        <p className={styles.actionNote}>이전에 거절된 제안이 있어요</p>
+        <p className={styles.actionNote}>거절된 제안이 있어요</p>
       </>
     );
   }

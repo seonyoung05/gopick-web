@@ -48,13 +48,13 @@
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   width: 128px;
   flex-shrink: 0;
 }
 
 .actionNote {
-  margin: 0;
+  margin: -2px 0 0;
   color: var(--faint);
   font-size: 12px;
   text-align: center;

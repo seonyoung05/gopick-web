@@ -11,9 +11,9 @@ interface FitListsProps {
 
 function ReasonList({ reasons, ok }: { reasons: MatchReason[]; ok: boolean }) {
   return (
-    <div>
+    <div className={clsx(styles.box, ok ? styles.okBox : styles.noBox)}>
       <p className={clsx(styles.title, ok ? styles.ok : styles.no)}>{ok ? '일치 항목' : '불일치 항목'}</p>
-      <ul className={styles.box}>
+      <ul className={styles.list}>
         {reasons.length === 0 ? (
           <li className={styles.empty}>없음</li>
         ) : (

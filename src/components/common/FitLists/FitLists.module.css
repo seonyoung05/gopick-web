@@ -2,11 +2,24 @@
 .wrap {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 10px;
+  align-items: stretch; /* 두 상자 높이를 같게 */
 }
 
+.box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.okBox { background: #f3f9f4; }
+.noBox { background: #fdf5f4; }
+
 .title {
-  margin: 0 0 4px;
+  margin: 0 0 2px;
   font-size: 12px;
   font-weight: 700;
 }
@@ -14,14 +27,12 @@
 .ok { color: var(--green); }
 .no { color: var(--red); }
 
-.box {
+.list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   margin: 0;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: var(--surface-2);
+  padding: 0;
   list-style: none;
   font-size: 14px;
 }
@@ -29,10 +40,12 @@
 .item {
   display: flex;
   gap: 6px;
+  line-height: 1.5;
 }
 
 .mark {
   flex-shrink: 0;
+  width: 14px;
   font-weight: 700;
 }
 
