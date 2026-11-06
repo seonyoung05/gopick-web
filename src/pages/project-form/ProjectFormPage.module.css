@@ -1,0 +1,75 @@
+/* src/pages/project-form/ProjectFormPage.module.css */
+.heading {
+  margin: 0;
+}
+
+.sub {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--sub);
+}
+
+.sub em {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--red);
+}
+
+.projects {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8);
+  margin: 20px 0;
+}
+
+.projectsLabel {
+  margin-right: var(--space-4);
+  font-size: 14px;
+  color: var(--sub);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: var(--space-24);
+  align-items: start;
+}
+
+.card {
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-8);
+  padding-top: var(--space-24);
+}
+
+.noticeOk,
+.noticeError {
+  margin: var(--space-16) 0 0;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+}
+
+.noticeOk {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.noticeError {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

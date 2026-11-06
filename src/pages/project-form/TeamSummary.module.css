@@ -1,0 +1,101 @@
+/* src/pages/project-form/TeamSummary.module.css */
+.panel {
+  position: sticky;
+  top: calc(var(--topbar-h) + var(--space-24));
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.title {
+  margin: 0 0 var(--space-12);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.second {
+  margin-top: 28px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.rows > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.rows dt {
+  color: var(--sub);
+}
+
+.rows dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.sub {
+  padding-left: var(--space-12);
+  font-size: 12px;
+}
+
+.sub dd {
+  font-weight: 400;
+  color: var(--sub);
+  text-align: right;
+}
+
+.total {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.fit {
+  margin: var(--space-12) 0 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.fitOk {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.fitWarn {
+  background: var(--yellow-soft);
+  color: var(--yellow-ink);
+}
+
+.checks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.checks li {
+  display: flex;
+  justify-content: space-between;
+}
+
+.done {
+  font-size: 12px;
+  color: var(--green);
+}
+
+.todo {
+  font-size: 12px;
+  color: var(--red);
+}
