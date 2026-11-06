@@ -1,0 +1,80 @@
+/* src/components/layout/Topbar/Topbar.module.css */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--topbar-h);
+  padding: 0 var(--space-32);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 420px;
+  max-width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--faint);
+}
+
+.search:focus-within {
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--blue), var(--focus-ring);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.search input::placeholder {
+  color: var(--faint);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+.bell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--sub);
+  cursor: pointer;
+}
+
+.bell:hover {
+  background: var(--surface-2);
+}
+
+.bell:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.bellBadge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+}
