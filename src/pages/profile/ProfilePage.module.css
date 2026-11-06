@@ -1,0 +1,213 @@
+/* src/pages/profile/ProfilePage.module.css */
+.page {
+  max-width: 1128px;
+  padding: 32px 32px 64px;
+}
+
+.head h1 { margin: 0; }
+.head p { margin: 4px 0 26px; color: var(--sub); }
+.head strong { color: var(--red); }
+
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 26px;
+}
+
+.card {
+  flex: 1;
+  min-width: 0;
+  padding: 29px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.contactRow {
+  display: flex;
+  gap: 8px;
+  max-width: 540px;
+}
+
+/* ---------- 왼쪽 진행도 카드 ---------- */
+.side {
+  position: sticky;
+  top: calc(var(--topbar-h) + 20px);
+  width: 270px;
+  flex-shrink: 0;
+  padding: 25px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.sideName { margin: 14px 0 0; font-size: 19px; font-weight: 700; }
+.sideMajor { margin: 0; color: var(--sub); font-size: 14px; }
+.sideParts { display: flex; gap: 6px; padding: 10px 0 19px; }
+
+.meterRow { display: flex; justify-content: space-between; font-size: 14px; }
+.meterBar { height: 8px; margin-top: 6px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.meterFill { height: 100%; border-radius: 4px; background: var(--green); transition: width 0.3s; }
+
+.toc {
+  display: flex;
+  flex-direction: column;
+  margin-top: 19px;
+  padding-top: 13px;
+  border-top: 1px solid var(--line);
+}
+
+.tocItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 8px;
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.tocItem:hover { background: var(--surface-2); }
+.tocDone { color: var(--green); font-size: 12px; font-weight: 700; }
+.tocTodo { color: var(--faint); font-size: 12px; }
+
+/* ---------- 기술별 수준 ---------- */
+.levelList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.levelRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.levelRow[data-missing] {
+  border-color: var(--red);
+  background: var(--red-soft);
+}
+
+.levelName {
+  width: 130px;
+  flex-shrink: 0;
+  font-size: 15px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.levelOptions {
+  flex: 1;
+  min-width: 0;
+}
+
+.emptyLevel {
+  margin: 0;
+  padding: 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 10px;
+  color: var(--faint);
+  font-size: 14px;
+  text-align: center;
+}
+
+.etcInput {
+  max-width: 320px;
+}
+
+/* ---------- 프로젝트 경험 ---------- */
+.expList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.expCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 19px 21px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: #fbfcfd;
+}
+
+.expHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+}
+
+.textButton {
+  border: none;
+  background: none;
+  color: var(--sub);
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.textButton:hover {
+  color: var(--red);
+}
+
+.addButton {
+  width: 100%;
+  padding: 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--blue-deep);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.addButton:hover {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+
+/* ---------- 소개 ---------- */
+.counter {
+  margin: 0;
+  color: var(--faint);
+  font-size: 12px;
+  text-align: right;
+}
+
+/* ---------- 저장 바 ---------- */
+.saveBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.noticeOk,
+.noticeError {
+  margin: 0 auto 0 0;  /* 왼쪽으로 붙이고 버튼은 오른쪽 */
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.noticeOk { color: var(--green); }
+.noticeError { color: var(--red); }
