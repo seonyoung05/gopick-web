@@ -1,0 +1,39 @@
+/* src/pages/projects/ProjectsPage.module.css */
+.heading {
+  margin: 0;
+}
+
+.sub {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--sub);
+}
+
+.tabs {
+  margin: 28px 0 22px;
+}
+
+.recruitList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 26px;
+  align-items: start;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+@media (max-width: 900px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+}
