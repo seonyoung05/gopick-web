@@ -1,0 +1,258 @@
+/* src/pages/inbox/InboxPage.module.css */
+.page {
+  max-width: 1128px;
+  padding: 32px 32px 64px;
+}
+
+.head h1 { margin: 0; }
+.head p { margin: 4px 0 22px; color: var(--sub); }
+
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+  padding-top: 22px;
+}
+
+/* ---------- 왼쪽 목록 ---------- */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 322px;
+  flex-shrink: 0;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.item:hover { border-color: var(--line-strong); }
+
+.item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.itemSelected,
+.itemSelected:hover {
+  border-color: var(--blue);
+  box-shadow: var(--focus-ring);
+}
+
+.itemText {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemTitle {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.itemSub {
+  overflow: hidden;
+  color: var(--sub);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 6px;
+}
+
+.itemDate {
+  color: var(--sub);
+  font-size: 12px;
+}
+
+.unread {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+.emptyList {
+  margin: 0;
+  padding: 32px 16px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-md);
+  color: var(--sub);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ---------- 오른쪽 상세 ---------- */
+.detail,
+.placeholder {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.placeholder {
+  padding: 64px 24px;
+  color: var(--sub);
+  text-align: center;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 26px;
+}
+
+.detailHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detailTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.detailSub {
+  margin: 4px 0 0;
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.blockHeadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.blockTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.blockText {
+  margin: 0;
+  font-size: 14px;
+}
+
+.blockMeta {
+  margin: 0;
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.roleRow {
+  display: flex;
+  gap: 16px;
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  font-size: 14px;
+}
+
+.roleRow strong { min-width: 100px; }
+.roleRow span { color: var(--sub); }
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.contact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.contact p {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.messageGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.label {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.optional {
+  margin-left: 4px;
+  color: var(--faint);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.bubble {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line; /* 메시지의 줄바꿈 유지 */
+}
+
+.note {
+  margin: 0;
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
