@@ -1,0 +1,10 @@
+/* src/components/common/EtcChipGroup/EtcChipGroup.module.css */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input {
+  max-width: 320px;
+}
