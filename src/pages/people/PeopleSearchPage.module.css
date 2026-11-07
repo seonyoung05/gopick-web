@@ -1,0 +1,75 @@
+/* src/pages/people/PeopleSearchPage.module.css */
+.page {
+  max-width: 1128px;
+  padding: 32px 32px 64px;
+}
+
+.head h1 { margin: 0; }
+.head p { margin: 4px 0 22px; color: var(--sub); }
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.searchBox {
+  position: relative;
+  flex: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  color: var(--faint);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.searchInput {
+  padding-left: 42px;
+}
+
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 26px;
+}
+
+.results {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.resultHead {
+  display: flex;
+  justify-content: space-between;
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.resultHead strong {
+  color: var(--ink);
+}
+
+.empty {
+  padding: 48px 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 14px;
+  color: var(--sub);
+  text-align: center;
+}
+
+.empty strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+  font-size: 16px;
+}
