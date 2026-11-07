@@ -1,0 +1,51 @@
+/* src/components/common/ProfileDetailModal/ProfileDetailModal.module.css */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.major {
+  margin: 2px 0 0;
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.list {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px 14px;
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.list dt {
+  color: var(--sub);
+  font-weight: 700;
+}
+
+.list dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}
+
+.muted {
+  color: var(--sub);
+}
