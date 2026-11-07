@@ -1,0 +1,193 @@
+/* src/pages/recommend/RecommendPage.module.css */
+.page {
+  max-width: 1128px;
+  padding: 32px 32px 64px;
+}
+
+.back {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--blue-deep);
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.head h1 { margin: 12px 0 0; }
+.head p { margin: 4px 0 22px; color: var(--sub); }
+
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 26px;
+}
+
+.results {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.meta {
+  margin: 0;
+  color: var(--sub);
+  font-size: 14px;
+}
+
+/* ---------- 추천 카드 ---------- */
+.card {
+  display: flex;
+  gap: 22px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.cardInfo {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.rank {
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.rankTop { background: var(--green-soft); color: var(--green); }
+.rankOther { background: var(--blue-soft); color: var(--blue-deep); }
+
+.name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.sub {
+  margin: 0;
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fit {
+  padding-top: 6px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 128px;
+  flex-shrink: 0;
+}
+
+.actionNote {
+  margin: 0;
+  color: var(--faint);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ---------- 더 찾기 · 빈 상태 ---------- */
+.more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 19px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.more strong { display: block; }
+.more p { margin: 2px 0 0; color: var(--sub); font-size: 14px; }
+
+.empty {
+  padding: 48px 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 14px;
+  color: var(--sub);
+  text-align: center;
+}
+
+/* ---------- 추천 기준 ---------- */
+.aside {
+  position: sticky;
+  top: calc(var(--topbar-h) + 20px);
+  width: 290px;
+  flex-shrink: 0;
+  padding: 25px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.aside h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.priority {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+  counter-reset: p;
+}
+
+.priority li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 14px;
+  counter-increment: p;
+}
+
+.priority li::before {
+  content: counter(p);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--blue-soft);
+  color: var(--blue-deep);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.basis {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 0 0 18px;
+  border-top: 1px solid var(--line);
+  color: var(--sub);
+  font-size: 14px;
+}

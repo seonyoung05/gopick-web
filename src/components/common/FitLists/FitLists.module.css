@@ -1,0 +1,45 @@
+/* src/components/common/FitLists/FitLists.module.css */
+.wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.title {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ok { color: var(--green); }
+.no { color: var(--red); }
+
+.box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  list-style: none;
+  font-size: 14px;
+}
+
+.item {
+  display: flex;
+  gap: 6px;
+}
+
+.mark {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.category {
+  color: var(--sub);
+}
+
+.empty {
+  color: var(--faint);
+}

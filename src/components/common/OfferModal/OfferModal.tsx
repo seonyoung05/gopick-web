@@ -20,9 +20,11 @@ interface OfferModalProps {
   projects: MyRecruitingProject[];
   onClose: () => void;
   onSubmit: (payload: OfferPayload) => void;
+  /** 미리 골라 둘 모집 역할 (추천 화면에서 탭 역할) */
+  defaultRecruitmentId?: string;
 }
 
-export function OfferModal({ person, projects, onClose, onSubmit }: OfferModalProps) {
+export function OfferModal({ person, projects, onClose, onSubmit, defaultRecruitmentId }: OfferModalProps) {
   return (
     <Modal
       open={person !== null}
@@ -32,7 +34,14 @@ export function OfferModal({ person, projects, onClose, onSubmit }: OfferModalPr
     >
       {/* 열릴 때마다 입력값이 초기화되도록 사람별로 새로 그림 */}
       {person && (
-        <OfferForm key={person.id} person={person} projects={projects} onClose={onClose} onSubmit={onSubmit} />
+        <OfferForm
+          key={person.id}
+          person={person}
+          projects={projects}
+          onClose={onClose}
+          onSubmit={onSubmit}
+          defaultRecruitmentId={defaultRecruitmentId}
+        />
       )}
     </Modal>
   );
@@ -43,12 +52,14 @@ function OfferForm({
   projects,
   onClose,
   onSubmit,
+  defaultRecruitmentId,
 }: Omit<OfferModalProps, 'person'> & { person: PersonSummary }) {
   const [projectId, setProjectId] = useState(projects[0]?.id ?? '');
   const project = projects.find((p) => p.id === projectId);
 
   const roleLabel = (r: { role: string; remaining: number }) => `${r.role} ${r.remaining}명 모집`;
-  const [roleText, setRoleText] = useState<string | null>(null);
+  const defaultRole = project?.recruitments.find((r) => r.recruitmentId === defaultRecruitmentId);
+  const [roleText, setRoleText] = useState<string | null>(defaultRole ? roleLabel(defaultRole) : null);
   const [message, setMessage] = useState(
     `안녕하세요, ${person.name} 님! 프로필을 보고 ${projects[0]?.name ?? ''} 팀에 함께하고 싶어서 제안드려요.`,
   );
