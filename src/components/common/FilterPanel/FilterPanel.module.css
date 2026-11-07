@@ -16,6 +16,8 @@
   border-radius: var(--r-lg);
   background: var(--surface);
   box-shadow: var(--shadow-card);
+  scrollbar-width: thin;                            /* 얇게 */
+  scrollbar-color: var(--line-strong) transparent;  /* 연한 회색 */
 }
 
 .group {
@@ -56,4 +58,16 @@
 
 .reset:hover {
   color: var(--ink);
+}
+.panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.panel::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--line-strong);
+}
+
+.panel::-webkit-scrollbar-track {
+  background: transparent;
 }

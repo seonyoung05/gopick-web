@@ -8,9 +8,9 @@ export interface LevelOptionItem<T extends string> {
 }
 
 interface LevelSelectProps<T extends string> {
-  options: readonly LevelOptionItem<T>[];
-  value: T | null;
-  onChange: (value: T) => void;
+  options: readonly LevelOptionItem<T>[];    
+  value: NoInfer<T> | null;                   
+  onChange: (value: NoInfer<T>) => void;      
   className?: string;
   'aria-label'?: string;
 }

@@ -26,15 +26,21 @@ interface SingleProps extends BaseProps {
 
 export type ChipGroupProps = MultipleProps | SingleProps;
 
+/** 복수 선택인지 TypeScript에게 확실히 알려 주는 함수 */
+function isMultiple(props: ChipGroupProps): props is MultipleProps {
+  return props.multiple === true;
+}
+
 export function ChipGroup(props: ChipGroupProps) {
   const { options, size = 'md', className } = props;
-  const selectedStyle = props.selectedStyle ?? (props.multiple ? 'soft' : 'filled');
+  const multiple = isMultiple(props);
+  const selectedStyle = props.selectedStyle ?? (multiple ? 'soft' : 'filled');
 
   const isSelected = (option: string) =>
-    props.multiple ? props.value.includes(option) : props.value === option;
+    isMultiple(props) ? props.value.includes(option) : props.value === option;
 
   const handleClick = (option: string) => {
-    if (props.multiple) {
+    if (isMultiple(props)) {
       const next = props.value.includes(option)
         ? props.value.filter((v) => v !== option) // 이미 선택 → 해제
         : [...props.value, option];               // 선택 안 됨 → 추가
