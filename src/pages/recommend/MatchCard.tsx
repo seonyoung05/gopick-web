@@ -7,6 +7,7 @@ import { FitLists } from '../../components/common/FitLists';
 import type { Recommendation } from '../../types/recommendation';
 import { skillSummary } from '../people/filterPeople';
 import styles from './RecommendPage.module.css';
+import { RelationAction } from '../../components/common/PersonCard';
 
 interface MatchCardProps {
   rec: Recommendation;
@@ -30,42 +31,6 @@ export function MatchCard({
   onViewApplication,
 }: MatchCardProps) {
   const { person, rank, relation } = rec;
-
-  /** 관계에 따라 세 번째 버튼이 달라짐 */
-  const renderAction = () => {
-    if (relation === 'applied') {
-      return (
-        <Button variant="ghost" size="sm" block onClick={onViewApplication}>
-          받은 지원 보기
-        </Button>
-      );
-    }
-    if (relation === 'member') {
-      return <p className={styles.actionNote}>이미 팀원이에요</p>;
-    }
-    if (relation === 'rejected') {
-      return (
-        <>
-          <Button variant="ghost" size="sm" block disabled>
-            제안 불가
-          </Button>
-          <p className={styles.actionNote}>이전에 거절된 제안이 있어요</p>
-        </>
-      );
-    }
-    if (offered || relation === 'offered') {
-      return (
-        <Button variant="ghost" size="sm" block disabled>
-          제안 보냄
-        </Button>
-      );
-    }
-    return (
-      <Button size="sm" block onClick={onOffer}>
-        참여 제안 보내기
-      </Button>
-    );
-  };
 
   return (
     <article className={styles.card}>
@@ -99,7 +64,12 @@ export function MatchCard({
         <Button variant={saved ? 'saved' : 'ghost'} size="sm" block onClick={onToggleSave} aria-pressed={saved}>
           {saved ? '★ 저장됨' : '☆ 저장'}
         </Button>
-        {renderAction()}
+        <RelationAction
+          relation={relation}
+          offered={offered}
+          onOffer={onOffer}
+          onViewApplication={onViewApplication}
+        />
       </div>
     </article>
   );
