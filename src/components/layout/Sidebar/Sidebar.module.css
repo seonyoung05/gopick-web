@@ -1,0 +1,149 @@
+/* src/components/layout/Sidebar/Sidebar.module.css */
+.sidebar {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  padding: var(--space-24) 14px var(--space-16);
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  transition: width 0.18s ease;
+}
+
+.collapsed {
+  width: 76px;
+}
+
+/* ---------- Brand ---------- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 var(--space-8) 22px;
+}
+
+.logo {
+  display: flex;
+  gap: 3px;
+}
+
+.logo i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.name {
+  white-space: nowrap;
+}
+
+.toggle {
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--sub);
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: var(--surface-2);
+}
+
+/* ---------- Nav ---------- */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  height: 45px;
+  padding: 0 14px;
+  border-radius: 10px;
+  color: var(--sub);
+  font-size: 15px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.link:hover {
+  background: var(--surface-2);
+}
+
+.link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.active,
+.active:hover {
+  background: var(--blue-soft);
+  color: var(--blue-deep);
+  font-weight: 700;
+}
+
+.badge {
+  margin-left: auto;
+}
+
+/* ---------- Summary ---------- */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding: var(--space-12) 14px;
+  border-radius: 10px;
+  background: var(--blue-soft);
+  color: var(--sub);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.summary strong {
+  color: var(--blue-deep);
+  font-weight: 500;
+}
+
+/* ---------- Collapsed: 아이콘만 ---------- */
+.collapsed .name,
+.collapsed .label,
+.collapsed .summary,
+.collapsed .logo {
+  display: none;
+}
+
+.collapsed .brand {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.collapsed .toggle {
+  margin-left: 0;
+}
+
+.collapsed .link {
+  justify-content: center;
+  padding: 0;
+}
+
+.collapsed .badge {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  margin-left: 0;
+}
