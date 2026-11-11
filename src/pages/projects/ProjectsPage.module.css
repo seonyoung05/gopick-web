@@ -1,4 +1,9 @@
 /* src/pages/projects/ProjectsPage.module.css */
+.page {
+  max-width: 1128px;
+  padding: 32px 32px 64px;
+}
+
 .heading {
   margin: 0;
 }
