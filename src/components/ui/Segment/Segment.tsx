@@ -6,8 +6,8 @@ export type SegmentSize = 'md' | 'lg';
 
 interface SegmentProps<T extends string> {
   options: readonly T[];
-  value: T;
-  onChange: (value: T) => void;
+  value: NoInfer<T>;
+  onChange: (value: NoInfer<T>) => void;
   size?: SegmentSize;
   className?: string;
   'aria-label'?: string;
