@@ -1,0 +1,230 @@
+/* src/pages/projects/ProjectDetail.module.css */
+.detail {
+  padding: 26px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+
+.scrap {
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.6px;
+}
+
+.meta {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--sub);
+}
+
+.desc {
+  margin: var(--space-4) 0 0;
+}
+
+.notice {
+  margin: 20px 0 8px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  font-size: 14px;
+  color: var(--sub);
+}
+
+.h {
+  margin: 26px 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.h small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--faint);
+}
+
+/* ---------- 구성원 ---------- */
+.members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  font-size: 14px;
+}
+
+.member > span:last-child {
+  color: var(--sub);
+}
+
+.outputs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.outputs li {
+  margin-bottom: var(--space-4);
+}
+
+/* ---------- 단계별 과제 아코디언 ---------- */
+.accs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.acc {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.acc_now {
+  border-color: var(--blue);
+  background: #f8fbff;
+}
+
+.accHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.accHead:disabled {
+  cursor: default;
+}
+
+.accHead:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.acc_todo .accHead strong {
+  color: var(--faint);
+}
+
+.accIcon {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  color: var(--green);
+}
+
+.acc_now .accIcon i,
+.acc_todo .accIcon i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.acc_now .accIcon i {
+  background: var(--blue);
+}
+
+.acc_todo .accIcon i {
+  border: 1.5px solid var(--faint);
+}
+
+.accCount {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--sub);
+}
+
+.accCount b {
+  color: var(--ink);
+}
+
+.tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0 16px 14px 42px;
+  list-style: none;
+  font-size: 14px;
+}
+
+/* ---------- 활동 기록 ---------- */
+.log {
+  position: relative;
+  margin: 0;
+  padding: 0 0 0 30px;
+  list-style: none;
+}
+
+.log::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--line);
+}
+
+.log li {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.log li::before {
+  content: '';
+  position: absolute;
+  left: -30px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--blue);
+  background: var(--surface);
+}
+
+.log p {
+  margin: 0;
+}
+
+.logMeta {
+  font-size: 12px;
+  color: var(--sub);
+}
+
+@media (max-width: 900px) {
+  .head {
+    flex-direction: column;
+  }
+}

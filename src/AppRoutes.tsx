@@ -10,6 +10,7 @@ import PeopleSearchPage from './pages/people/PeopleSearchPage';
 import RecommendPage from './pages/recommend/RecommendPage';
 import SavedPage from './pages/saved/SavedPage';
 import InboxPage from './pages/inbox/InboxPage';
+import ProjectsPage from './pages/projects/ProjectsPage';
 
 function ComingSoon() {
   return <p className="t-body-m">준비 중인 화면이에요.</p>;
@@ -46,6 +47,7 @@ export function AppRoutes() {
         <Route path="saved" element={<SavedPage />} />
         {/* 사이드바의 '제안·지원' 메뉴는 /offers 로 연결돼 있어요 */}
         <Route path="offers" element={<InboxPage />} />
+        <Route path="projects" element={<ProjectsPage />} />
         {/* TODO: 화면이 병합되면 추가 — /projects, /manage */}
         <Route path="manage" element={<ProjectFormPage />} />
         <Route path="*" element={<ComingSoon />} />

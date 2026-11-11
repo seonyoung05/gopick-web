@@ -1,0 +1,98 @@
+/* src/pages/projects/StageTracker.module.css */
+
+/* ---------- 목록용 점 ---------- */
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-4);
+}
+
+.dot {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line-strong);
+}
+
+.dot_done {
+  background: var(--green-soft);
+  border-color: var(--green-soft);
+  color: var(--green);
+}
+
+.dot_now {
+  border: 4px solid var(--blue);
+  background: var(--surface);
+}
+
+.dotsLabel {
+  margin-left: 2px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ---------- 상세용 파이프라인 ---------- */
+.pipeline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pipelineItem {
+  display: flex;
+  align-items: center;
+}
+
+.line {
+  width: 18px;
+  height: 2px;
+  margin: 0 6px;
+  background: var(--line);
+}
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.step_done {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.step_now {
+  background: var(--blue);
+  color: var(--on-color);
+}
+
+.step_todo {
+  background: var(--surface-2);
+  color: var(--faint);
+}
+
+.stepNow {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--on-color);
+}
+
+.stepTodo {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+}
