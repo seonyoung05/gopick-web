@@ -56,7 +56,7 @@ export default function ProjectFormPage() {
   const sectionProps = { form, update, showErrors };
 
   return (
-    <div>
+    <div className={s.page}>
       <h1 className={`t-h1 ${s.heading}`}>{pageTitle}</h1>
       <p className={s.sub}>
         <em>추천 필수</em> 항목을 채우면 팀원 추천을 받을 수 있어요. 직접 검색만 할 거라면 비워 둬도 괜찮아요.
