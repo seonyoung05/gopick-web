@@ -11,18 +11,14 @@
   flex-direction: column;
 }
 
+/* 본문 여백은 각 화면(.page)이 직접 가져요. 여기서 padding을 주면 이중으로 들어가요. */
 .content {
   width: 100%;
   max-width: 1192px;
-  padding: var(--space-32);
 }
 
 @media (max-width: 900px) {
   .layout > aside {
     display: none;
-  }
-
-  .content {
-    padding: var(--space-24) var(--space-16);
   }
 }
