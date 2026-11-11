@@ -48,7 +48,6 @@ export function AppRoutes() {
         {/* 사이드바의 '제안·지원' 메뉴는 /offers 로 연결돼 있어요 */}
         <Route path="offers" element={<InboxPage />} />
         <Route path="projects" element={<ProjectsPage />} />
-        {/* TODO: 화면이 병합되면 추가 — /projects, /manage */}
         <Route path="manage" element={<ProjectFormPage />} />
         <Route path="*" element={<ComingSoon />} />
       </Route>
