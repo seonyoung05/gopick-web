@@ -1,12 +1,17 @@
 // src/pages/profile/ProfilePage.tsx
 import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { Field } from '../../components/common/Field';
 import { FormSection } from '../../components/common/FormSection';
 import { EtcChipGroup } from '../../components/common/EtcChipGroup';
+import { useToast } from '../../components/common/Toast';
 import { Button } from '../../components/ui/Button';
 import { Input, Select, Textarea } from '../../components/ui/Input';
 import { Segment } from '../../components/ui/Segment';
 import { ChipGroup } from '../../components/ui/Chip';
+import { ApiError, ERROR_CODE, profilesApi } from '../../api';
+import { fromProfileDetail, toProfileRequest } from '../../api/mappers/profile';
+import { useAuth } from '../../stores/auth';
 import {
   CONTACT_TYPES,
   CONTACT_PLACEHOLDER,
@@ -20,6 +25,7 @@ import {
   ROLES,
   TEAM_TENDENCIES,
   COLLAB_GROUPS,
+  withExtraOptions,
 } from '../../constants/options';
 import type { TechLevel } from '../../constants/levels';
 import {
@@ -34,19 +40,58 @@ import { TechLevelList } from './TechLevelList';
 import { ExperienceCard } from './ExperienceCard';
 import { validateProfile, REQUIRED_KEYS, SECTION_OF, type RequiredKey } from './validateProfile';
 import styles from './ProfilePage.module.css';
-import { useToast } from '../../components/common/Toast';
+
+type LoadState = 'loading' | 'ready' | 'error';
 
 export default function ProfilePage() {
-  const [form, setForm] = useState<ProfileForm>(EMPTY_PROFILE);
-  /** 마지막으로 저장한 상태 (취소할 때 여기로 되돌림) */
-  const [savedForm, setSavedForm] = useState<ProfileForm>(EMPTY_PROFILE);
-  /** 저장을 한 번 눌렀는지 (그 뒤부터 빨간 표시를 보여 줌) */
-  const [showErrors, setShowErrors] = useState(false);
-  /** 저장 버튼 옆 안내 문구 */
-  const [notice, setNotice] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
   const toast = useToast();
+  const { status, account, setProfileId } = useAuth();
+  const profileId = account?.profileId ?? null;
 
-  /** 폼의 한 항목만 바꾸는 도우미: update('name', '김수뭉') */
+  const [form, setForm] = useState<ProfileForm>(EMPTY_PROFILE);
+  /** 마지막으로 저장(또는 불러온) 상태 — 취소할 때 여기로 되돌림 */
+  const [savedForm, setSavedForm] = useState<ProfileForm>(EMPTY_PROFILE);
+  const [showErrors, setShowErrors] = useState(false);
+  const [notice, setNotice] = useState<{ type: 'ok' | 'error'; text: string } | null>(null);
+  const [loadState, setLoadState] = useState<LoadState>('loading');
+  const [reloadKey, setReloadKey] = useState(0);
+  const [saving, setSaving] = useState(false);
+
+  /* ---------- 불러오기 ---------- */
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+
+    // 아직 프로필이 없으면 빈 폼으로 시작
+    if (!profileId) {
+      setLoadState('ready');
+      return;
+    }
+
+    let cancelled = false; // 화면을 떠난 뒤 도착한 응답은 무시
+    setLoadState('loading');
+    profilesApi
+      .get(profileId)
+      .then((res) => {
+        if (cancelled) return;
+        const loaded = fromProfileDetail(res);
+        setForm(loaded);
+        setSavedForm(loaded);
+        setLoadState('ready');
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        if (err instanceof ApiError && err.code === ERROR_CODE.PROFILE_NOT_FOUND) {
+          setLoadState('ready'); // 서버에 없으면 새로 만들기
+        } else {
+          setLoadState('error');
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [status, profileId, reloadKey]);
+
+  /** 폼의 한 항목만 바꾸는 도우미 */
   const update = <K extends keyof ProfileForm>(key: K, value: ProfileForm[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -96,8 +141,6 @@ export default function ProfilePage() {
   const isDone = (key: RequiredKey) => !errors[key];
   const requiredDone = REQUIRED_KEYS.filter(isDone).length;
   const requiredTotal = REQUIRED_KEYS.length;
-
-  /** 저장을 누른 뒤에만 에러 문구를 돌려줌 */
   const err = (key: RequiredKey) => (showErrors ? errors[key] : undefined);
 
   const basicDone = isDone('name') && isDone('major') && isDone('contact') && isDone('parts');
@@ -121,23 +164,44 @@ export default function ProfilePage() {
   /* ---------- 저장 · 취소 ---------- */
   const isDirty = JSON.stringify(form) !== JSON.stringify(savedForm);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setShowErrors(true);
     const errorKeys = REQUIRED_KEYS.filter((k) => errors[k]);
 
     if (errorKeys.length > 0) {
       setNotice({ type: 'error', text: `필수 항목 ${errorKeys.length}개를 채워 주세요.` });
-      document
-        .getElementById(SECTION_OF[errorKeys[0]])
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById(SECTION_OF[errorKeys[0]])?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
 
-    // TODO: API 연결 시 profilesApi.create / update 호출
-    console.log('저장할 프로필', form);
-    setSavedForm(form);
-    setShowErrors(false);
-    toast('프로필을 저장했어요', 'success');
+    setSaving(true);
+    setNotice(null);
+    try {
+      const body = toProfileRequest(form);
+      if (profileId) {
+        await profilesApi.update(profileId, body);
+        toast('프로필을 저장했어요', 'success');
+      } else {
+        const res = await profilesApi.create(body);
+        setProfileId(res.profileId); // 로그인 상태에 "프로필 있음" 반영
+        toast('프로필을 만들었어요! 이제 팀원 추천을 받을 수 있어요', 'success');
+      }
+      setSavedForm(form);
+      setShowErrors(false);
+    } catch (e) {
+      const code = e instanceof ApiError ? e.code : '';
+      if (code === ERROR_CODE.VALIDATION_ERROR) {
+        setNotice({ type: 'error', text: '입력한 내용을 다시 확인해 주세요.' });
+      } else if (code === ERROR_CODE.NETWORK_ERROR) {
+        setNotice({ type: 'error', text: '서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.' });
+      } else if (code === ERROR_CODE.UNAUTHENTICATED) {
+        setNotice({ type: 'error', text: '로그인이 풀렸어요. 다시 로그인해 주세요.' });
+      } else {
+        setNotice({ type: 'error', text: '저장하지 못했어요. 잠시 후 다시 시도해 주세요.' });
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -148,20 +212,37 @@ export default function ProfilePage() {
     setNotice(null);
   };
 
-  // 안내 문구는 3초 뒤 자동으로 사라지게
   useEffect(() => {
     if (!notice) return;
     const timer = setTimeout(() => setNotice(null), 3000);
     return () => clearTimeout(timer);
   }, [notice]);
 
-  // 저장 안 하고 창을 닫으려 하면 브라우저가 한 번 물어보게
   useEffect(() => {
     if (!isDirty) return;
     const warn = (e: BeforeUnloadEvent) => e.preventDefault();
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, [isDirty]);
+
+  /* ---------- 화면 상태별 처리 (훅들보다 아래에 있어야 해요) ---------- */
+  // TODO(5단계): 로그인 확인은 라우팅에서 한 번에 처리
+  if (status === 'unauthenticated') return <Navigate to="/login" replace state={{ from: '/profile' }} />;
+
+  if (status === 'loading' || loadState === 'loading') {
+    return <div className={styles.state}>프로필을 불러오는 중이에요…</div>;
+  }
+
+  if (loadState === 'error') {
+    return (
+      <div className={styles.state}>
+        <p>프로필을 불러오지 못했어요.</p>
+        <Button variant="ghost" onClick={() => setReloadKey((k) => k + 1)}>
+          다시 시도
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -200,12 +281,7 @@ export default function ProfilePage() {
               </Field>
             </div>
 
-            <Field
-              label="연락처"
-              req="필수"
-              hint="지원·제안이 수락된 상대에게만 공개돼요"
-              error={err('contact')}
-            >
+            <Field label="연락처" req="필수" hint="지원·제안이 수락된 상대에게만 공개돼요" error={err('contact')}>
               <div className={styles.contactRow}>
                 <Select
                   options={CONTACT_TYPES}
@@ -264,7 +340,7 @@ export default function ProfilePage() {
             <Field label="기술 스택" req="필수" hint="복수 선택" error={err('stacks')}>
               <ChipGroup
                 multiple
-                options={TECH_STACKS}
+                options={withExtraOptions(TECH_STACKS, form.stacks)}
                 value={form.stacks}
                 onChange={handleStacksChange}
                 aria-label="기술 스택"
@@ -300,7 +376,7 @@ export default function ProfilePage() {
           <FormSection id="field" title="관심 분야" description="해보고 싶은 프로젝트 분야를 골라 주세요.">
             <Field label="관심 분야" req="필수" hint="복수 선택" error={err('fields')}>
               <EtcChipGroup
-                options={FIELDS}
+                options={withExtraOptions(FIELDS, form.fields)}
                 value={form.fields}
                 onChange={(v) => update('fields', v)}
                 etcValue={form.fieldEtc}
@@ -339,7 +415,7 @@ export default function ProfilePage() {
           <FormSection id="role" title="희망 역할" description="다음 프로젝트에서 맡고 싶은 역할이에요.">
             <Field label="담당 역할" req="필수" hint="복수 선택" error={err('roles')}>
               <EtcChipGroup
-                options={ROLES}
+                options={withExtraOptions(ROLES, form.wantedRoles)}
                 value={form.wantedRoles}
                 onChange={(v) => update('wantedRoles', v)}
                 etcValue={form.roleEtc}
@@ -403,10 +479,12 @@ export default function ProfilePage() {
                 {notice.text}
               </p>
             )}
-            <Button variant="ghost" onClick={handleCancel} disabled={!isDirty}>
+            <Button variant="ghost" onClick={handleCancel} disabled={!isDirty || saving}>
               취소
             </Button>
-            <Button onClick={handleSave}>프로필 저장</Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? '저장하는 중…' : profileId ? '프로필 저장' : '프로필 만들기'}
+            </Button>
           </div>
         </div>
       </div>
