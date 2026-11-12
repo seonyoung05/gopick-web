@@ -64,3 +64,45 @@
   color: var(--sub);
   pointer-events: none;      /* 화살표를 눌러도 select가 열리게 */
 }
+
+/* ---------- 비밀번호 보기 ---------- */
+.passwordWrap {
+  position: relative;
+  display: flex;
+  width: 100%;
+}
+
+.passwordInput {
+  padding-right: 46px;
+}
+
+.toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--faint);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.toggle:hover {
+  color: var(--ink);
+}
+
+.toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.toggle svg {
+  width: 18px;
+  height: 18px;
+}
