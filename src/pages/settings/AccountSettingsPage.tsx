@@ -1,6 +1,5 @@
 // src/pages/settings/AccountSettingsPage.tsx
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { LogoutDialog } from '../../components/common/LogoutDialog';
 import { useToast } from '../../components/common/Toast';
@@ -13,7 +12,6 @@ export default function AccountSettingsPage() {
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   // TODO(5단계): 로그인 확인은 라우팅에서 한 번에 처리
-  if (status === 'unauthenticated') return <Navigate to="/login" replace state={{ from: '/settings' }} />;
   if (status === 'loading') return null;
 
   return (

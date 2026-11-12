@@ -3,19 +3,17 @@ import { useState, type FormEvent } from 'react';
 import { Search, Bell } from 'lucide-react';
 import { AvatarMenu } from '../AvatarMenu';
 import { Badge } from '../../ui/Label';
-import { MOCK_USER, MOCK_UNREAD_COUNT } from '../../../constants/nav';
+import { MOCK_UNREAD_COUNT } from '../../../constants/nav';
 import styles from './Topbar.module.css';
 
 interface TopbarProps {
   unreadCount?: number;
-  userName?: string;
   /** 검색어 제출 시 호출 (Enter) */
   onSearch?: (keyword: string) => void;
 }
 
 export function Topbar({
   unreadCount = MOCK_UNREAD_COUNT,
-  userName = MOCK_USER.name,
   onSearch,
 }: TopbarProps) {
   const [keyword, setKeyword] = useState('');

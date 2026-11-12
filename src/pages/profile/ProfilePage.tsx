@@ -1,6 +1,5 @@
 // src/pages/profile/ProfilePage.tsx
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
 import { Field } from '../../components/common/Field';
 import { FormSection } from '../../components/common/FormSection';
 import { EtcChipGroup } from '../../components/common/EtcChipGroup';
@@ -227,8 +226,6 @@ export default function ProfilePage() {
   }, [isDirty]);
 
   /* ---------- 화면 상태별 처리 (훅들보다 아래에 있어야 해요) ---------- */
-  // TODO(5단계): 로그인 확인은 라우팅에서 한 번에 처리
-  if (status === 'unauthenticated') return <Navigate to="/login" replace state={{ from: '/profile' }} />;
 
   if (status === 'loading' || loadState === 'loading') {
     return <div className={styles.state}>프로필을 불러오는 중이에요…</div>;

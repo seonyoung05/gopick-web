@@ -12,6 +12,7 @@ import InboxPage from './pages/inbox/InboxPage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 import AccountSettingsPage from './pages/settings/AccountSettingsPage';
+import { RequireAuth } from './components/layout/RequireAuth';
 
 function ComingSoon() {
   return <p className="t-body-m">준비 중인 화면이에요.</p>;
@@ -42,7 +43,7 @@ export function AppRoutes() {
       <Route path="/signup" element={<SignupPage />} />
       
       {/* 사이드바·상단바가 붙는 화면 */}
-      <Route element={<AppLayout />}>
+      <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
         <Route index element={<HomeOrLegacyRedirect />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="/settings" element={<AccountSettingsPage />} />
