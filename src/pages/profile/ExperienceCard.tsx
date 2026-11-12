@@ -2,7 +2,7 @@
 import { Field } from '../../components/common/Field';
 import { EtcChipGroup } from '../../components/common/EtcChipGroup';
 import { Textarea } from '../../components/ui/Input';
-import { EXPERIENCE_TYPES, EXPERIENCE_FIELDS, ROLES, TECH_STACKS } from '../../constants/options';
+import { EXPERIENCE_TYPES, EXPERIENCE_FIELDS, ROLES, TECH_STACKS, withExtraOptions } from '../../constants/options';
 import type { Experience } from '../../types/profile';
 import styles from './ProfilePage.module.css';
 
@@ -25,7 +25,7 @@ export function ExperienceCard({ index, experience: exp, onChange, onRemove }: E
 
       <Field label="경험 유형" hint="복수 선택">
         <EtcChipGroup
-          options={EXPERIENCE_TYPES}
+          options={withExtraOptions(EXPERIENCE_TYPES, exp.types)}
           value={exp.types}
           onChange={(v) => onChange({ types: v })}
           etcValue={exp.typeEtc}
@@ -37,7 +37,7 @@ export function ExperienceCard({ index, experience: exp, onChange, onRemove }: E
 
       <Field label="경험 분야" hint="복수 선택">
         <EtcChipGroup
-          options={EXPERIENCE_FIELDS}
+          options={withExtraOptions(EXPERIENCE_FIELDS, exp.fields)}
           value={exp.fields}
           onChange={(v) => onChange({ fields: v })}
           etcValue={exp.fieldEtc}
@@ -49,7 +49,7 @@ export function ExperienceCard({ index, experience: exp, onChange, onRemove }: E
 
       <Field label="담당 역할" hint="복수 선택">
         <EtcChipGroup
-          options={ROLES}
+          options={withExtraOptions(ROLES, exp.roles)}
           value={exp.roles}
           onChange={(v) => onChange({ roles: v })}
           etcValue={exp.roleEtc}
@@ -61,7 +61,7 @@ export function ExperienceCard({ index, experience: exp, onChange, onRemove }: E
 
       <Field label="사용 기술" hint="복수 선택">
         <EtcChipGroup
-          options={TECH_STACKS}
+          options={withExtraOptions(TECH_STACKS, exp.stacks)}
           value={exp.stacks}
           onChange={(v) => onChange({ stacks: v })}
           etcValue={exp.stackEtc}
