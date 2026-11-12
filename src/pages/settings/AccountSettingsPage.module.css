@@ -1,0 +1,84 @@
+/* src/pages/settings/AccountSettingsPage.module.css */
+.page {
+  max-width: 1128px;
+  padding: 32px 32px 64px;
+}
+
+.head h1 { margin: 0; }
+.head p { margin: 4px 0 26px; color: var(--sub); }
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 760px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 26px 29px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.key {
+  width: 110px;
+  flex-shrink: 0;
+  color: var(--sub);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.value {
+  flex: 1;
+}
+
+.rowText strong {
+  display: block;
+  font-size: 14px;
+}
+
+.rowText span {
+  color: var(--sub);
+  font-size: 12px;
+}
+
+.desc {
+  margin: -4px 0 0;
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.dangerButton {
+  align-self: flex-start;
+  padding: 11px 20px;
+  border: 1px solid var(--red);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--red);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dangerButton:hover {
+  background: var(--red-soft);
+}

@@ -11,6 +11,7 @@ import SavedPage from './pages/saved/SavedPage';
 import InboxPage from './pages/inbox/InboxPage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
+import AccountSettingsPage from './pages/settings/AccountSettingsPage';
 
 function ComingSoon() {
   return <p className="t-body-m">준비 중인 화면이에요.</p>;
@@ -44,6 +45,7 @@ export function AppRoutes() {
       <Route element={<AppLayout />}>
         <Route index element={<HomeOrLegacyRedirect />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="/settings" element={<AccountSettingsPage />} />
         <Route path="search" element={<PeopleSearchPage />} />
         <Route path="recommend" element={<RecommendPage />} />
         <Route path="saved" element={<SavedPage />} />

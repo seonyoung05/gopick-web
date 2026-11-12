@@ -1,7 +1,7 @@
 // src/components/layout/Topbar/Topbar.tsx
 import { useState, type FormEvent } from 'react';
 import { Search, Bell } from 'lucide-react';
-import { Avatar } from '../../ui/Avatar';
+import { AvatarMenu } from '../AvatarMenu';
 import { Badge } from '../../ui/Label';
 import { MOCK_USER, MOCK_UNREAD_COUNT } from '../../../constants/nav';
 import styles from './Topbar.module.css';
@@ -48,7 +48,7 @@ export function Topbar({
           <Bell size={22} aria-hidden="true" />
           <Badge count={unreadCount} className={styles.bellBadge} />
         </button>
-        <Avatar name={userName} size="top" color="blue" />
+        <AvatarMenu />
       </div>
     </header>
   );

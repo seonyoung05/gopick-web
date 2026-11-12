@@ -1,28 +1,44 @@
 // src/stores/auth/AuthProvider.tsx
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { authApi, type AccountResponse, type Credentials } from '../../api';
+import { authApi, profilesApi, type AccountResponse, type Credentials } from '../../api';
 import { AuthContext, type AuthStatus, type AuthStore } from './AuthContext';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [account, setAccount] = useState<AccountResponse | null>(null);
+  const [profileName, setProfileName] = useState<string | null>(null);
 
-  const applyAccount = (next: AccountResponse | null) => {
-    setAccount(next);
-    setStatus(next ? 'authenticated' : 'unauthenticated');
-  };
+  /** 프로필이 있으면 이름만 가져와 기억 (실패해도 로그인에는 지장 없음) */
+  const loadProfileName = useCallback(async (profileId: number | null) => {
+    if (!profileId) {
+      setProfileName(null);
+      return;
+    }
+    try {
+      const profile = await profilesApi.get(profileId);
+      setProfileName(profile.name);
+    } catch {
+      setProfileName(null);
+    }
+  }, []);
 
-  /** 서버에 "지금 누구야?" 물어보기 */
+  const applyAccount = useCallback(
+    (next: AccountResponse | null) => {
+      setAccount(next);
+      setStatus(next ? 'authenticated' : 'unauthenticated');
+      loadProfileName(next?.profileId ?? null);
+    },
+    [loadProfileName],
+  );
+
   const refresh = useCallback(async () => {
     try {
       applyAccount(await authApi.getMe());
     } catch {
-      // 401(비로그인)이든 서버 연결 실패든 로그인 안 된 것으로 처리
       applyAccount(null);
     }
-  }, []);
+  }, [applyAccount]);
 
-  // 앱이 켜질 때 한 번 확인
   useEffect(() => {
     refresh();
   }, [refresh]);
@@ -31,13 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       status,
       account,
+      profileName,
       login: async (body: Credentials) => {
-        const res = await authApi.login(body); // 실패하면 ApiError가 화면까지 전달됨
+        const res = await authApi.login(body);
         applyAccount(res);
         return res;
       },
       signUp: async (body: Credentials) => {
-        const res = await authApi.signUp(body); // 가입하면 서버가 바로 로그인시켜 줌
+        const res = await authApi.signUp(body);
         applyAccount(res);
         return res;
       },
@@ -45,14 +62,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           await authApi.logout();
         } finally {
-          applyAccount(null); // 서버 요청이 실패해도 화면에서는 로그아웃 처리
+          applyAccount(null);
         }
       },
-      setProfileId: (profileId: number) =>
-        setAccount((prev) => (prev ? { ...prev, profileId } : prev)),
+      setProfileId: (profileId: number) => setAccount((prev) => (prev ? { ...prev, profileId } : prev)),
+      setProfileName: (name: string) => setProfileName(name),
       refresh,
     }),
-    [status, account, refresh],
+    [status, account, profileName, applyAccount, refresh],
   );
 
   return <AuthContext.Provider value={store}>{children}</AuthContext.Provider>;

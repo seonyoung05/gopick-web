@@ -11,7 +11,6 @@ import { Segment } from '../../components/ui/Segment';
 import { ChipGroup } from '../../components/ui/Chip';
 import { ApiError, ERROR_CODE, profilesApi } from '../../api';
 import { fromProfileDetail, toProfileRequest } from '../../api/mappers/profile';
-import { useAuth } from '../../stores/auth';
 import {
   CONTACT_TYPES,
   CONTACT_PLACEHOLDER,
@@ -40,12 +39,13 @@ import { TechLevelList } from './TechLevelList';
 import { ExperienceCard } from './ExperienceCard';
 import { validateProfile, REQUIRED_KEYS, SECTION_OF, type RequiredKey } from './validateProfile';
 import styles from './ProfilePage.module.css';
+import { myAvatarSeed, useAuth } from '../../stores/auth';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
 export default function ProfilePage() {
   const toast = useToast();
-  const { status, account, setProfileId } = useAuth();
+  const { status, account, setProfileId, setProfileName } = useAuth();
   const profileId = account?.profileId ?? null;
 
   const [form, setForm] = useState<ProfileForm>(EMPTY_PROFILE);
@@ -186,6 +186,7 @@ export default function ProfilePage() {
         setProfileId(res.profileId); // 로그인 상태에 "프로필 있음" 반영
         toast('프로필을 만들었어요! 이제 팀원 추천을 받을 수 있어요', 'success');
       }
+      setProfileName(form.name.trim());
       setSavedForm(form);
       setShowErrors(false);
     } catch (e) {
@@ -255,7 +256,13 @@ export default function ProfilePage() {
       </div>
 
       <div className={styles.layout}>
-        <ProfileSide form={form} requiredDone={requiredDone} requiredTotal={requiredTotal} toc={toc} />
+        <ProfileSide
+          form={form}
+          avatarSeed={myAvatarSeed(account)}
+          requiredDone={requiredDone}
+          requiredTotal={requiredTotal}
+          toc={toc}
+        />
 
         <div className={styles.card}>
           {/* ---------- 기본 정보 ---------- */}
