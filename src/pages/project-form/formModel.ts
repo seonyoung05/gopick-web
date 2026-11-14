@@ -29,6 +29,8 @@ export interface ProjectFormValues {
   experience: Condition;
   extraNote: string;
   collab: string[];
+  /** 등록하는 본인의 역할 (등록하면 이 역할의 팀장이 됨) */
+  myRole: string;
   /** 현재 팀 역할별 인원 */
   currentTeam: Record<string, number>;
   links: LinkRow[];
@@ -65,6 +67,7 @@ export function emptyForm(): ProjectFormValues {
     experience: '상관없음',
     extraNote: '',
     collab: [],
+    myRole: '기획',
     currentTeam: { ...emptyTeam(), 기획: 1 },
     links: [],
     background: '',
@@ -168,50 +171,6 @@ export function buildPrompt(form: ProjectFormValues): string {
     `원하는 팀원: ${form.wantedTeam || '-'}`,
   ].join('\n');
 }
-
-// ---------- 수정 화면용 목업 ----------
-
-export interface MyProject {
-  id: string;
-  /** 상단 칩에 보이는 이름 */
-  label: string;
-  title: string;
-  /** 편집을 시작할 때마다 새 값을 만들어 원본이 바뀌지 않게 함 */
-  create: () => ProjectFormValues;
-}
-
-const vocarchive = (): ProjectFormValues => {
-  const form: ProjectFormValues = {
-    name: 'Vocarchive',
-    description: 'LLM으로 사용자의 오답 패턴을 분석해 맞춤형 영단어장을 만들어 주는 학습 서비스예요.',
-    fields: ['AI', '웹'],
-    purposes: ['포트폴리오', '해커톤'],
-    teamSizes: ['4명', '5명'],
-    roles: ['Backend', 'Frontend'],
-    roleDetails: {
-      Backend: { count: 2, condition: '상관없음', techs: [], levels: {} },
-      Frontend: { count: 1, condition: '우대', techs: ['React'], levels: { React: '기초 경험 이상' } },
-    },
-    experience: '상관없음',
-    extraNote: '초보자도 참여할 수 있어요. 디자인 경험이 있으면 우대해요.',
-    collab: ['빠른 피드백', '문서화 선호', '코드 리뷰 선호'],
-    currentTeam: { ...emptyTeam(), 기획: 1, AI: 1 },
-    links: [
-      { id: newLinkId(), type: '기획안', url: 'https://notion.so/vocarchive' },
-      { id: newLinkId(), type: 'GitHub', url: 'https://github.com/gdgoc/vocarchive' },
-    ],
-    background: '영단어 앱을 여러 개 써 봤지만, 한 번 틀린 단어를 계속 틀리는 문제는 그대로였어요. 틀린 이유를 분석해서 나에게 맞는 단어장을 만들어 주면 어떨까 하는 생각에서 시작했어요.',
-    goal: '해커톤 기간 안에 오답 기록을 넣으면 틀리는 패턴을 분석하고, 맞춤형 단어장까지 만들어 주는 흐름이 실제로 동작하는 웹 서비스를 완성하는 것',
-    wantedTeam: '막히는 부분이 있으면 바로 공유하고, 마감 직전까지 같이 버그를 잡아줄 분이면 좋겠어요. LLM을 처음 다뤄 봐도 괜찮아요.',
-    draft: null,
-  };
-  form.draft = buildDraft(form);
-  return form;
-};
-
-export const MY_PROJECTS: MyProject[] = [
-  { id: 'vocarchive', label: 'Vocarchive · 모집 중', title: 'Vocarchive', create: vocarchive },
-];
 
 /** 각 섹션 컴포넌트가 공통으로 받는 props */
 export interface SectionProps {

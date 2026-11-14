@@ -112,3 +112,11 @@ export const projectsApi = {
   unscrap: (id: number) => api.delete<void>(`/projects/${id}/scraps`),
   myScraps: () => api.get<ProjectSummary[]>('/me/scrapped-projects'),
 };
+
+/** 목록 + 각 프로젝트 상세
+ *  목록 응답에는 팀원·모집 정보가 없어서 상세를 같이 불러와요.
+ *  TODO: 서버 목록 응답에 members·recruitments가 생기면 list 하나로 바꾸기 */
+export async function fetchProjectDetails(q?: ProjectListQuery): Promise<ProjectDetail[]> {
+  const list = await projectsApi.list(q);
+  return Promise.all(list.map((p) => projectsApi.get(p.projectId)));
+}

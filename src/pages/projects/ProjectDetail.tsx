@@ -3,6 +3,8 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import { Check } from 'lucide-react';
 import { Avatar } from '../../components/ui/Avatar';
+import { Button } from '../../components/ui/Button';
+import { Select } from '../../components/ui/Input';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { Status } from '../../components/ui/Label';
 import { STAGES } from '../../constants/project';
@@ -73,9 +75,20 @@ interface ProjectDetailProps {
   editable: boolean;
   onToggleScrap: () => void;
   onToggleTask: (stage: number, taskIndex: number, done: boolean) => void;
+  /** 있으면 단계 변경 드롭다운 표시 (진행 중 프로젝트의 팀원) */
+  onChangeStage?: (stageIndex: number) => void;
+  /** 있으면 '프로젝트 완료' 버튼 표시 (진행 중 프로젝트의 팀장) */
+  onComplete?: () => void;
 }
 
-export function ProjectDetail({ project: p, editable, onToggleScrap, onToggleTask }: ProjectDetailProps) {
+export function ProjectDetail({
+  project: p,
+  editable,
+  onToggleScrap,
+  onToggleTask,
+  onChangeStage,
+  onComplete,
+}: ProjectDetailProps) {
   const isDone = p.currentStage >= STAGES.length;
 
   return (
@@ -129,6 +142,24 @@ export function ProjectDetail({ project: p, editable, onToggleScrap, onToggleTas
 
       <h4 className={styles.h}>진행 단계</h4>
       <StagePipeline currentStage={p.currentStage} />
+      {(onChangeStage || onComplete) && !isDone && (
+        <div className={styles.stageControls}>
+          {onChangeStage && (
+            <Select
+              className={styles.stageSelect}
+              options={STAGES}
+              value={STAGES[p.currentStage]}
+              aria-label="진행 단계 변경"
+              onChange={(e) => onChangeStage(STAGES.indexOf(e.target.value as (typeof STAGES)[number]))}
+            />
+          )}
+          {onComplete && (
+            <Button size="sm" variant="ghost" onClick={onComplete}>
+              프로젝트 완료로 바꾸기
+            </Button>
+          )}
+        </div>
+      )}
 
       <h4 className={styles.h}>
         단계별 세부 과제 <small>선택</small>
@@ -148,6 +179,7 @@ export function ProjectDetail({ project: p, editable, onToggleScrap, onToggleTas
       </div>
 
       <h4 className={styles.h}>활동 기록</h4>
+      {p.log.length === 0 && <p className={styles.notice}>아직 활동 기록이 없어요.</p>}
       <ol className={styles.log}>
         {p.log.map((l) => (
           <li key={l.date + l.text}>
