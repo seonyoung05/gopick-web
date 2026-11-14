@@ -10,6 +10,8 @@ import RecommendPage from './pages/recommend/RecommendPage';
 import SavedPage from './pages/saved/SavedPage';
 import InboxPage from './pages/inbox/InboxPage';
 import ProjectsPage from './pages/projects/ProjectsPage';
+import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
 
 function ComingSoon() {
   return <p className="t-body-m">준비 중인 화면이에요.</p>;
@@ -36,7 +38,9 @@ export function AppRoutes() {
     <Routes>
       {/* 사이드바·상단바가 필요 없는 개발용 화면 */}
       <Route path="/dev" element={<DevPage />} />
-
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      
       {/* 사이드바·상단바가 붙는 화면 */}
       <Route element={<AppLayout />}>
         <Route index element={<HomeOrLegacyRedirect />} />

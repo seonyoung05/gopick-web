@@ -8,10 +8,12 @@ import { SegmentTabsSection } from './sections/SegmentTabsSection';
 import { FormControlSection } from './sections/FormControlSection';
 import { FilterSection } from './sections/FilterSection';
 import { FoundationSection } from './sections/FoundationSection';
+import { ApiTestSection } from './sections/ApiTestSection';
 
 export default function DevPage() {
   return (
     <div style={{ padding: 40, display: 'grid', gap: 40 }}>
+      <ApiTestSection />
       <ButtonSection />
       <ChipSection />
       <LabelSection />
