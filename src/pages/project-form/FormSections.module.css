@@ -1,0 +1,261 @@
+/* src/pages/project-form/FormSections.module.css */
+.section {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.section:first-child {
+  padding-top: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.3px;
+}
+
+.desc {
+  margin: 2px 0 var(--space-16);
+  font-size: 14px;
+  color: var(--sub);
+}
+
+.field {
+  margin-top: 18px;
+}
+
+.field > * + * {
+  margin-top: var(--space-8);
+}
+
+.label {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.req {
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--red);
+}
+
+.hint {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--faint);
+}
+
+.error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--red);
+}
+
+.help {
+  margin: 0;
+  font-size: 13px;
+  color: var(--sub);
+}
+
+.empty {
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--faint);
+}
+
+/* ---------- 역할 카드 ---------- */
+.roleList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.roleCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--canvas);
+}
+
+.roleHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  align-self: stretch;
+}
+
+.subLabel {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.levelRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  align-self: stretch;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.levelRow strong {
+  width: 56px;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+/* ---------- 현재 팀 ---------- */
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-8);
+}
+
+.teamCell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding: 8px 10px 8px 14px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 14px;
+}
+
+/* ---------- 링크 ---------- */
+.linkList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.linkRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.linkType {
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.textBtn {
+  flex-shrink: 0;
+  padding: var(--space-4) var(--space-8);
+  border: 0;
+  background: none;
+  color: var(--sub);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.dashedBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: var(--space-8);
+  padding: 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 10px;
+  background: none;
+  color: var(--blue-deep);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dashedBtn:hover {
+  background: var(--blue-soft);
+}
+
+/* ---------- 모집글 초안 ---------- */
+.aiNote {
+  margin: var(--space-8) 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.draft {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid var(--violet);
+  border-radius: var(--r-md);
+  background: var(--violet-soft);
+}
+
+.draftHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  color: var(--violet);
+}
+
+.draftBadge {
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.draftSub {
+  margin: 2px 0 10px;
+  font-size: 12px;
+  color: var(--sub);
+}
+
+.draftText {
+  min-height: 220px;
+}
+
+.promptToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--violet);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.prompt {
+  margin: var(--space-8) 0 0;
+  padding: var(--space-12);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 900px) {
+  .teamGrid {
+    grid-template-columns: 1fr;
+  }
+}
