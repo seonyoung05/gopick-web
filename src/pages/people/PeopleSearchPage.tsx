@@ -1,5 +1,5 @@
 // src/pages/people/PeopleSearchPage.tsx
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import { FilterPanel, createFilterValues } from '../../components/common/FilterPanel';
 import { PersonCard } from '../../components/common/PersonCard';
@@ -8,7 +8,9 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Segment } from '../../components/ui/Segment';
 import { PEOPLE_FILTERS } from '../../constants/filters';
-import { MOCK_PEOPLE } from '../../mocks/people';
+import { ApiError, ERROR_CODE, profilesApi } from '../../api';
+import { personFromDetail, personFromSearch } from '../../api/mappers/person';
+import { useAuth } from '../../stores/auth';
 import { filterPeople, skillSummary } from './filterPeople';
 import styles from './PeopleSearchPage.module.css';
 import { ProfileDetailModal } from '../../components/common/ProfileDetailModal';
@@ -16,8 +18,15 @@ import { OfferModal, type OfferPayload } from '../../components/common/OfferModa
 import { MY_RECRUITING_PROJECTS } from '../../mocks/myProjects';
 import type { PersonSummary } from '../../types/person';
 
+type LoadStatus = 'loading' | 'error' | 'done';
+
 export default function PeopleSearchPage() {
   const toast = useToast();
+  const { account } = useAuth();
+  const myProfileId = account?.profileId;
+  const [people, setPeople] = useState<PersonSummary[]>([]);
+  const [status, setStatus] = useState<LoadStatus>('loading');
+  const [reloadKey, setReloadKey] = useState(0);
   const [keyword, setKeyword] = useState('');
   const [filters, setFilters] = useState(() => createFilterValues(PEOPLE_FILTERS));
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
@@ -27,27 +36,78 @@ export default function PeopleSearchPage() {
   const [offerPerson, setOfferPerson] = useState<PersonSummary | null>(null);
   /** 제안을 보낸 사람 ID */
   const [offeredIds, setOfferedIds] = useState<Set<string>>(new Set());
+  // 공개 프로필 전체 + 내 북마크를 한 번에 불러오기 (필터는 화면에서 적용)
+  useEffect(() => {
+    let ignore = false; // 화면을 떠난 뒤 늦게 온 응답은 무시
+    Promise.all([profilesApi.search(), profilesApi.myBookmarks()])
+      .then(([found, bookmarks]) => {
+        if (ignore) return;
+        setPeople(found.filter((p) => p.profileId !== myProfileId).map(personFromSearch)); // 나는 빼고
+        setSavedIds(new Set(bookmarks.map((b) => String(b.profileId))));
+        setStatus('done');
+      })
+      .catch(() => {
+        if (!ignore) setStatus('error');
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [myProfileId, reloadKey]);
+
+  const retry = () => {
+    setStatus('loading');
+    setReloadKey((k) => k + 1);
+  };
+
   // 검색어나 필터가 바뀔 때만 다시 계산
   const results = useMemo(
-    () =>
-      filterPeople(MOCK_PEOPLE, filters, keyword).sort((a, b) => a.name.localeCompare(b.name, 'ko')),
-    [filters, keyword],
+    () => filterPeople(people, filters, keyword).sort((a, b) => a.name.localeCompare(b.name, 'ko')),
+    [people, filters, keyword],
   );
-  const privateCount = MOCK_PEOPLE.filter((p) => !p.isPublic).length;
 
-  const toggleSave = (id: string, name: string) => {
-    const isSaved = savedIds.has(id);
-
+  /** 저장 버튼: 화면을 먼저 바꾸고, 실패하면 되돌리기 */
+  const setSaved = (id: string, saved: boolean) =>
     setSavedIds((prev) => {
       const next = new Set(prev);
-      if (isSaved) next.delete(id);
-      else next.add(id);
+      if (saved) next.add(id);
+      else next.delete(id);
       return next;
     });
 
-    // 토스트는 상태 변경 함수 바깥에서
-    if (isSaved) toast(`${name} 님을 저장함에서 뺐어요`);
-    else toast(`${name} 님을 저장했어요`, 'success');
+  const toggleSave = async (id: string, name: string) => {
+    const isSaved = savedIds.has(id);
+    setSaved(id, !isSaved);
+
+    try {
+      if (isSaved) await profilesApi.unbookmark(Number(id));
+      else await profilesApi.bookmark(Number(id));
+      // 토스트는 상태 변경 함수 바깥에서
+      if (isSaved) toast(`${name} 님을 저장함에서 뺐어요`);
+      else toast(`${name} 님을 저장했어요`, 'success');
+    } catch (e) {
+      setSaved(id, isSaved);
+      if (e instanceof ApiError && e.code === ERROR_CODE.PRIVATE_PROFILE) {
+        toast('비공개로 바뀐 프로필은 저장할 수 없어요');
+      } else {
+        toast('저장하지 못했어요. 잠시 후 다시 시도해 주세요');
+      }
+    }
+  };
+
+  /** 프로필 보기: 성향·경험까지 있는 상세를 불러온 뒤 모달 열기 */
+  const openDetail = async (person: PersonSummary) => {
+    try {
+      const res = await profilesApi.get(Number(person.id));
+      setDetailPerson(personFromDetail(res));
+    } catch (e) {
+      if (e instanceof ApiError && e.code === ERROR_CODE.PRIVATE_PROFILE) {
+        toast('비공개로 바뀐 프로필이에요');
+      } else if (e instanceof ApiError && e.code === ERROR_CODE.PROFILE_NOT_FOUND) {
+        toast('더 이상 없는 프로필이에요');
+      } else {
+        toast('프로필을 불러오지 못했어요');
+      }
+    }
   };
 
   const openOffer = (person: PersonSummary) => {
@@ -105,13 +165,24 @@ export default function PeopleSearchPage() {
         <section className={styles.results} aria-label="검색 결과">
           <div className={styles.resultHead}>
             <span>
-              사람 <strong>{results.length}명</strong> + 비공개 {privateCount}명 | 고른 조건에 맞는 사람만
-              보여줘요
+              사람 <strong>{results.length}명</strong> | 공개 프로필 중 고른 조건에 맞는 사람만 보여줘요
             </span>
             <span>이름순</span>
           </div>
 
-          {results.length === 0 ? (
+          {status === 'loading' ? (
+            <div className={styles.empty}>사람을 불러오는 중이에요…</div>
+          ) : status === 'error' ? (
+            <div className={styles.empty}>
+              <strong>사람 목록을 불러오지 못했어요</strong>
+              잠시 후 다시 시도해 주세요.
+              <div style={{ marginTop: 16 }}>
+                <Button variant="ghost" size="sm" onClick={retry}>
+                  다시 불러오기
+                </Button>
+              </div>
+            </div>
+          ) : results.length === 0 ? (
             <div className={styles.empty}>
               <strong>조건에 맞는 사람이 없어요</strong>
               검색어를 바꾸거나 필터를 줄여 보세요.
@@ -129,7 +200,7 @@ export default function PeopleSearchPage() {
                 skillText={skillSummary(person)}
                 saved={savedIds.has(person.id)}
                 onToggleSave={() => toggleSave(person.id, person.name)}
-                onViewProfile={() => setDetailPerson(person)}
+                onViewProfile={() => openDetail(person)}
                 action={
                   offeredIds.has(person.id) ? (
                     <Button variant="ghost" size="sm" block disabled>
