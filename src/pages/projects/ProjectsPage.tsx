@@ -50,6 +50,9 @@ export default function ProjectsPage() {
       ),
     }));
 
+  const setStage = (key: TeamTabKey, id: string, stage: number) =>
+    updateTeam(key, id, (p) => ({ ...p, currentStage: stage }));
+
   const renderTeamTab = (key: TeamTabKey) => {
     const list = teams[key];
     const current = list.find((p) => p.id === selected[key]) ?? list[0];
@@ -74,6 +77,7 @@ export default function ProjectsPage() {
           editable={key === 'ongoing'}
           onToggleScrap={() => setTeams((prev) => ({ ...prev, [key]: toggleScrap(prev[key], current.id) }))}
           onToggleTask={(stage, ti, done) => setTaskDone(key, current.id, stage, ti, done)}
+          onChangeStage={(stage) => setStage(key, current.id, stage)}
         />
       </div>
     );
