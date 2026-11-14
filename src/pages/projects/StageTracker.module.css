@@ -68,6 +68,23 @@
   font-weight: 700;
 }
 
+/* 눌러서 단계를 바꿀 수 있는 모드(button) */
+.stepButton {
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+  transition: filter 0.12s ease;
+}
+
+.stepButton:hover {
+  filter: brightness(0.95);
+}
+
+.stepButton:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
 .step_done {
   background: var(--green-soft);
   color: var(--green);
