@@ -81,7 +81,7 @@ export function fromProfileDetail(res: ProfileDetailResponse): ProfileForm {
   }
 
   // 연락처 종류: 모르는 값이면 '기타'
-  const contactType = (CONTACT_TYPES as readonly string[]).includes(res.contactPlatform)
+  const contactType = (CONTACT_TYPES as readonly string[]).includes(res.contactPlatform ?? '')
     ? (res.contactPlatform as ContactType)
     : '기타';
 
