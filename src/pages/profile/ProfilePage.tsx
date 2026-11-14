@@ -1,6 +1,5 @@
 // src/pages/profile/ProfilePage.tsx
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
 import { Field } from '../../components/common/Field';
 import { FormSection } from '../../components/common/FormSection';
 import { EtcChipGroup } from '../../components/common/EtcChipGroup';
@@ -11,7 +10,6 @@ import { Segment } from '../../components/ui/Segment';
 import { ChipGroup } from '../../components/ui/Chip';
 import { ApiError, ERROR_CODE, profilesApi } from '../../api';
 import { fromProfileDetail, toProfileRequest } from '../../api/mappers/profile';
-import { useAuth } from '../../stores/auth';
 import {
   CONTACT_TYPES,
   CONTACT_PLACEHOLDER,
@@ -40,12 +38,13 @@ import { TechLevelList } from './TechLevelList';
 import { ExperienceCard } from './ExperienceCard';
 import { validateProfile, REQUIRED_KEYS, SECTION_OF, type RequiredKey } from './validateProfile';
 import styles from './ProfilePage.module.css';
+import { myAvatarSeed, useAuth } from '../../stores/auth';
 
 type LoadState = 'loading' | 'ready' | 'error';
 
 export default function ProfilePage() {
   const toast = useToast();
-  const { status, account, setProfileId } = useAuth();
+  const { status, account, setProfileId, setProfileName } = useAuth();
   const profileId = account?.profileId ?? null;
 
   const [form, setForm] = useState<ProfileForm>(EMPTY_PROFILE);
@@ -186,6 +185,7 @@ export default function ProfilePage() {
         setProfileId(res.profileId); // 로그인 상태에 "프로필 있음" 반영
         toast('프로필을 만들었어요! 이제 팀원 추천을 받을 수 있어요', 'success');
       }
+      setProfileName(form.name.trim());
       setSavedForm(form);
       setShowErrors(false);
     } catch (e) {
@@ -226,8 +226,6 @@ export default function ProfilePage() {
   }, [isDirty]);
 
   /* ---------- 화면 상태별 처리 (훅들보다 아래에 있어야 해요) ---------- */
-  // TODO(5단계): 로그인 확인은 라우팅에서 한 번에 처리
-  if (status === 'unauthenticated') return <Navigate to="/login" replace state={{ from: '/profile' }} />;
 
   if (status === 'loading' || loadState === 'loading') {
     return <div className={styles.state}>프로필을 불러오는 중이에요…</div>;
@@ -255,7 +253,13 @@ export default function ProfilePage() {
       </div>
 
       <div className={styles.layout}>
-        <ProfileSide form={form} requiredDone={requiredDone} requiredTotal={requiredTotal} toc={toc} />
+        <ProfileSide
+          form={form}
+          avatarSeed={myAvatarSeed(account)}
+          requiredDone={requiredDone}
+          requiredTotal={requiredTotal}
+          toc={toc}
+        />
 
         <div className={styles.card}>
           {/* ---------- 기본 정보 ---------- */}

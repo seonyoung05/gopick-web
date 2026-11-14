@@ -13,17 +13,24 @@ export interface TocItem {
 
 interface ProfileSideProps {
   form: ProfileForm;
+  /** 아바타 색 기준 (상단바와 같은 값) */
+  avatarSeed?: string | number;
   requiredDone: number;
   requiredTotal: number;
   toc: TocItem[];
 }
 
-export function ProfileSide({ form, requiredDone, requiredTotal, toc }: ProfileSideProps) {
+export function ProfileSide({ form, avatarSeed, requiredDone, requiredTotal, toc }: ProfileSideProps) {
   const percent = requiredTotal ? (requiredDone / requiredTotal) * 100 : 0;
 
   return (
     <aside className={styles.side}>
-      <Avatar name={form.name || '?'} size="xl" color={form.name ? undefined : 'muted'} />
+      <Avatar
+        name={form.name || '?'}
+        seed={avatarSeed}
+        size="xl"
+        color={form.name ? undefined : 'muted'}
+      />
       <p className={styles.sideName}>{form.name || '이름을 입력해 주세요'}</p>
       <p className={styles.sideMajor}>{form.major || '전공'}</p>
       <div className={styles.sideParts}>
@@ -53,3 +60,4 @@ export function ProfileSide({ form, requiredDone, requiredTotal, toc }: ProfileS
     </aside>
   );
 }
+

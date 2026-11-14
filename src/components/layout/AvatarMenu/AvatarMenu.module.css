@@ -1,0 +1,88 @@
+/* src/components/layout/AvatarMenu/AvatarMenu.module.css */
+.wrap {
+  position: relative;
+}
+
+.trigger {
+  display: inline-flex;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.trigger:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 240px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-modal);
+}
+
+.account {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.email {
+  overflow: hidden;
+  color: var(--faint);
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.divider {
+  height: 1px;
+  margin: 0;
+  border: none;
+  background: var(--line);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--ink);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item svg {
+  width: 18px;
+  height: 18px;
+  color: var(--sub);
+}
+
+.item:hover,
+.item:focus-visible {
+  outline: none;
+  background: var(--surface-2);
+}
