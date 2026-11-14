@@ -1,0 +1,6 @@
+/* src/pages/projects/CompleteProjectModal.module.css */
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}

@@ -37,6 +37,13 @@
   gap: var(--space-8);
 }
 
+/* 목록이 비어 있을 때 */
+.empty {
+  margin: var(--space-32) 0;
+  text-align: center;
+  color: var(--faint);
+}
+
 @media (max-width: 900px) {
   .split {
     grid-template-columns: 1fr;

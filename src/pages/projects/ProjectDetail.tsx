@@ -6,7 +6,8 @@ import { Avatar } from '../../components/ui/Avatar';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { Status } from '../../components/ui/Label';
 import { STAGES } from '../../constants/project';
-import type { StageTask, TeamProject } from '../../types/project';
+import type { OutputLink, StageTask, TeamProject } from '../../types/project';
+import { CompleteProjectModal } from './CompleteProjectModal';
 import { ScrapButton } from './ScrapButton';
 import { StagePipeline } from './StageTracker';
 import styles from './ProjectDetail.module.css';
@@ -71,20 +72,26 @@ interface ProjectDetailProps {
   project: TeamProject;
   /** 팀 구성원만 과제를 수정할 수 있음 (완료 프로젝트는 읽기 전용) */
   editable: boolean;
+  /** 완료 처리된 프로젝트인지 (완료 · 아카이브 탭) */
+  completed: boolean;
   onToggleScrap: () => void;
   onToggleTask: (stage: number, taskIndex: number, done: boolean) => void;
-  /** 진행 단계를 눌러 바꿀 때 (editable일 때만 쓰여요) */
+  /** 진행 단계를 눌렀을 때 (editable일 때만 쓰여요) */
   onChangeStage: (stage: number) => void;
+  /** '완료'를 눌러 프로젝트를 완료 처리할 때 (editable일 때만 쓰여요) */
+  onComplete: (outputs: OutputLink[]) => void;
 }
 
 export function ProjectDetail({
   project: p,
   editable,
+  completed: isDone,
   onToggleScrap,
   onToggleTask,
   onChangeStage,
+  onComplete,
 }: ProjectDetailProps) {
-  const isDone = p.currentStage >= STAGES.length;
+  const [completing, setCompleting] = useState(false);
 
   return (
     <section className={styles.detail} aria-label={`${p.title} 상세`}>
@@ -136,9 +143,26 @@ export function ProjectDetail({
       )}
 
       <h4 className={styles.h}>
-        진행 단계 {editable && <small>단계를 눌러 바꿀 수 있어요</small>}
+        진행 단계{' '}
+        {editable && (
+          <small>단계를 누르면 진행 중, 한 번 더 누르면 완료(✓)예요. 마지막 &lsquo;완료&rsquo;를 누르면 프로젝트가 끝나요</small>
+        )}
       </h4>
-      <StagePipeline currentStage={p.currentStage} onSelect={editable ? onChangeStage : undefined} />
+      <StagePipeline
+        currentStage={p.currentStage}
+        completed={isDone}
+        onSelect={editable ? onChangeStage : undefined}
+        onComplete={editable ? () => setCompleting(true) : undefined}
+      />
+      <CompleteProjectModal
+        open={completing}
+        projectTitle={p.title}
+        onClose={() => setCompleting(false)}
+        onConfirm={(outputs) => {
+          setCompleting(false);
+          onComplete(outputs);
+        }}
+      />
 
       <h4 className={styles.h}>
         단계별 세부 과제 <small>선택</small>

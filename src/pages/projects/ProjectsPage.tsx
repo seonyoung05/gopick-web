@@ -1,9 +1,11 @@
 // src/pages/projects/ProjectsPage.tsx
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useToast } from '../../components/common/Toast';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
+import { STAGES } from '../../constants/project';
 import { recruitProjects, ongoingProjects, doneProjects } from '../../mocks/projects';
-import type { RecruitProject, TeamProject } from '../../types/project';
+import type { OutputLink, RecruitProject, TeamProject } from '../../types/project';
 import { RecruitCard } from './RecruitCard';
 import { ProjectListItem } from './ProjectListItem';
 import { ProjectDetail } from './ProjectDetail';
@@ -20,6 +22,7 @@ function toggleScrap<T extends { id: string; scrapped: boolean }>(list: T[], id:
 
 export default function ProjectsPage() {
   const [params, setParams] = useSearchParams();
+  const toast = useToast();
   const raw = params.get('tab');
   const tab: TabKey = TAB_KEYS.find((k) => k === raw) ?? 'recruit';
 
@@ -50,11 +53,37 @@ export default function ProjectsPage() {
       ),
     }));
 
+  // 단계를 누르면 그 단계가 진행 중(●), 이미 진행 중인 단계를 한 번 더 누르면 끝난 것(✓)으로 표시해요.
+  // 배포까지 끝나면 currentStage가 STAGES.length(5)가 되고, 그다음은 '완료' 처리만 남아요.
   const setStage = (key: TeamTabKey, id: string, stage: number) =>
-    updateTeam(key, id, (p) => ({ ...p, currentStage: stage }));
+    updateTeam(key, id, (p) => ({
+      ...p,
+      currentStage: stage === p.currentStage ? Math.min(stage + 1, STAGES.length) : stage,
+    }));
+
+  // 진행 중 → 완료: 진행 중 목록에서 빼서 완료 · 아카이브 맨 위로 옮기고, 그 탭으로 이동해요
+  const completeProject = (id: string, outputs: OutputLink[]) => {
+    const target = teams.ongoing.find((p) => p.id === id);
+    if (!target) return;
+    const now = new Date();
+    const finished: TeamProject = {
+      ...target,
+      currentStage: STAGES.length,
+      lastActive: `${now.getMonth() + 1}/${now.getDate()}`,
+      outputs: outputs.length > 0 ? outputs : undefined,
+    };
+    const rest = teams.ongoing.filter((p) => p.id !== id);
+    setTeams({ ongoing: rest, done: [finished, ...teams.done] });
+    setSelected({ ongoing: rest[0]?.id ?? '', done: finished.id });
+    setParams({ tab: 'done' });
+    toast('프로젝트를 완료 처리했어요');
+  };
 
   const renderTeamTab = (key: TeamTabKey) => {
     const list = teams[key];
+    if (list.length === 0) {
+      return <p className={styles.empty}>진행 중인 프로젝트가 없어요.</p>;
+    }
     const current = list.find((p) => p.id === selected[key]) ?? list[0];
 
     return (
@@ -75,9 +104,11 @@ export default function ProjectsPage() {
           project={current}
           // TODO: 로그인한 사용자가 이 프로젝트의 팀 구성원인지로 교체 (지금은 진행 중 탭만 수정 가능)
           editable={key === 'ongoing'}
+          completed={key === 'done'}
           onToggleScrap={() => setTeams((prev) => ({ ...prev, [key]: toggleScrap(prev[key], current.id) }))}
           onToggleTask={(stage, ti, done) => setTaskDone(key, current.id, stage, ti, done)}
           onChangeStage={(stage) => setStage(key, current.id, stage)}
+          onComplete={(outputs) => completeProject(current.id, outputs)}
         />
       </div>
     );
