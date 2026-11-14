@@ -41,8 +41,8 @@ export interface ProfileDetailResponse {
   profileId: number;
   name: string;
   major: string;
-  contactPlatform: string;
   /** 본인 프로필 조회일 때만 옴 */
+  contactPlatform?: string;
   contactId?: string;
   isPublic: boolean;
   teamTendency: string | null;
