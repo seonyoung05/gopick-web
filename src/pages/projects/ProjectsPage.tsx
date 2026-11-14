@@ -80,7 +80,7 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div>
+    <div className={styles.page}>
       <h1 className={`t-h1 ${styles.heading}`}>프로젝트</h1>
       <p className={styles.sub}>
         모집 중 · 진행 중 · 완료로 나눠 보여줘요. 각 탭 안에서는 최근 활동순이고, 모든 팀의 진행 정보는 공개돼요.

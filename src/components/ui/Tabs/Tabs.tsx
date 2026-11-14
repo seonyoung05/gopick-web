@@ -12,8 +12,8 @@ export interface TabItem<T extends string> {
 
 interface TabsProps<T extends string> {
   items: readonly TabItem<T>[];
-  value: T;
-  onChange: (value: T) => void;
+  value: NoInfer<T>;
+  onChange: (value: NoInfer<T>) => void;
   className?: string;
   'aria-label'?: string;
 }

@@ -211,3 +211,18 @@
 
 .noticeOk { color: var(--green); }
 .noticeError { color: var(--red); }
+
+/* ---------- 불러오는 중 · 실패 ---------- */
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 96px 24px;
+  color: var(--sub);
+  text-align: center;
+}
+
+.state p {
+  margin: 0;
+}

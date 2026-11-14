@@ -57,3 +57,13 @@ export const COLLAB_GROUPS = [
     options: ['비동기 소통 선호', '자주 소통 선호', '피드백 환영', '질문 많이 하는 편'],
   },
 ] as const;
+
+/** 선택지에 없는 값(직접 입력했던 값)을 '기타' 앞에 칩으로 끼워 넣음 */
+export function withExtraOptions(base: readonly string[], selected: readonly string[]) {
+  const extras = selected.filter((v) => !base.includes(v));
+  if (extras.length === 0) return base;
+  const etcIndex = base.indexOf('기타');
+  return etcIndex === -1
+    ? [...base, ...extras]
+    : [...base.slice(0, etcIndex), ...extras, ...base.slice(etcIndex)];
+}

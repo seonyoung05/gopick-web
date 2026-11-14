@@ -12,7 +12,7 @@ interface ModalProps {
   /** 제목 대신 넣을 머리 영역 */
   header?: ReactNode;
   footer?: ReactNode;
-  size?: 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg';
   children?: ReactNode;
 }
 
@@ -40,7 +40,7 @@ export function Modal({ open, onClose, title, description, header, footer, size 
   return (
     <dialog
       ref={ref}
-      className={clsx(styles.dialog, size === 'lg' && styles.lg)}
+      className={clsx(styles.dialog, size === 'lg' && styles.lg, size === 'sm' && styles.sm)}
       aria-labelledby={title ? 'modal-title' : undefined}
       onCancel={(e) => {
         e.preventDefault(); // ESC 키: 브라우저가 직접 닫지 않고 onClose로 처리
