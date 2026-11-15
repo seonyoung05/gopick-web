@@ -259,3 +259,58 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* 현재 팀 정보 */
+.sectionHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+
+.infoBox {
+  display: flex;
+  gap: 12px;
+  margin-top: var(--space-16);
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 14px;
+}
+
+.infoBox strong {
+  display: block;
+  font-size: 15px;
+}
+
+.infoBox p {
+  margin: 2px 0 0;
+}
+
+.memberList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.memberRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+
+.memberRole {
+  color: var(--sub);
+  font-size: 14px;
+}
+
+.leaderTag {
+  margin-left: auto;
+}
