@@ -12,19 +12,25 @@ interface RecruitCardProps {
   onToggleScrap: () => void;
   /** 지원하기 클릭 (지원 모달은 공통 Modal 병합 후 연결) */
   onApply: () => void;
+  /** 이미 지원을 보낸 프로젝트면 버튼을 비활성으로 보여줘요 */
+  applied?: boolean;
   /** 내 프로젝트일 때: 수정 / 추천 팀원 보기 / 모집 마치고 진행 시작 */
   onEdit?: () => void;
   onRecommend?: () => void;
   onStart?: () => void;
 }
 
-type ActionsProps = Pick<RecruitCardProps, 'onApply' | 'onEdit' | 'onRecommend' | 'onStart'> & {
+type ActionsProps = Pick<RecruitCardProps, 'onApply' | 'applied' | 'onEdit' | 'onRecommend' | 'onStart'> & {
   action: RecruitProject['action'];
 };
 
-function Actions({ action, onApply, onEdit, onRecommend, onStart }: ActionsProps) {
+function Actions({ action, onApply, applied = false, onEdit, onRecommend, onStart }: ActionsProps) {
   if (action === 'apply') {
-    return (
+    return applied ? (
+      <Button size="sm" variant="ghost" disabled>
+        지원 보냄
+      </Button>
+    ) : (
       <Button size="sm" onClick={onApply}>
         지원하기
       </Button>
