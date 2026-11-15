@@ -1,0 +1,23 @@
+/* src/pages/projects/LogComposer.module.css */
+.form {
+  margin: 0 0 18px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.hint {
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 2px 0;
+  font-size: 12px;
+  color: var(--faint);
+}
