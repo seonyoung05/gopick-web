@@ -13,7 +13,7 @@ import { useToast } from '../../components/common/Toast';
 import { Button } from '../../components/ui/Button';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
 import { useAuth } from '../../stores/auth';
-import type { ActivityLog, OutputLink } from '../../types/project';
+import type { ActivityLog, OutputLink, StageTask, TeamProject } from '../../types/project';
 import { monthDay } from './formatDate';
 import { RecruitCard } from './RecruitCard';
 import { ProjectListItem } from './ProjectListItem';
@@ -43,6 +43,10 @@ export default function ProjectsPage() {
   const author = profileName ?? '나';
   // 활동 기록 API가 아직 없어서, 새 기록은 이 화면 안에서만 보관해요 (새로고침하면 사라져요)
   const [newLogs, setNewLogs] = useState<Record<string, ActivityLog[]>>({});
+  // 세부 과제 API가 아직 없어서, 과제 수정은 이 화면 안에서만 보관해요 (새로고침하면 사라져요)
+  const [taskEdits, setTaskEdits] = useState<Record<string, StageTask[][]>>({});
+  const editTasks = (base: TeamProject, fn: (tasks: StageTask[][]) => StageTask[][]) =>
+    setTaskEdits((prev) => ({ ...prev, [base.id]: fn(prev[base.id] ?? base.tasks) }));
   const addLog = (id: string, text: string) =>
     setNewLogs((prev) => ({ ...prev, [id]: [{ date: monthDay(), author, text }, ...(prev[id] ?? [])] }));
   const myProfileId = account?.profileId;
@@ -192,7 +196,7 @@ export default function ProjectsPage() {
     }
 
     const base = list.find((p) => p.id === selected[key]) ?? list[0];
-    const current = { ...base, log: [...(newLogs[base.id] ?? []), ...base.log] };
+    const current = { ...base, tasks: taskEdits[base.id] ?? base.tasks, log: [...(newLogs[base.id] ?? []), ...base.log] };
     const raw = findProject(current.id);
     const { isMember, isLeader } = raw ? myMembership(raw, myProfileId) : { isMember: false, isLeader: false };
     const canEdit = key === 'ongoing' && isMember;
@@ -217,8 +221,17 @@ export default function ProjectsPage() {
           author={author}
           onAddLog={(text) => addLog(current.id, text)}
           onToggleScrap={() => toggleScrap(current.id)}
-          // 세부 과제는 아직 서버에 없어서 체크해도 저장되지 않음
-          onToggleTask={() => undefined}
+          onToggleTask={(stage, ti, done) =>
+            editTasks(current, (all) =>
+              all.map((list, si) => (si === stage ? list.map((t, i) => (i === ti ? { ...t, done } : t)) : list)),
+            )
+          }
+          onAddTask={(stage, text) =>
+            editTasks(current, (all) => all.map((list, si) => (si === stage ? [...list, { text, done: false }] : list)))
+          }
+          onRemoveTask={(stage, ti) =>
+            editTasks(current, (all) => all.map((list, si) => (si === stage ? list.filter((_, i) => i !== ti) : list)))
+          }
           onChangeStage={canEdit ? (index) => changeStage(current.id, index) : undefined}
           onComplete={canEdit && isLeader ? (outputs) => completeProject(current.id, outputs) : undefined}
         />
