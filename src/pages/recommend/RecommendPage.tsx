@@ -1,5 +1,6 @@
 // src/pages/recommend/RecommendPage.tsx
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChipGroup } from '../../components/ui/Chip';
 import { Button } from '../../components/ui/Button';
 import { useToast } from '../../components/common/Toast';
@@ -16,6 +17,7 @@ const project = MY_RECRUITING_PROJECTS[0];
 
 export default function RecommendPage() {
   const toast = useToast();
+  const navigate = useNavigate();
 
   const roleLabel = (r: { role: string; remaining: number }) => `${r.role} ${r.remaining}명 모집`;
   const [roleText, setRoleText] = useState(roleLabel(project.recruitments[0]));
@@ -114,8 +116,7 @@ export default function RecommendPage() {
               <strong>추천 결과가 마음에 들지 않나요?</strong>
               <p>사람 검색에서 필터를 바꿔 가며 더 다양한 사람을 찾아보세요.</p>
             </div>
-            {/* TODO: 라우팅 생기면 /search/people 로 이동 */}
-            <Button variant="ghost" size="sm" onClick={() => (window.location.search = '?page=people')}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/search')}>
               사람 검색으로 더 찾기
             </Button>
           </div>

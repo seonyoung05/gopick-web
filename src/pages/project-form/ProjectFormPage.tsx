@@ -1,5 +1,5 @@
 // src/pages/project-form/ProjectFormPage.tsx
-// 프로젝트 모집 등록 · 수정 (Figma 03). 사이드바 "프로젝트 관리" 화면
+// 프로젝트 모집 등록 · 수정 (Figma 03). 사이드바 "내 프로젝트" 화면
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
@@ -74,7 +74,7 @@ export default function ProjectFormPage() {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
 
-  // 내 프로젝트 불러오기 → ?id= 가 있으면 그 프로젝트, 없으면 첫 프로젝트를 편집
+  // 내 프로젝트 불러오기 → ?id=new 면 새 프로젝트, ?id=번호 면 그 프로젝트, 없으면 첫 프로젝트를 편집
   const wantedId = params.get('id');
   useEffect(() => {
     let ignore = false;
@@ -85,7 +85,8 @@ export default function ProjectFormPage() {
           (p) => p.lifecycleStatus !== 'COMPLETED' && myMembership(p, myProfileId).isLeader,
         );
         setMyProjects(mine);
-        const first = mine.find((p) => String(p.projectId) === wantedId) ?? mine[0];
+        const first =
+          wantedId === NEW ? undefined : (mine.find((p) => String(p.projectId) === wantedId) ?? mine[0]);
         if (first) {
           setSelectedId(String(first.projectId));
           setForm(toProjectForm(first));
