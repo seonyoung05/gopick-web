@@ -11,6 +11,7 @@ import ProjectSearchPage from './pages/project-search/ProjectSearchPage';
 import RecommendPage from './pages/recommend/RecommendPage';
 import SavedPage from './pages/saved/SavedPage';
 import InboxPage from './pages/inbox/InboxPage';
+import HomePage from './pages/home/HomePage';
 import ProjectsPage from './pages/projects/ProjectsPage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
@@ -34,7 +35,7 @@ const LEGACY_PAGE_PATH: Record<string, string> = {
 function HomeOrLegacyRedirect() {
   const [params] = useSearchParams();
   const target = LEGACY_PAGE_PATH[params.get('page') ?? ''];
-  return target ? <Navigate to={target} replace /> : <ComingSoon />;
+  return target ? <Navigate to={target} replace /> : <HomePage />;
 }
 
 export function AppRoutes() {

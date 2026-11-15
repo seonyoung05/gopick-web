@@ -1,0 +1,122 @@
+/* src/pages/home/HomePage.module.css */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1128px;
+  padding: 32px 32px 64px;
+}
+
+/* 새 소식 배너 */
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid #d2e3fc;
+  border-radius: var(--r-md);
+  background: var(--blue-soft);
+}
+
+.notice p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.notice strong {
+  margin-right: 4px;
+}
+
+/* 히어로 */
+.hero {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+
+.stripe {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: 5px;
+}
+
+.stripe i:nth-child(1) { background: var(--blue); }
+.stripe i:nth-child(2) { background: var(--red); }
+.stripe i:nth-child(3) { background: var(--yellow); }
+.stripe i:nth-child(4) { background: var(--green); }
+
+.heroBody {
+  padding: 52px 41px 52px;
+}
+
+.heroBody h1 {
+  margin: 0;
+}
+
+.heroDesc {
+  max-width: 620px;
+  margin: 16px 0 0;
+  color: var(--sub);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.cta {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+/* 구역 */
+.section {
+  margin-top: 4px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.sectionHead h2 {
+  margin: 0;
+}
+
+.more {
+  color: var(--blue);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.more:hover {
+  text-decoration: underline;
+}
+
+.grid3,
+.grid2 {
+  display: grid;
+  gap: 19px;
+}
+
+.grid3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 900px) {
+  .grid3,
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .heroBody {
+    padding: 32px 24px;
+  }
+}
