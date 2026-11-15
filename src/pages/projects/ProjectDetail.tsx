@@ -73,9 +73,17 @@ interface ProjectDetailProps {
   editable: boolean;
   onToggleScrap: () => void;
   onToggleTask: (stage: number, taskIndex: number, done: boolean) => void;
+  /** 진행 단계를 눌러 바꿀 때 (editable일 때만 쓰여요) */
+  onChangeStage: (stage: number) => void;
 }
 
-export function ProjectDetail({ project: p, editable, onToggleScrap, onToggleTask }: ProjectDetailProps) {
+export function ProjectDetail({
+  project: p,
+  editable,
+  onToggleScrap,
+  onToggleTask,
+  onChangeStage,
+}: ProjectDetailProps) {
   const isDone = p.currentStage >= STAGES.length;
 
   return (
@@ -127,8 +135,10 @@ export function ProjectDetail({ project: p, editable, onToggleScrap, onToggleTas
         </>
       )}
 
-      <h4 className={styles.h}>진행 단계</h4>
-      <StagePipeline currentStage={p.currentStage} />
+      <h4 className={styles.h}>
+        진행 단계 {editable && <small>단계를 눌러 바꿀 수 있어요</small>}
+      </h4>
+      <StagePipeline currentStage={p.currentStage} onSelect={editable ? onChangeStage : undefined} />
 
       <h4 className={styles.h}>
         단계별 세부 과제 <small>선택</small>
