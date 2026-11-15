@@ -7,7 +7,8 @@ import { Button } from '../../components/ui/Button';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { Status } from '../../components/ui/Label';
 import { STAGES } from '../../constants/project';
-import type { StageTask, TeamProject } from '../../types/project';
+import type { OutputLink, StageTask, TeamProject } from '../../types/project';
+import { CompleteProjectModal } from './CompleteProjectModal';
 import { ScrapButton } from './ScrapButton';
 import { StagePipeline } from './StageTracker';
 import styles from './ProjectDetail.module.css';
@@ -76,8 +77,8 @@ interface ProjectDetailProps {
   onToggleTask: (stage: number, taskIndex: number, done: boolean) => void;
   /** 있으면 진행 단계를 눌러 바꿀 수 있음 (진행 중 프로젝트의 팀원) */
   onChangeStage?: (stage: number) => void;
-  /** 있으면 '프로젝트 완료' 버튼 표시 (진행 중 프로젝트의 팀장) */
-  onComplete?: () => void;
+  /** 있으면 '프로젝트 완료' 버튼 표시 (진행 중 프로젝트의 팀장). 산출물(GitHub 필수)을 받아 호출돼요 */
+  onComplete?: (outputs: OutputLink[]) => void;
 }
 
 export function ProjectDetail({
@@ -89,6 +90,7 @@ export function ProjectDetail({
   onComplete,
 }: ProjectDetailProps) {
   const isDone = p.currentStage >= STAGES.length;
+  const [completing, setCompleting] = useState(false);
 
   return (
     <section className={styles.detail} aria-label={`${p.title} 상세`}>
@@ -142,13 +144,29 @@ export function ProjectDetail({
       <h4 className={styles.h}>
         진행 단계 {editable && onChangeStage && <small>단계를 눌러 바꿀 수 있어요</small>}
       </h4>
-      <StagePipeline currentStage={p.currentStage} onSelect={editable ? onChangeStage : undefined} />
+      <StagePipeline
+        currentStage={p.currentStage}
+        completed={isDone}
+        onSelect={editable ? onChangeStage : undefined}
+        onComplete={editable && onComplete && !isDone ? () => setCompleting(true) : undefined}
+      />
       {onComplete && !isDone && (
         <div className={styles.stageControls}>
-          <Button size="sm" variant="ghost" onClick={onComplete}>
+          <Button size="sm" variant="ghost" onClick={() => setCompleting(true)}>
             프로젝트 완료로 바꾸기
           </Button>
         </div>
+      )}
+      {onComplete && (
+        <CompleteProjectModal
+          open={completing}
+          projectTitle={p.title}
+          onClose={() => setCompleting(false)}
+          onConfirm={(outputs) => {
+            setCompleting(false);
+            onComplete(outputs);
+          }}
+        />
       )}
 
       <h4 className={styles.h}>

@@ -13,6 +13,7 @@ import { useToast } from '../../components/common/Toast';
 import { Button } from '../../components/ui/Button';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
 import { useAuth } from '../../stores/auth';
+import type { OutputLink } from '../../types/project';
 import { RecruitCard } from './RecruitCard';
 import { ProjectListItem } from './ProjectListItem';
 import { ProjectDetail } from './ProjectDetail';
@@ -144,9 +145,14 @@ export default function ProjectsPage() {
     }
   };
 
-  const completeProject = async (id: string) => {
-    if (!window.confirm('프로젝트를 완료할까요? 완료한 프로젝트는 다시 진행 중으로 되돌릴 수 없어요.')) return;
+  const completeProject = async (id: string, outputs: OutputLink[]) => {
     try {
+      // 완료 API는 산출물을 받지 않아서, 먼저 프로젝트 링크로 저장한 뒤 완료 처리해요 (기존 링크는 유지)
+      const existing = findProject(id)?.links ?? [];
+      const added = outputs
+        .filter((o) => !existing.some((l) => l.url === o.url))
+        .map((o) => ({ type: o.label, url: o.url }));
+      if (added.length > 0) await projectsApi.update(Number(id), { links: [...existing, ...added] });
       await projectsApi.complete(Number(id));
       await refreshOne(id);
       toast('프로젝트를 완료했어요', 'success');
@@ -204,7 +210,7 @@ export default function ProjectsPage() {
           // 세부 과제는 아직 서버에 없어서 체크해도 저장되지 않음
           onToggleTask={() => undefined}
           onChangeStage={canEdit ? (index) => changeStage(current.id, index) : undefined}
-          onComplete={canEdit && isLeader ? () => completeProject(current.id) : undefined}
+          onComplete={canEdit && isLeader ? (outputs) => completeProject(current.id, outputs) : undefined}
         />
       </div>
     );
