@@ -77,7 +77,7 @@ export default function HomePage() {
             진행 상황까지 한곳에서 보여줍니다.
           </p>
           <div className={styles.cta}>
-            <Button onClick={() => navigate('/manage')}>프로젝트 모집 등록</Button>
+            <Button onClick={() => navigate('/manage?id=new')}>프로젝트 모집 등록</Button>
             <Button variant="ghost" onClick={() => navigate('/profile')}>
               내 프로필 작성
             </Button>
@@ -95,7 +95,7 @@ export default function HomePage() {
               onDetail={() => navigate('/projects?tab=recruit')}
               // TODO: 지원 모달(M2)이 병합되면 모달로 연결
               onApply={() => navigate('/projects?tab=recruit')}
-              onEdit={() => navigate('/manage')}
+              onEdit={() => navigate(`/manage?id=${p.id}`)}
               onRecommend={() => navigate('/recommend')}
               onStart={() => navigate('/projects?tab=recruit')}
               onOffers={() => navigate('/offers')}
