@@ -154,6 +154,8 @@ export default function PeopleSearchPage() {
             placeholder="이름, 전공, 소개로 사람 검색"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
+            // 탑바 돋보기로 들어오면 바로 입력할 수 있게
+            autoFocus
             aria-label="사람 검색"
           />
         </div>
