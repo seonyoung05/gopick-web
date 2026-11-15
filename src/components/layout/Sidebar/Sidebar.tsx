@@ -6,8 +6,6 @@ import { Badge } from '../../ui/Label';
 import {
   NAV_ITEMS,
   MOCK_UNREAD_COUNT,
-  MOCK_SUMMARY,
-  MOCK_DECISION_NOTE,
 } from '../../../constants/nav';
 import styles from './Sidebar.module.css';
 
@@ -19,7 +17,6 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed = false, onToggle, unreadCount = MOCK_UNREAD_COUNT }: SidebarProps) {
-  const { recruiting, ongoing, done } = MOCK_SUMMARY;
 
   return (
     <aside className={clsx(styles.sidebar, collapsed && styles.collapsed)}>
@@ -57,13 +54,6 @@ export function Sidebar({ collapsed = false, onToggle, unreadCount = MOCK_UNREAD
           </NavLink>
         ))}
       </nav>
-
-      <div className={styles.summary}>
-        <strong>
-          모집 중 {recruiting} · 진행 중 {ongoing} · 완료 {done}
-        </strong>
-        <span>{MOCK_DECISION_NOTE}</span>
-      </div>
     </aside>
   );
 }

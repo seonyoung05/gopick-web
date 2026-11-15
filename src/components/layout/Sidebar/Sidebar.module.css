@@ -100,20 +100,6 @@
   margin-left: auto;
 }
 
-/* ---------- Summary ---------- */
-.summary {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: auto;
-  padding: var(--space-12) 14px;
-  border-radius: 10px;
-  background: var(--blue-soft);
-  color: var(--sub);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
 .summary strong {
   color: var(--blue-deep);
   font-weight: 500;

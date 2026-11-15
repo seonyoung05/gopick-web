@@ -29,5 +29,3 @@ export const NAV_ITEMS: NavItem[] = [
 // TODO: 백엔드 연동 시 API 값으로 교체 (지금은 목업)
 export const MOCK_USER = { name: '김수뭉' };
 export const MOCK_UNREAD_COUNT = 3;
-export const MOCK_SUMMARY = { recruiting: 4, ongoing: 3, done: 2 };
-export const MOCK_DECISION_NOTE = '10/10 회의 결정사항 반영 (v8)';
