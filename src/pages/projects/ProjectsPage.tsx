@@ -53,6 +53,19 @@ export default function ProjectsPage() {
       ),
     }));
 
+  // 단계에 세부 과제를 새로 등록해요 (맨 아래에 쌓여요)
+  const addTask = (key: TeamTabKey, id: string, stage: number, text: string) =>
+    updateTeam(key, id, (p) => ({
+      ...p,
+      tasks: p.tasks.map((list, si) => (si === stage ? [...list, { text, done: false }] : list)),
+    }));
+
+  const removeTask = (key: TeamTabKey, id: string, stage: number, taskIndex: number) =>
+    updateTeam(key, id, (p) => ({
+      ...p,
+      tasks: p.tasks.map((list, si) => (si === stage ? list.filter((_, ti) => ti !== taskIndex) : list)),
+    }));
+
   // 단계를 누르면 그 단계가 진행 중(●), 이미 진행 중인 단계를 한 번 더 누르면 끝난 것(✓)으로 표시해요.
   // 배포까지 끝나면 currentStage가 STAGES.length(5)가 되고, 그다음은 '완료' 처리만 남아요.
   const setStage = (key: TeamTabKey, id: string, stage: number) =>
@@ -107,6 +120,8 @@ export default function ProjectsPage() {
           completed={key === 'done'}
           onToggleScrap={() => setTeams((prev) => ({ ...prev, [key]: toggleScrap(prev[key], current.id) }))}
           onToggleTask={(stage, ti, done) => setTaskDone(key, current.id, stage, ti, done)}
+          onAddTask={(stage, text) => addTask(key, current.id, stage, text)}
+          onRemoveTask={(stage, ti) => removeTask(key, current.id, stage, ti)}
           onChangeStage={(stage) => setStage(key, current.id, stage)}
           onComplete={(outputs) => completeProject(current.id, outputs)}
         />
