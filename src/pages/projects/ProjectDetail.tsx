@@ -3,6 +3,7 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import { Check } from 'lucide-react';
 import { Avatar } from '../../components/ui/Avatar';
+import { Button } from '../../components/ui/Button';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { Status } from '../../components/ui/Label';
 import { STAGES } from '../../constants/project';
@@ -73,8 +74,10 @@ interface ProjectDetailProps {
   editable: boolean;
   onToggleScrap: () => void;
   onToggleTask: (stage: number, taskIndex: number, done: boolean) => void;
-  /** 진행 단계를 눌러 바꿀 때 (editable일 때만 쓰여요) */
-  onChangeStage: (stage: number) => void;
+  /** 있으면 진행 단계를 눌러 바꿀 수 있음 (진행 중 프로젝트의 팀원) */
+  onChangeStage?: (stage: number) => void;
+  /** 있으면 '프로젝트 완료' 버튼 표시 (진행 중 프로젝트의 팀장) */
+  onComplete?: () => void;
 }
 
 export function ProjectDetail({
@@ -83,6 +86,7 @@ export function ProjectDetail({
   onToggleScrap,
   onToggleTask,
   onChangeStage,
+  onComplete,
 }: ProjectDetailProps) {
   const isDone = p.currentStage >= STAGES.length;
 
@@ -136,9 +140,16 @@ export function ProjectDetail({
       )}
 
       <h4 className={styles.h}>
-        진행 단계 {editable && <small>단계를 눌러 바꿀 수 있어요</small>}
+        진행 단계 {editable && onChangeStage && <small>단계를 눌러 바꿀 수 있어요</small>}
       </h4>
       <StagePipeline currentStage={p.currentStage} onSelect={editable ? onChangeStage : undefined} />
+      {onComplete && !isDone && (
+        <div className={styles.stageControls}>
+          <Button size="sm" variant="ghost" onClick={onComplete}>
+            프로젝트 완료로 바꾸기
+          </Button>
+        </div>
+      )}
 
       <h4 className={styles.h}>
         단계별 세부 과제 <small>선택</small>
@@ -158,6 +169,7 @@ export function ProjectDetail({
       </div>
 
       <h4 className={styles.h}>활동 기록</h4>
+      {p.log.length === 0 && <p className={styles.notice}>아직 활동 기록이 없어요.</p>}
       <ol className={styles.log}>
         {p.log.map((l) => (
           <li key={l.date + l.text}>

@@ -42,3 +42,22 @@
     grid-template-columns: 1fr;
   }
 }
+
+.empty {
+  padding: 48px 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 14px;
+  color: var(--sub);
+  text-align: center;
+}
+
+.empty strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.emptyAction {
+  margin-top: 16px;
+}
