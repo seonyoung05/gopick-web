@@ -169,14 +169,51 @@
   color: var(--ink);
 }
 
+.accBody {
+  padding-bottom: 14px;
+}
+
 .tasks {
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin: 0;
-  padding: 0 16px 14px 42px;
+  padding: 0 16px 0 42px;
   list-style: none;
   font-size: 14px;
+}
+
+.taskRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.taskDel {
+  display: grid;
+  place-items: center;
+  flex: none;
+  padding: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--faint);
+  cursor: pointer;
+}
+
+.taskDel:hover {
+  background: var(--surface-2);
+  color: var(--red);
+}
+
+.taskDel:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.taskAdd {
+  padding: 10px 16px 0 42px;
 }
 
 /* ---------- 활동 기록 ---------- */
@@ -227,4 +264,11 @@
   .head {
     flex-direction: column;
   }
+}
+
+.stageControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
 }

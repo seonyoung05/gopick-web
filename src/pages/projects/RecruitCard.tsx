@@ -14,17 +14,17 @@ interface RecruitCardProps {
   onApply: () => void;
   /** 이미 지원을 보낸 프로젝트면 버튼을 비활성으로 보여줘요 */
   applied?: boolean;
+  /** 내 프로젝트일 때: 수정 / 추천 팀원 보기 / 모집 마치고 진행 시작 */
+  onEdit?: () => void;
+  onRecommend?: () => void;
+  onStart?: () => void;
 }
 
-function Actions({
-  action,
-  onApply,
-  applied,
-}: {
+type ActionsProps = Pick<RecruitCardProps, 'onApply' | 'applied' | 'onEdit' | 'onRecommend' | 'onStart'> & {
   action: RecruitProject['action'];
-  onApply: () => void;
-  applied: boolean;
-}) {
+};
+
+function Actions({ action, onApply, applied = false, onEdit, onRecommend, onStart }: ActionsProps) {
   if (action === 'apply') {
     return applied ? (
       <Button size="sm" variant="ghost" disabled>
@@ -39,16 +39,16 @@ function Actions({
   if (action === 'mine') {
     return (
       <>
-        <Button size="sm" variant="ghost">수정</Button>
-        <Button size="sm" variant="ghost">추천 팀원 보기</Button>
-        <Button size="sm">모집 마치고 진행 시작</Button>
+        <Button size="sm" variant="ghost" onClick={onEdit}>수정</Button>
+        <Button size="sm" variant="ghost" onClick={onRecommend}>추천 팀원 보기</Button>
+        <Button size="sm" onClick={onStart}>모집 마치고 진행 시작</Button>
       </>
     );
   }
   return <Button size="sm">받은 제안 보기</Button>;
 }
 
-export function RecruitCard({ project: p, onToggleScrap, onApply, applied = false }: RecruitCardProps) {
+export function RecruitCard({ project: p, onToggleScrap, ...actions }: RecruitCardProps) {
   const [open, setOpen] = useState(false);
   const detailId = useId();
 
@@ -107,7 +107,7 @@ export function RecruitCard({ project: p, onToggleScrap, onApply, applied = fals
       )}
 
       <div className={styles.actions}>
-        <Actions action={p.action} onApply={onApply} applied={applied} />
+        <Actions action={p.action} {...actions} />
       </div>
     </article>
   );

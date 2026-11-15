@@ -1,0 +1,11 @@
+/* src/pages/projects/TaskAddForm.module.css */
+.form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form > :first-child {
+  flex: 1;
+  min-width: 0;
+}
