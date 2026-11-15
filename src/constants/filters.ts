@@ -2,7 +2,7 @@
 import type { FilterGroupConfig } from '../components/common/FilterPanel';
 import {
   ROLES, TECH_STACKS, FIELDS, PURPOSES, TEAM_SIZES, PROJECT_STATUSES,
-  PROJECT_TENDENCIES, COLLAB_PREFERENCES, withoutEtc,
+  withoutEtc,
 } from './options';
 
 /** 검색 - 사람 (A 담당) */
@@ -18,8 +18,9 @@ export const PEOPLE_FILTERS: FilterGroupConfig[] = [
     legend: '기초: 간단한 프로젝트·코딩 경험 / 실전: 프로젝트에서 직접 활용 / 심화: 복잡한 문제를 독립적으로 해결',
   },
   { key: 'fields', label: '관심 분야', options: withoutEtc(FIELDS) },
-  { key: 'tendencies', label: '프로젝트 성향', options: PROJECT_TENDENCIES },
-  { key: 'collab', label: '협업 성향', options: COLLAB_PREFERENCES.slice(0, 5) },
+  // TODO: 검색 API 응답에 협업·프로젝트 성향이 생기면 다시 켜기
+  // { key: 'tendencies', label: '프로젝트 성향', options: PROJECT_TENDENCIES },
+  // { key: 'collab', label: '협업 성향', options: COLLAB_PREFERENCES.slice(0, 5) },
 ];
 
 /** 검색 - 프로젝트 (B 담당) */
