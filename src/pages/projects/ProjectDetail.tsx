@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import { Check } from 'lucide-react';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
-import { Select } from '../../components/ui/Input';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { Status } from '../../components/ui/Label';
 import { STAGES } from '../../constants/project';
@@ -75,8 +74,8 @@ interface ProjectDetailProps {
   editable: boolean;
   onToggleScrap: () => void;
   onToggleTask: (stage: number, taskIndex: number, done: boolean) => void;
-  /** 있으면 단계 변경 드롭다운 표시 (진행 중 프로젝트의 팀원) */
-  onChangeStage?: (stageIndex: number) => void;
+  /** 있으면 진행 단계를 눌러 바꿀 수 있음 (진행 중 프로젝트의 팀원) */
+  onChangeStage?: (stage: number) => void;
   /** 있으면 '프로젝트 완료' 버튼 표시 (진행 중 프로젝트의 팀장) */
   onComplete?: () => void;
 }
@@ -140,24 +139,15 @@ export function ProjectDetail({
         </>
       )}
 
-      <h4 className={styles.h}>진행 단계</h4>
-      <StagePipeline currentStage={p.currentStage} />
-      {(onChangeStage || onComplete) && !isDone && (
+      <h4 className={styles.h}>
+        진행 단계 {editable && onChangeStage && <small>단계를 눌러 바꿀 수 있어요</small>}
+      </h4>
+      <StagePipeline currentStage={p.currentStage} onSelect={editable ? onChangeStage : undefined} />
+      {onComplete && !isDone && (
         <div className={styles.stageControls}>
-          {onChangeStage && (
-            <Select
-              className={styles.stageSelect}
-              options={STAGES}
-              value={STAGES[p.currentStage]}
-              aria-label="진행 단계 변경"
-              onChange={(e) => onChangeStage(STAGES.indexOf(e.target.value as (typeof STAGES)[number]))}
-            />
-          )}
-          {onComplete && (
-            <Button size="sm" variant="ghost" onClick={onComplete}>
-              프로젝트 완료로 바꾸기
-            </Button>
-          )}
+          <Button size="sm" variant="ghost" onClick={onComplete}>
+            프로젝트 완료로 바꾸기
+          </Button>
         </div>
       )}
 
