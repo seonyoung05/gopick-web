@@ -13,7 +13,8 @@ import { useToast } from '../../components/common/Toast';
 import { Button } from '../../components/ui/Button';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
 import { useAuth } from '../../stores/auth';
-import type { OutputLink } from '../../types/project';
+import type { ActivityLog, OutputLink } from '../../types/project';
+import { monthDay } from './formatDate';
 import { RecruitCard } from './RecruitCard';
 import { ProjectListItem } from './ProjectListItem';
 import { ProjectDetail } from './ProjectDetail';
@@ -37,7 +38,13 @@ function errorText(e: unknown, fallback: string) {
 export default function ProjectsPage() {
   const toast = useToast();
   const navigate = useNavigate();
-  const { account } = useAuth();
+  const { account, profileName } = useAuth();
+  // 활동 기록에 남길 이름 (프로필이 아직 없으면 '나')
+  const author = profileName ?? '나';
+  // 활동 기록 API가 아직 없어서, 새 기록은 이 화면 안에서만 보관해요 (새로고침하면 사라져요)
+  const [newLogs, setNewLogs] = useState<Record<string, ActivityLog[]>>({});
+  const addLog = (id: string, text: string) =>
+    setNewLogs((prev) => ({ ...prev, [id]: [{ date: monthDay(), author, text }, ...(prev[id] ?? [])] }));
   const myProfileId = account?.profileId;
 
   const [params, setParams] = useSearchParams();
@@ -184,7 +191,8 @@ export default function ProjectsPage() {
         : empty('완료한 프로젝트가 없어요', '완료한 프로젝트는 여기에서 다시 볼 수 있어요.');
     }
 
-    const current = list.find((p) => p.id === selected[key]) ?? list[0];
+    const base = list.find((p) => p.id === selected[key]) ?? list[0];
+    const current = { ...base, log: [...(newLogs[base.id] ?? []), ...base.log] };
     const raw = findProject(current.id);
     const { isMember, isLeader } = raw ? myMembership(raw, myProfileId) : { isMember: false, isLeader: false };
     const canEdit = key === 'ongoing' && isMember;
@@ -206,6 +214,8 @@ export default function ProjectsPage() {
           key={current.id}
           project={current}
           editable={canEdit}
+          author={author}
+          onAddLog={(text) => addLog(current.id, text)}
           onToggleScrap={() => toggleScrap(current.id)}
           // 세부 과제는 아직 서버에 없어서 체크해도 저장되지 않음
           onToggleTask={() => undefined}

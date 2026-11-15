@@ -8,6 +8,7 @@ import { Checkbox } from '../../components/ui/Checkbox';
 import { Status } from '../../components/ui/Label';
 import { STAGES } from '../../constants/project';
 import type { OutputLink, StageTask, TeamProject } from '../../types/project';
+import { LogComposer } from './LogComposer';
 import { CompleteProjectModal } from './CompleteProjectModal';
 import { ScrapButton } from './ScrapButton';
 import { StagePipeline } from './StageTracker';
@@ -79,6 +80,10 @@ interface ProjectDetailProps {
   onChangeStage?: (stage: number) => void;
   /** 있으면 '프로젝트 완료' 버튼 표시 (진행 중 프로젝트의 팀장). 산출물(GitHub 필수)을 받아 호출돼요 */
   onComplete?: (outputs: OutputLink[]) => void;
+  /** 활동 기록에 표시될 내 이름 */
+  author: string;
+  /** 활동 기록을 새로 남길 때 (editable일 때만 쓰여요) */
+  onAddLog: (text: string) => void;
 }
 
 export function ProjectDetail({
@@ -88,6 +93,8 @@ export function ProjectDetail({
   onToggleTask,
   onChangeStage,
   onComplete,
+  author,
+  onAddLog,
 }: ProjectDetailProps) {
   const isDone = p.currentStage >= STAGES.length;
   const [completing, setCompleting] = useState(false);
@@ -187,10 +194,11 @@ export function ProjectDetail({
       </div>
 
       <h4 className={styles.h}>활동 기록</h4>
+      {editable && <LogComposer author={author} onSubmit={onAddLog} />}
       {p.log.length === 0 && <p className={styles.notice}>아직 활동 기록이 없어요.</p>}
       <ol className={styles.log}>
-        {p.log.map((l) => (
-          <li key={l.date + l.text}>
+        {p.log.map((l, i) => (
+          <li key={`${l.date}-${i}-${l.text}`}>
             <span className={styles.logMeta}>
               {l.date}, {l.author}
             </span>
