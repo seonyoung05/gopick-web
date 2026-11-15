@@ -178,7 +178,7 @@ export default function ProjectFormPage() {
           <BasicInfoSection {...sectionProps} />
           <RecruitSection {...sectionProps} />
           <CollabSection {...sectionProps} />
-          <CurrentTeamSection {...sectionProps} isNew={!editing} />
+          <CurrentTeamSection {...sectionProps} isNew={!editing} members={editing?.members} />
           <ReferenceSection {...sectionProps} />
           <PostSection {...sectionProps} />
 
