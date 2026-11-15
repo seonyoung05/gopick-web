@@ -7,6 +7,7 @@ import { Checkbox } from '../../components/ui/Checkbox';
 import { Status } from '../../components/ui/Label';
 import { STAGES } from '../../constants/project';
 import type { StageTask, TeamProject } from '../../types/project';
+import { LogComposer } from './LogComposer';
 import { ScrapButton } from './ScrapButton';
 import { StagePipeline } from './StageTracker';
 import styles from './ProjectDetail.module.css';
@@ -73,9 +74,20 @@ interface ProjectDetailProps {
   editable: boolean;
   onToggleScrap: () => void;
   onToggleTask: (stage: number, taskIndex: number, done: boolean) => void;
+  /** 활동 기록에 표시될 내 이름 */
+  author: string;
+  /** 활동 기록을 새로 남길 때 (editable일 때만 쓰여요) */
+  onAddLog: (text: string) => void;
 }
 
-export function ProjectDetail({ project: p, editable, onToggleScrap, onToggleTask }: ProjectDetailProps) {
+export function ProjectDetail({
+  project: p,
+  editable,
+  onToggleScrap,
+  onToggleTask,
+  author,
+  onAddLog,
+}: ProjectDetailProps) {
   const isDone = p.currentStage >= STAGES.length;
 
   return (
@@ -148,9 +160,10 @@ export function ProjectDetail({ project: p, editable, onToggleScrap, onToggleTas
       </div>
 
       <h4 className={styles.h}>활동 기록</h4>
+      {editable && <LogComposer author={author} onSubmit={onAddLog} />}
       <ol className={styles.log}>
-        {p.log.map((l) => (
-          <li key={l.date + l.text}>
+        {p.log.map((l, i) => (
+          <li key={`${l.date}-${i}-${l.text}`}>
             <span className={styles.logMeta}>
               {l.date}, {l.author}
             </span>

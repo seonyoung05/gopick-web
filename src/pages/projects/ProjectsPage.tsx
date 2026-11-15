@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
 import { recruitProjects, ongoingProjects, doneProjects } from '../../mocks/projects';
+import { useAuth } from '../../stores/auth';
 import type { RecruitProject, TeamProject } from '../../types/project';
+import { monthDay, monthDayShort } from './formatDate';
 import { RecruitCard } from './RecruitCard';
 import { ProjectListItem } from './ProjectListItem';
 import { ProjectDetail } from './ProjectDetail';
@@ -22,6 +24,10 @@ export default function ProjectsPage() {
   const [params, setParams] = useSearchParams();
   const raw = params.get('tab');
   const tab: TabKey = TAB_KEYS.find((k) => k === raw) ?? 'recruit';
+
+  // 활동 기록에 남길 이름 (프로필이 아직 없으면 '나')
+  const { profileName } = useAuth();
+  const author = profileName ?? '나';
 
   const [recruit, setRecruit] = useState<RecruitProject[]>(recruitProjects);
   const [teams, setTeams] = useState<Record<TeamTabKey, TeamProject[]>>({
@@ -50,6 +56,14 @@ export default function ProjectsPage() {
       ),
     }));
 
+  // 새 기록은 맨 위에 쌓고, '최근 활동' 날짜도 오늘로 갱신해요
+  const addLog = (key: TeamTabKey, id: string, text: string) =>
+    updateTeam(key, id, (p) => ({
+      ...p,
+      lastActive: monthDayShort(),
+      log: [{ date: monthDay(), author, text }, ...p.log],
+    }));
+
   const renderTeamTab = (key: TeamTabKey) => {
     const list = teams[key];
     const current = list.find((p) => p.id === selected[key]) ?? list[0];
@@ -74,6 +88,8 @@ export default function ProjectsPage() {
           editable={key === 'ongoing'}
           onToggleScrap={() => setTeams((prev) => ({ ...prev, [key]: toggleScrap(prev[key], current.id) }))}
           onToggleTask={(stage, ti, done) => setTaskDone(key, current.id, stage, ti, done)}
+          author={author}
+          onAddLog={(text) => addLog(key, current.id, text)}
         />
       </div>
     );
