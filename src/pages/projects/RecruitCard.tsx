@@ -12,11 +12,25 @@ interface RecruitCardProps {
   onToggleScrap: () => void;
   /** 지원하기 클릭 (지원 모달은 공통 Modal 병합 후 연결) */
   onApply: () => void;
+  /** 이미 지원을 보낸 프로젝트면 버튼을 비활성으로 보여줘요 */
+  applied?: boolean;
 }
 
-function Actions({ action, onApply }: { action: RecruitProject['action']; onApply: () => void }) {
+function Actions({
+  action,
+  onApply,
+  applied,
+}: {
+  action: RecruitProject['action'];
+  onApply: () => void;
+  applied: boolean;
+}) {
   if (action === 'apply') {
-    return (
+    return applied ? (
+      <Button size="sm" variant="ghost" disabled>
+        지원 보냄
+      </Button>
+    ) : (
       <Button size="sm" onClick={onApply}>
         지원하기
       </Button>
@@ -34,7 +48,7 @@ function Actions({ action, onApply }: { action: RecruitProject['action']; onAppl
   return <Button size="sm">받은 제안 보기</Button>;
 }
 
-export function RecruitCard({ project: p, onToggleScrap, onApply }: RecruitCardProps) {
+export function RecruitCard({ project: p, onToggleScrap, onApply, applied = false }: RecruitCardProps) {
   const [open, setOpen] = useState(false);
   const detailId = useId();
 
@@ -93,7 +107,7 @@ export function RecruitCard({ project: p, onToggleScrap, onApply }: RecruitCardP
       )}
 
       <div className={styles.actions}>
-        <Actions action={p.action} onApply={onApply} />
+        <Actions action={p.action} onApply={onApply} applied={applied} />
       </div>
     </article>
   );

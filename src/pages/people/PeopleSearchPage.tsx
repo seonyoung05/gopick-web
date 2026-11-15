@@ -1,6 +1,7 @@
 // src/pages/people/PeopleSearchPage.tsx
 import { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { FilterPanel, createFilterValues } from '../../components/common/FilterPanel';
 import { PersonCard } from '../../components/common/PersonCard';
 import { useToast } from '../../components/common/Toast';
@@ -18,6 +19,7 @@ import type { PersonSummary } from '../../types/person';
 
 export default function PeopleSearchPage() {
   const toast = useToast();
+  const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
   const [filters, setFilters] = useState(() => createFilterValues(PEOPLE_FILTERS));
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
@@ -81,8 +83,7 @@ export default function PeopleSearchPage() {
           options={['사람', '프로젝트']}
           value="사람"
           onChange={(v) => {
-            // TODO: 라우팅 생기면 프로젝트 검색(B 담당)으로 이동
-            if (v === '프로젝트') toast('프로젝트 검색은 준비 중이에요');
+            if (v === '프로젝트') navigate('/search/projects');
           }}
           aria-label="검색 대상"
         />

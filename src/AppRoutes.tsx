@@ -7,6 +7,7 @@ import DevPage from './pages/dev/DevPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import ProjectFormPage from './pages/project-form/ProjectFormPage';
 import PeopleSearchPage from './pages/people/PeopleSearchPage';
+import ProjectSearchPage from './pages/project-search/ProjectSearchPage';
 import RecommendPage from './pages/recommend/RecommendPage';
 import SavedPage from './pages/saved/SavedPage';
 import InboxPage from './pages/inbox/InboxPage';
@@ -50,6 +51,7 @@ export function AppRoutes() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="/settings" element={<AccountSettingsPage />} />
         <Route path="search" element={<PeopleSearchPage />} />
+        <Route path="search/projects" element={<ProjectSearchPage />} />
         <Route path="recommend" element={<RecommendPage />} />
         <Route path="saved" element={<SavedPage />} />
         {/* 사이드바의 '제안·지원' 메뉴는 /offers 로 연결돼 있어요 */}
