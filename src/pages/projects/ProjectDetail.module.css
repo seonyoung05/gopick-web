@@ -265,3 +265,10 @@
     flex-direction: column;
   }
 }
+
+.stageControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}

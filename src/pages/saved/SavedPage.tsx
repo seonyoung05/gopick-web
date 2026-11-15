@@ -1,7 +1,7 @@
 // src/pages/saved/SavedPage.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { profilesApi, projectsApi } from '../../api';
 import { Tabs } from '../../components/ui/Tabs';
-import { MOCK_SAVED_PROFILES } from '../../mocks/saved';
 import { SavedProfilesTab } from './SavedProfilesTab';
 import { ScrapsTab } from './ScrapsTab';
 import styles from './SavedPage.module.css';
@@ -10,10 +10,20 @@ type SavedTab = 'profiles' | 'scraps';
 
 export default function SavedPage() {
   const [tab, setTab] = useState<SavedTab>('profiles');
+  const [profileCount, setProfileCount] = useState<number | null>(null);
+  const [scrapCount, setScrapCount] = useState<number | null>(null);
 
-  // TODO: API 연결 시 실제 개수로
-  const profileCount = MOCK_SAVED_PROFILES.length;
-  const scrapCount = 0;
+  // 탭 제목에 보여 줄 개수 (실패하면 숫자 없이 표시)
+  useEffect(() => {
+    profilesApi
+      .myBookmarks()
+      .then((list) => setProfileCount(list.length))
+      .catch(() => undefined);
+    projectsApi
+      .myScraps()
+      .then((list) => setScrapCount(list.length))
+      .catch(() => undefined);
+  }, []);
 
   return (
     <div className={styles.page}>
@@ -27,13 +37,13 @@ export default function SavedPage() {
         value={tab}
         onChange={setTab}
         items={[
-          { value: 'profiles', label: `저장한 프로필 ${profileCount}` },
-          { value: 'scraps', label: `스크랩한 프로젝트 ${scrapCount}` },
+          { value: 'profiles', label: `저장한 프로필 ${profileCount ?? ''}`.trim() },
+          { value: 'scraps', label: `스크랩한 프로젝트 ${scrapCount ?? ''}`.trim() },
         ]}
       />
 
       <div className={styles.panel} role="tabpanel">
-        {tab === 'profiles' ? <SavedProfilesTab /> : <ScrapsTab />}
+        {tab === 'profiles' ? <SavedProfilesTab onCountChange={setProfileCount} /> : <ScrapsTab onCountChange={setScrapCount} />}
       </div>
     </div>
   );
