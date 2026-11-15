@@ -43,51 +43,6 @@
   font-weight: 700;
 }
 
-.hero h1 {
-  margin: 0;
-  font-size: 40px;
-  font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: -1.2px;
-}
-
-.hero p {
-  max-width: 520px;
-  margin: 36px 0 0;             
-  color: var(--ink);          
-  font-size: 17px;
-}
-
-.features {
-  display: flex;
-  flex-direction: column;
-  gap: 36px;                   
-  margin: 36px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.features li {
-  display: flex;
-  gap: 14px;
-}
-
-.num {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  color: var(--on-color);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.features strong { display: block; }
-.features p { margin: 2px 0 0; color: var(--sub); font-size: 14px; }
-
 /* ---------- 오른쪽 입력 ---------- */
 .formSide {
   display: flex;
@@ -147,8 +102,4 @@
 @media (max-width: 960px) {
   .screen { grid-template-columns: 1fr; }
   .intro { display: none; }
-}
-
-.spacer {
-  height: 12px;
 }
