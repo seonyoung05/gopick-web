@@ -15,6 +15,7 @@ export function Topbar({ unreadCount = MOCK_UNREAD_COUNT }: TopbarProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const onSearchPage = pathname.startsWith('/search');
+  const onOffersPage = pathname.startsWith('/offers');
 
   return (
     <header className={styles.topbar}>
@@ -32,8 +33,11 @@ export function Topbar({ unreadCount = MOCK_UNREAD_COUNT }: TopbarProps) {
         </button>
         <button
           type="button"
-          className={styles.iconButton}
+          className={clsx(styles.iconButton, onOffersPage && styles.iconButtonActive)}
           aria-label={unreadCount > 0 ? `알림, 새 알림 ${unreadCount}개` : '알림'}
+          aria-current={onOffersPage ? 'page' : undefined}
+          title="제안·지원 확인"
+          onClick={() => navigate('/offers')}
         >
           <Bell size={22} aria-hidden="true" />
           <Badge count={unreadCount} className={styles.bellBadge} />
