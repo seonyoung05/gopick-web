@@ -1,0 +1,134 @@
+/* src/pages/auth/AuthPuzzle.module.css
+   로그인 · 회원가입 왼쪽 "마지막 한 조각" 퍼즐 (한 바퀴 6초 반복) */
+
+/* 퍼즐 + 문구를 왼쪽 영역 가운데에 */
+.body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 44px;
+  text-align: center;
+}
+
+.copy h1 {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -1.4px;
+}
+
+.copy p {
+  margin: 14px 0 0;
+  color: var(--sub);
+  font-size: 17px;
+}
+
+.foot {
+  margin: 0;
+  color: var(--faint);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ---------- 퍼즐 판 ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 96px);
+  gap: 14px;
+}
+
+.cell {
+  width: 96px;
+  height: 96px;
+}
+
+.square { border-radius: 26px; }
+.cornerTL { border-radius: 26px 26px 26px 6px; }
+.cornerBR { border-radius: 6px 26px 26px 26px; }
+.round { border-radius: 50%; }
+
+/* 조각: 바깥에서 날아와 살짝 튕기며 자리에 맞춰짐 → 끝에 흩어졌다가 다시 */
+.piece {
+  animation: snap 6s cubic-bezier(0.2, 0.9, 0.3, 1.25) infinite both;
+}
+
+@keyframes snap {
+  0% {
+    transform: translate(var(--from-x), var(--from-y)) rotate(-18deg) scale(0.6);
+    opacity: 0;
+  }
+  14%,
+  80% {
+    transform: none;
+    opacity: 1;
+  }
+  92% {
+    transform: translate(calc(var(--from-x) * 0.4), calc(var(--from-y) * 0.4)) rotate(10deg) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(var(--from-x), var(--from-y)) rotate(-18deg) scale(0.6);
+    opacity: 0;
+  }
+}
+
+/* 빈칸: 점선 칸이 깜빡이다가, 마지막 조각이 들어오면 사라짐 */
+.slot {
+  position: relative;
+}
+
+.slotHint {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 3px dashed var(--line-strong);
+  border-radius: 26px;
+  color: var(--faint);
+  animation: hint 6s ease-in-out infinite;
+}
+
+@keyframes hint {
+  0%,
+  22% { opacity: 0; transform: scale(0.9); }
+  28% { opacity: 1; transform: scale(1); }
+  36% { opacity: 1; transform: scale(1.06); border-color: var(--blue); color: var(--blue); }
+  44% { opacity: 1; transform: scale(1); }
+  50%,
+  100% { opacity: 0; }
+}
+
+/* 마지막 조각(새 팀원): 오른쪽 아래에서 들어와 딱 맞춰짐 */
+.last {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 26px;
+  background: var(--violet);
+  color: var(--on-color);
+  box-shadow: 0 10px 24px rgba(124, 77, 255, 0.35);
+  animation: last 6s cubic-bezier(0.2, 0.9, 0.3, 1.3) infinite;
+}
+
+@keyframes last {
+  0%,
+  46% { transform: translate(140px, 120px) rotate(25deg) scale(0.7); opacity: 0; }
+  58% { transform: scale(1.08); opacity: 1; }
+  64%,
+  80% { transform: none; opacity: 1; }
+  92%,
+  100% { transform: translate(60px, 50px) rotate(10deg) scale(0.8); opacity: 0; }
+}
+
+/* "동작 줄이기"를 켠 사용자에게는 완성된 모습만 */
+@media (prefers-reduced-motion: reduce) {
+  .piece,
+  .last {
+    animation: none;
+  }
+  .slotHint {
+    display: none;
+  }
+}
