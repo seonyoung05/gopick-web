@@ -108,9 +108,15 @@ function toQuery(q: ProjectListQuery = {}) {
   return s ? `?${s}` : '';
 }
 
+/** 서버가 목록에 팀원·모집·속성을 안 보내도(배포 전 서버) 화면이 깨지지 않게 빈 배열로 채워요 */
+function withLists<T extends ProjectSummary>(p: T & Partial<Pick<ProjectListItem, 'members' | 'recruitments' | 'attributes'>>) {
+  return { ...p, members: p.members ?? [], recruitments: p.recruitments ?? [], attributes: p.attributes ?? [] };
+}
+
 export const projectsApi = {
   /** 전체 목록 (팀원·모집·속성 포함) */
-  list: (q?: ProjectListQuery) => api.get<ProjectListItem[]>(`/projects${toQuery(q)}`),
+  list: async (q?: ProjectListQuery): Promise<ProjectListItem[]> =>
+    (await api.get<ProjectSummary[]>(`/projects${toQuery(q)}`)).map(withLists),
   get: (id: number) => api.get<ProjectDetail>(`/projects/${id}`),
   create: (body: ProjectCreateRequest) => api.post<{ projectId: number }>('/projects', body),
   update: (id: number, body: ProjectUpdateRequest) =>
