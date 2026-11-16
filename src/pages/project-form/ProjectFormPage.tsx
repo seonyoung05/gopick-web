@@ -127,6 +127,8 @@ export default function ProjectFormPage() {
   }, [selectedId, toast]);
 
   const editing = detail && String(detail.projectId) === selectedId ? detail : undefined;
+  /** 모집이 끝나고 진행 중인 프로젝트 → 추천 없이 정보만 수정 */
+  const ongoing = editing?.lifecycleStatus === 'IN_PROGRESS';
   const pageTitle = editing ? `${editing.title} 수정` : '새 프로젝트 등록';
 
   const update = (patch: Partial<ProjectFormValues>) => setForm((prev) => ({ ...prev, ...patch }));
@@ -176,6 +178,8 @@ export default function ProjectFormPage() {
       if (editing) {
         await projectsApi.update(editing.projectId, toProjectUpdateRequest(form));
         toast('프로젝트를 저장했어요', 'success');
+        // 진행 중 프로젝트는 추천으로 넘어가지 않고 이 화면에 그대로
+        if (ongoing) return;
       } else {
         await projectsApi.create(toProjectCreateRequest(form));
         toast('프로젝트를 등록했어요', 'success');
@@ -195,7 +199,13 @@ export default function ProjectFormPage() {
     <div className={s.page}>
       <h1 className={`t-h1 ${s.heading}`}>{pageTitle}</h1>
       <p className={s.sub}>
-        <em>추천 필수</em> 항목을 채우면 팀원 추천을 받을 수 있어요. 직접 검색만 할 거라면 비워 둬도 괜찮아요.
+        {ongoing ? (
+          <>진행 중인 프로젝트예요. 모집이 끝나서 추천 없이 프로젝트 정보만 고칠 수 있어요.</>
+        ) : (
+          <>
+            <em>추천 필수</em> 항목을 채우면 팀원 추천을 받을 수 있어요. 직접 검색만 할 거라면 비워 둬도 괜찮아요.
+          </>
+        )}
       </p>
 
       <div className={s.projects}>
@@ -241,11 +251,24 @@ export default function ProjectFormPage() {
                 {deleting ? '삭제 중…' : '프로젝트 삭제'}
               </Button>
             )}
-            <Button variant="ghost" onClick={() => navigate('/search')}>
-              조건 없이 사람 검색하기
-            </Button>
+            {ongoing && editing ? (
+              // 진행 중: 추천 대신 이 프로젝트의 진행 현황으로
+              <Button variant="ghost" onClick={() => navigate(`/projects?tab=ongoing&project=${editing.projectId}`)}>
+                진행 현황 보기
+              </Button>
+            ) : (
+              <Button variant="ghost" onClick={() => navigate('/search')}>
+                조건 없이 사람 검색하기
+              </Button>
+            )}
             <Button onClick={handleSave} disabled={saving || loading || detailLoading}>
-              {saving ? '저장 중…' : editing ? '저장하고 팀원 추천받기' : '등록하고 팀원 추천받기'}
+              {saving
+                ? '저장 중…'
+                : !editing
+                  ? '등록하고 팀원 추천받기'
+                  : ongoing
+                    ? '저장'
+                    : '저장하고 팀원 추천받기'}
             </Button>
           </div>
         </form>
