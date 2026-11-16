@@ -69,7 +69,11 @@ export default function ProjectsPage() {
   const [scrapIds, setScrapIds] = useState<Set<string>>(new Set());
   const [status, setStatus] = useState<LoadStatus>('loading');
   const [reloadKey, setReloadKey] = useState(0);
-  const [selected, setSelected] = useState<Partial<Record<TeamTabKey, string>>>({});
+  // ?project=번호 로 들어오면(내 프로젝트의 "진행 현황 보기") 그 프로젝트를 골라 둔 채로 열기
+  const [selected, setSelected] = useState<Partial<Record<TeamTabKey, string>>>(() => {
+    const id = params.get('project');
+    return id && tab !== 'recruit' ? { [tab]: id } : {};
+  });
   /** 지원하기 모달을 연 프로젝트 */
   const [applyTarget, setApplyTarget] = useState<RecruitProject | null>(null);
   /** 내가 지원해 두고 아직 답을 기다리는 프로젝트 */
