@@ -117,6 +117,8 @@ interface ProjectDetailProps {
   onChangeStage?: (stage: number) => void;
   /** 있으면 '프로젝트 완료' 버튼 표시 (진행 중 프로젝트의 팀장). 산출물(GitHub 필수)을 받아 호출돼요 */
   onComplete?: (outputs: OutputLink[]) => void;
+  /** 있으면 '프로젝트 나가기' 버튼 표시 (팀장이 아닌 팀원) */
+  onLeave?: () => void;
   /** 활동 기록에 표시될 내 이름 */
   author: string;
   /** 활동 기록을 새로 남길 때 (editable일 때만 쓰여요) */
@@ -132,6 +134,7 @@ export function ProjectDetail({
   onRemoveTask,
   onChangeStage,
   onComplete,
+  onLeave,
   author,
   onAddLog,
 }: ProjectDetailProps) {
@@ -162,9 +165,15 @@ export function ProjectDetail({
 
       <h4 className={styles.h}>구성원</h4>
       <ul className={styles.members}>
-        {p.members.map((m) => (
-          <li key={m.name} className={styles.member}>
-            <Avatar name={m.name} size="sm" />
+        {p.members.map((m, i) => (
+          <li key={`${m.profileId ?? m.name}-${i}`} className={styles.member}>
+            <Avatar
+              name={m.name}
+              // 탑바·프로필과 같은 색이 되도록 profileId 기준 (탈퇴한 회원은 회색)
+              seed={m.profileId ?? undefined}
+              color={m.profileId === null ? 'muted' : undefined}
+              size="sm"
+            />
             <strong>{m.name}</strong>
             <span>{m.role}</span>
           </li>
@@ -196,11 +205,18 @@ export function ProjectDetail({
         onSelect={editable ? onChangeStage : undefined}
         onComplete={editable && onComplete && !isDone ? () => setCompleting(true) : undefined}
       />
-      {onComplete && !isDone && (
+      {((onComplete && !isDone) || onLeave) && (
         <div className={styles.stageControls}>
-          <Button size="sm" variant="ghost" onClick={() => setCompleting(true)}>
-            프로젝트 완료로 바꾸기
-          </Button>
+          {onComplete && !isDone && (
+            <Button size="sm" variant="ghost" onClick={() => setCompleting(true)}>
+              프로젝트 완료로 바꾸기
+            </Button>
+          )}
+          {onLeave && (
+            <Button size="sm" variant="ghost" onClick={onLeave}>
+              프로젝트 나가기
+            </Button>
+          )}
         </div>
       )}
       {onComplete && (

@@ -67,13 +67,14 @@ export interface MyProject extends ProjectListItem {
   myAuthority: 'LEADER' | 'MEMBER';
 }
 
-export interface ProjectDetail extends ProjectSummary {
-  members: ProjectMember[];
-  attributes: ProjectAttribute[];
+/** 상세(GET /projects/{id}): 목록 정보 + 경험 조건 · 링크 */
+export interface ProjectDetail extends ProjectListItem {
   experience: ProjectExperience;
-  recruitments: Recruitment[];
   links: ProjectLink[];
 }
+
+/** 화면에서 다루는 프로젝트: 목록에서 받았으면 경험 조건·링크가 없고, 상세를 받으면 채워져요 */
+export type ProjectData = ProjectListItem & Partial<Pick<ProjectDetail, 'experience' | 'links'>>;
 
 type ProjectText = Partial<
   Pick<ProjectSummary, 'description' | 'background' | 'goal' | 'wish' | 'extra'>
@@ -107,8 +108,15 @@ function toQuery(q: ProjectListQuery = {}) {
   return s ? `?${s}` : '';
 }
 
+/** 서버가 목록에 팀원·모집·속성을 안 보내도(배포 전 서버) 화면이 깨지지 않게 빈 배열로 채워요 */
+function withLists<T extends ProjectSummary>(p: T & Partial<Pick<ProjectListItem, 'members' | 'recruitments' | 'attributes'>>) {
+  return { ...p, members: p.members ?? [], recruitments: p.recruitments ?? [], attributes: p.attributes ?? [] };
+}
+
 export const projectsApi = {
-  list: (q?: ProjectListQuery) => api.get<ProjectSummary[]>(`/projects${toQuery(q)}`),
+  /** 전체 목록 (팀원·모집·속성 포함) */
+  list: async (q?: ProjectListQuery): Promise<ProjectListItem[]> =>
+    (await api.get<ProjectSummary[]>(`/projects${toQuery(q)}`)).map(withLists),
   get: (id: number) => api.get<ProjectDetail>(`/projects/${id}`),
   create: (body: ProjectCreateRequest) => api.post<{ projectId: number }>('/projects', body),
   update: (id: number, body: ProjectUpdateRequest) =>
@@ -126,12 +134,9 @@ export const projectsApi = {
   myScraps: () => api.get<ProjectSummary[]>('/me/scrapped-projects'),
   /** 내가 팀원(팀장 포함)인 프로젝트 + 내 권한 */
   myProjects: () => api.get<MyProject[]>('/me/projects'),
-};
 
-/** 목록 + 각 프로젝트 상세
- *  목록 응답에는 팀원·모집 정보가 없어서 상세를 같이 불러와요.
- *  TODO: 서버 목록 응답에 members·recruitments가 생기면 list 하나로 바꾸기 */
-export async function fetchProjectDetails(q?: ProjectListQuery): Promise<ProjectDetail[]> {
-  const list = await projectsApi.list(q);
-  return Promise.all(list.map((p) => projectsApi.get(p.projectId)));
-}
+  /** 프로젝트 삭제 (팀장만, 204) */
+  remove: (id: number) => api.delete<void>(`/projects/${id}`),
+  /** 프로젝트에서 나가기 (204). 준비 중 프로젝트의 팀장이 나가면 프로젝트가 삭제돼요 */
+  leave: (id: number) => api.delete<void>(`/projects/${id}/members/me`),
+};

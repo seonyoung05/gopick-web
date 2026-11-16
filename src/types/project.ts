@@ -1,7 +1,8 @@
 // src/types/project.ts
 
 /** 모집글 카드 하단에 보이는 버튼 종류 */
-export type RecruitAction = 'apply' | 'mine' | 'offers';
+/** apply: 지원 가능 · mine: 내가 팀장 · member: 이미 팀원 · offers: 받은 제안 보기 */
+export type RecruitAction = 'apply' | 'mine' | 'member' | 'offers';
 
 export interface RoleNeed {
   role: string;
@@ -33,6 +34,8 @@ export interface RecruitProject {
 }
 
 export interface Member {
+  /** 아바타 색 기준 (어디서나 같은 사람은 같은 색). 탈퇴한 회원이면 null */
+  profileId?: number | null;
   name: string;
   role: string;
 }

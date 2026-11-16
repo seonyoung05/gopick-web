@@ -4,10 +4,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ApiError,
   ERROR_CODE,
-  fetchProjectDetails,
   participationApi,
   projectsApi,
-  type ProjectDetail as ApiProject,
+  type ProjectData as ApiProject,
 } from '../../api';
 import { participationErrorText } from '../../api/mappers/participation';
 import {
@@ -102,10 +101,10 @@ export default function ProjectsPage() {
     }
   };
 
-  // 전체 프로젝트(상세 포함) + 내 스크랩 불러오기
+  // 전체 프로젝트(팀원·모집 포함) + 내 스크랩 불러오기
   useEffect(() => {
     let ignore = false;
-    Promise.all([fetchProjectDetails(), projectsApi.myScraps()])
+    Promise.all([projectsApi.list(), projectsApi.myScraps()])
       .then(([list, scraps]) => {
         if (ignore) return;
         setProjects(list);
@@ -146,6 +145,24 @@ export default function ProjectsPage() {
   }, [projects, scrapIds, myProfileId]);
 
   const findProject = (id: string) => projects.find((p) => String(p.projectId) === id);
+
+  // 진행 중·완료 탭에서 보고 있는 프로젝트는 상세를 불러와 결과물 링크까지 채워요 (목록에는 링크가 없어요)
+  const teamTab = tab === 'recruit' ? null : tab;
+  const viewingId = teamTab ? (lists[teamTab].find((p) => p.id === selected[teamTab]) ?? lists[teamTab][0])?.id : undefined;
+  const viewingNeedsDetail = viewingId !== undefined && findProject(viewingId)?.links === undefined;
+  useEffect(() => {
+    if (!viewingId || !viewingNeedsDetail) return;
+    let ignore = false;
+    projectsApi
+      .get(Number(viewingId))
+      .then((fresh) => {
+        if (!ignore) setProjects((prev) => prev.map((p) => (p.projectId === fresh.projectId ? fresh : p)));
+      })
+      .catch(() => undefined); // 실패해도 목록 정보로 그대로 보여줌
+    return () => {
+      ignore = true;
+    };
+  }, [viewingId, viewingNeedsDetail]);
 
   /** 한 프로젝트만 다시 불러와서 교체 (시작·단계 변경·완료 뒤) */
   const refreshOne = async (id: string) => {
@@ -194,6 +211,20 @@ export default function ProjectsPage() {
       toast('진행 단계를 바꿨어요', 'success');
     } catch (e) {
       toast(errorText(e, '단계를 바꾸지 못했어요'));
+    }
+  };
+
+  /** 프로젝트 나가기 (팀장이 아닌 팀원) */
+  const leaveProject = async (id: string) => {
+    const title = findProject(id)?.title ?? '이 프로젝트';
+    if (!window.confirm(`'${title}'에서 나갈까요? 다시 참여하려면 지원하거나 제안을 받아야 해요.`)) return;
+    try {
+      await projectsApi.leave(Number(id));
+      toast('프로젝트에서 나왔어요');
+      setStatus('loading');
+      setReloadKey((k) => k + 1);
+    } catch (e) {
+      toast(errorText(e, '프로젝트에서 나가지 못했어요'));
     }
   };
 
@@ -275,6 +306,7 @@ export default function ProjectsPage() {
           }
           onChangeStage={canEdit ? (index) => changeStage(current.id, index) : undefined}
           onComplete={canEdit && isLeader ? (outputs) => completeProject(current.id, outputs) : undefined}
+          onLeave={key === 'ongoing' && isMember && !isLeader ? () => leaveProject(current.id) : undefined}
         />
       </div>
     );
@@ -321,6 +353,7 @@ export default function ProjectsPage() {
             onEdit={() => navigate(`/manage?id=${p.id}`)}
             onRecommend={() => navigate('/recommend')}
             onStart={() => startProject(p.id)}
+            onLeave={() => leaveProject(p.id)}
           />
         ))}
       </div>

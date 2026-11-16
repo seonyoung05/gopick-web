@@ -1,7 +1,7 @@
 // src/pages/people/PeopleSearchPage.tsx
 import { useEffect, useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FilterPanel, createFilterValues } from '../../components/common/FilterPanel';
 import { PersonCard } from '../../components/common/PersonCard';
 import { useToast } from '../../components/common/Toast';
@@ -26,6 +26,9 @@ type LoadStatus = 'loading' | 'error' | 'done';
 export default function PeopleSearchPage() {
   const toast = useToast();
   const navigate = useNavigate();
+  // 내 프로젝트의 "팀원 초대하기"로 들어오면 참여 제안 모달에서 그 프로젝트를 미리 골라 둠
+  const [searchParams] = useSearchParams();
+  const inviteProjectId = searchParams.get('invite') ?? undefined;
   const { account } = useAuth();
   const myProfileId = account?.profileId;
   const [people, setPeople] = useState<PersonSummary[]>([]);
@@ -235,6 +238,7 @@ export default function PeopleSearchPage() {
         person={offerPerson}
         projects={offer.projects}
         status={offer.status}
+        defaultProjectId={inviteProjectId}
         onClose={() => setOfferPerson(null)}
         onSubmit={handleOfferSubmit}
       />

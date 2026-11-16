@@ -2,9 +2,10 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
-import { MOCK_PARTICIPATIONS } from '../../mocks/participations';
-import { doneProjects, ongoingProjects, recruitProjects } from '../../mocks/projects';
-import type { RecruitProject, TeamProject } from '../../types/project';
+import { useInboxSummary } from '../../hooks/useInboxSummary';
+import { useProjectFeed } from '../../hooks/useProjectFeed';
+import type { RecruitProject } from '../../types/project';
+import { ApplyModal } from '../projects/ApplyModal';
 import { ArchiveMiniCard, OngoingMiniCard, RecruitMiniCard } from './HomeCards';
 import styles from './HomePage.module.css';
 
@@ -12,9 +13,6 @@ import styles from './HomePage.module.css';
 const RECRUIT_LIMIT = 3;
 const ONGOING_LIMIT = 3;
 const DONE_LIMIT = 2;
-
-const toggleScrap = <T extends { id: string; scrapped: boolean }>(list: T[], id: string): T[] =>
-  list.map((p) => (p.id === id ? { ...p, scrapped: !p.scrapped } : p));
 
 function Section({ title, to, children }: { title: string; to: string; children: ReactNode }) {
   return (
@@ -33,14 +31,25 @@ function Section({ title, to, children }: { title: string; to: string; children:
 export default function HomePage() {
   const navigate = useNavigate();
 
-  const [recruit, setRecruit] = useState<RecruitProject[]>(() => recruitProjects.slice(0, RECRUIT_LIMIT));
-  const [ongoing, setOngoing] = useState<TeamProject[]>(() => ongoingProjects.slice(0, ONGOING_LIMIT));
-  const [done, setDone] = useState<TeamProject[]>(() => doneProjects.slice(0, DONE_LIMIT));
+  const feed = useProjectFeed();
+  const recruit = feed.recruit.slice(0, RECRUIT_LIMIT);
+  const ongoing = feed.ongoing.slice(0, ONGOING_LIMIT);
+  const done = feed.done.slice(0, DONE_LIMIT);
+  const [applyTarget, setApplyTarget] = useState<RecruitProject | null>(null);
 
   // 아직 열어 보지 않은 받은 제안 · 내 프로젝트에 들어온 지원
-  const unread = MOCK_PARTICIPATIONS.filter((p) => p.direction === 'received' && !p.read);
-  const offerCount = unread.filter((p) => p.kind === 'offer').length;
-  const applyCount = unread.filter((p) => p.kind === 'apply').length;
+  const { receivedOffers: offerCount, receivedApplies: applyCount } = useInboxSummary();
+
+  /** 구역이 비었거나 불러오는 중일 때 */
+  const emptyText = (text: string) => (
+    <p className={styles.emptySection}>
+      {feed.status === 'loading'
+        ? '불러오는 중이에요…'
+        : feed.status === 'error'
+          ? '프로젝트를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'
+          : text}
+    </p>
+  );
   const news = [
     offerCount > 0 && `받은 참여 제안 ${offerCount}건`,
     applyCount > 0 && `내 프로젝트 지원 ${applyCount}건`,
@@ -86,15 +95,16 @@ export default function HomePage() {
       </section>
 
       <Section title="팀원 모집 중인 프로젝트" to="/projects?tab=recruit">
+        {recruit.length === 0 && emptyText('지금 모집 중인 프로젝트가 없어요. 직접 등록해 팀원을 모아 보세요.')}
         <div className={styles.grid3}>
           {recruit.map((p) => (
             <RecruitMiniCard
               key={p.id}
               project={p}
-              onToggleScrap={() => setRecruit((prev) => toggleScrap(prev, p.id))}
+              applied={feed.appliedIds.has(p.id)}
+              onToggleScrap={() => feed.toggleScrap(p.id)}
               onDetail={() => navigate('/projects?tab=recruit')}
-              // TODO: 지원 모달(M2)이 병합되면 모달로 연결
-              onApply={() => navigate('/projects?tab=recruit')}
+              onApply={() => setApplyTarget(p)}
               onEdit={() => navigate(`/manage?id=${p.id}`)}
               onRecommend={() => navigate('/recommend')}
               onStart={() => navigate('/projects?tab=recruit')}
@@ -105,12 +115,13 @@ export default function HomePage() {
       </Section>
 
       <Section title="진행 중인 프로젝트" to="/projects?tab=ongoing">
+        {ongoing.length === 0 && emptyText('아직 진행 중인 프로젝트가 없어요.')}
         <div className={styles.grid3}>
           {ongoing.map((p) => (
             <OngoingMiniCard
               key={p.id}
               project={p}
-              onToggleScrap={() => setOngoing((prev) => toggleScrap(prev, p.id))}
+              onToggleScrap={() => feed.toggleScrap(p.id)}
               onView={() => navigate('/projects?tab=ongoing')}
             />
           ))}
@@ -118,17 +129,26 @@ export default function HomePage() {
       </Section>
 
       <Section title="완료 프로젝트 아카이브" to="/projects?tab=done">
+        {done.length === 0 && emptyText('아직 완료한 프로젝트가 없어요.')}
         <div className={styles.grid2}>
           {done.map((p) => (
             <ArchiveMiniCard
               key={p.id}
               project={p}
-              onToggleScrap={() => setDone((prev) => toggleScrap(prev, p.id))}
+              onToggleScrap={() => feed.toggleScrap(p.id)}
               onView={() => navigate('/projects?tab=done')}
             />
           ))}
         </div>
       </Section>
+
+      <ApplyModal
+        project={applyTarget}
+        onClose={() => setApplyTarget(null)}
+        onSubmit={async (payload) => {
+          if (await feed.apply(payload)) setApplyTarget(null);
+        }}
+      />
     </div>
   );
 }

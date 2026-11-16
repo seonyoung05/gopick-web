@@ -25,7 +25,3 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/offers', label: '제안·지원', icon: Mail },
   { to: '/profile', label: '내 프로필', icon: User },
 ];
-
-// TODO: 백엔드 연동 시 API 값으로 교체 (지금은 목업)
-export const MOCK_USER = { name: '김수뭉' };
-export const MOCK_UNREAD_COUNT = 3;

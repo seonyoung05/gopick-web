@@ -8,8 +8,10 @@ import { Button } from '../../components/ui/Button';
 import { Input, Select } from '../../components/ui/Input';
 import { Segment } from '../../components/ui/Segment';
 import { PROJECT_FILTERS } from '../../constants/filters';
-import { recruitProjects, ongoingProjects, doneProjects } from '../../mocks/projects';
-import type { RecruitProject, TeamProject } from '../../types/project';
+import { profilesApi } from '../../api';
+import { useProjectFeed } from '../../hooks/useProjectFeed';
+import { useAuth } from '../../stores/auth';
+import type { RecruitProject } from '../../types/project';
 import { ApplyModal, type ApplyPayload } from '../projects/ApplyModal';
 import { ProjectListItem } from '../projects/ProjectListItem';
 import { RecruitCard } from '../projects/RecruitCard';
@@ -23,32 +25,20 @@ import {
 } from './filterProjects';
 import styles from './ProjectSearchPage.module.css';
 
-/** "내 프로필로 채우기"에 쓰는 임시 값. TODO: 내 프로필(API)에서 역할·기술·관심 분야를 가져오기 */
-const MY_PROFILE_FILTERS: Partial<FilterValues> = {
-  roles: ['Backend'],
-  stacks: ['Python', 'Java'],
-  fields: ['AI', '웹'],
-};
-
-const toggleScrap = <T extends { id: string; scrapped: boolean }>(list: T[], id: string): T[] =>
-  list.map((p) => (p.id === id ? { ...p, scrapped: !p.scrapped } : p));
-
 export default function ProjectSearchPage() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { account } = useAuth();
 
   const [keyword, setKeyword] = useState('');
   const [filters, setFilters] = useState<FilterValues>(() => createFilterValues(PROJECT_FILTERS));
   const [sort, setSort] = useState<SortOption>('최근 활동순');
 
-  const [recruit, setRecruit] = useState<RecruitProject[]>(recruitProjects);
-  const [ongoing, setOngoing] = useState<TeamProject[]>(ongoingProjects);
-  const [done, setDone] = useState<TeamProject[]>(doneProjects);
+  const feed = useProjectFeed();
+  const { recruit, ongoing, done, appliedIds } = feed;
 
   /** 지금 지원 모달을 열어 둔 프로젝트 (null이면 닫힘) */
   const [applyTarget, setApplyTarget] = useState<RecruitProject | null>(null);
-  /** 지원을 보낸 프로젝트 ID */
-  const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
 
   // 상태를 하나도 안 고르면 전부 보여줘요
   const statuses = filters.status ?? [];
@@ -76,14 +66,32 @@ export default function ProjectSearchPage() {
     setFilters(createFilterValues(PROJECT_FILTERS));
   };
 
-  const fillFromMyProfile = () => setFilters((prev) => ({ ...prev, ...MY_PROFILE_FILTERS }));
+  /** 내 프로필의 희망 역할 · 기술 · 관심 분야로 필터 채우기 (필터에 있는 값만) */
+  const fillFromMyProfile = async () => {
+    if (!account?.profileId) {
+      toast('프로필을 먼저 만들어 주세요');
+      return;
+    }
+    try {
+      const me = await profilesApi.get(account.profileId);
+      const only = (key: string, values: string[]) => {
+        const options = PROJECT_FILTERS.find((g) => g.key === key)?.options ?? [];
+        return values.filter((v) => options.includes(v));
+      };
+      setFilters((prev) => ({
+        ...prev,
+        roles: only('roles', me.preferredRoles),
+        stacks: only('stacks', me.technologies.map((t) => t.technology)),
+        fields: only('fields', me.interests),
+      }));
+      toast('내 프로필로 필터를 채웠어요', 'success');
+    } catch {
+      toast('내 프로필을 불러오지 못했어요');
+    }
+  };
 
-  const handleApply = (payload: ApplyPayload) => {
-    // TODO: API 연결 시 participationApi로 지원 요청 보내기
-    console.log('프로젝트 지원', payload);
-    setAppliedIds((prev) => new Set(prev).add(payload.projectId));
-    setApplyTarget(null);
-    toast('지원을 보냈어요', 'success');
+  const handleApply = async (payload: ApplyPayload) => {
+    if (await feed.apply(payload)) setApplyTarget(null);
   };
 
   return (
@@ -142,7 +150,19 @@ export default function ProjectSearchPage() {
             />
           </div>
 
-          {total === 0 ? (
+          {feed.status === 'loading' ? (
+            <div className={styles.empty}>프로젝트를 불러오는 중이에요…</div>
+          ) : feed.status === 'error' ? (
+            <div className={styles.empty}>
+              <strong>프로젝트를 불러오지 못했어요</strong>
+              잠시 후 다시 시도해 주세요.
+              <div style={{ marginTop: 16 }}>
+                <Button variant="ghost" size="sm" onClick={feed.retry}>
+                  다시 불러오기
+                </Button>
+              </div>
+            </div>
+          ) : total === 0 ? (
             <div className={styles.empty}>
               <strong>조건에 맞는 프로젝트가 없어요</strong>
               검색어를 바꾸거나 필터를 줄여 보세요.
@@ -159,7 +179,7 @@ export default function ProjectSearchPage() {
                   key={p.id}
                   project={p}
                   applied={appliedIds.has(p.id)}
-                  onToggleScrap={() => setRecruit((prev) => toggleScrap(prev, p.id))}
+                  onToggleScrap={() => feed.toggleScrap(p.id)}
                   onApply={() => setApplyTarget(p)}
                 />
               ))}
@@ -174,7 +194,7 @@ export default function ProjectSearchPage() {
                         project={p}
                         selected={false}
                         onSelect={() => navigate('/projects?tab=ongoing')}
-                        onToggleScrap={() => setOngoing((prev) => toggleScrap(prev, p.id))}
+                        onToggleScrap={() => feed.toggleScrap(p.id)}
                       />
                     ))}
                   </div>
@@ -191,7 +211,7 @@ export default function ProjectSearchPage() {
                         project={p}
                         selected={false}
                         onSelect={() => navigate('/projects?tab=done')}
-                        onToggleScrap={() => setDone((prev) => toggleScrap(prev, p.id))}
+                        onToggleScrap={() => feed.toggleScrap(p.id)}
                       />
                     ))}
                   </div>
