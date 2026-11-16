@@ -18,7 +18,7 @@ interface RecruitCardProps {
   onEdit?: () => void;
   onRecommend?: () => void;
   onStart?: () => void;
-  /** 이미 팀원일 때: 프로젝트 나가기 */
+  /** 이미 팀원(팀장 포함)일 때: 프로젝트 나가기 */
   onLeave?: () => void;
 }
 
@@ -58,6 +58,11 @@ function Actions({ action, onApply, applied = false, onEdit, onRecommend, onStar
         <Button size="sm" variant="ghost" onClick={onEdit}>수정</Button>
         <Button size="sm" variant="ghost" onClick={onRecommend}>추천 팀원 보기</Button>
         <Button size="sm" onClick={onStart}>모집 마치고 진행 시작</Button>
+        {onLeave && (
+          <Button size="sm" variant="ghost" onClick={onLeave}>
+            프로젝트 나가기
+          </Button>
+        )}
       </>
     );
   }
