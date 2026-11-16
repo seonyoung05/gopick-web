@@ -3,10 +3,7 @@ import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
 import { PanelLeft } from 'lucide-react';
 import { Badge } from '../../ui/Label';
-import {
-  NAV_ITEMS,
-  MOCK_UNREAD_COUNT,
-} from '../../../constants/nav';
+import { NAV_ITEMS } from '../../../constants/nav';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
@@ -16,7 +13,7 @@ interface SidebarProps {
   unreadCount?: number;
 }
 
-export function Sidebar({ collapsed = false, onToggle, unreadCount = MOCK_UNREAD_COUNT }: SidebarProps) {
+export function Sidebar({ collapsed = false, onToggle, unreadCount = 0 }: SidebarProps) {
 
   return (
     <aside className={clsx(styles.sidebar, collapsed && styles.collapsed)}>

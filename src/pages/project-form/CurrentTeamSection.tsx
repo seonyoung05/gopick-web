@@ -17,9 +17,11 @@ interface CurrentTeamSectionProps extends SectionProps {
   isNew: boolean;
   /** 수정할 때 보여 줄 실제 팀원 (서버 값, 읽기 전용) */
   members?: ProjectMember[];
+  /** 수정 중인 프로젝트 → "팀원 초대하기"에서 이 프로젝트를 미리 골라 둠 */
+  projectId?: string;
 }
 
-export function CurrentTeamSection({ form, update, isNew, members = [] }: CurrentTeamSectionProps) {
+export function CurrentTeamSection({ form, update, isNew, members = [], projectId }: CurrentTeamSectionProps) {
   const navigate = useNavigate();
 
   /** 등록할 때 팀원은 본인 1명뿐이라, 내 역할이 곧 현재 팀 구성이에요 */
@@ -61,8 +63,13 @@ export function CurrentTeamSection({ form, update, isNew, members = [] }: Curren
             팀원 {members.length}명 · 참여 제안을 수락하거나 지원이 수락되면 여기에 추가돼요.
           </p>
         </div>
-        {/* TODO: 제안 API가 생기면 이 프로젝트를 미리 골라 둔 채로 열기 */}
-        <Button variant="ghost" size="sm" icon={<UserPlus size={16} aria-hidden="true" />} onClick={() => navigate('/search')}>
+        {/* 사람 검색에서 참여 제안을 열면 이 프로젝트가 미리 골라져 있어요 */}
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<UserPlus size={16} aria-hidden="true" />}
+          onClick={() => navigate(projectId ? `/search?invite=${projectId}` : '/search')}
+        >
           팀원 초대하기
         </Button>
       </div>

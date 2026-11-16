@@ -3,9 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
-import { ApiError, ERROR_CODE, fetchProjectDetails, projectsApi, type ProjectDetail } from '../../api';
+import { ApiError, ERROR_CODE, projectsApi, type MyProject, type ProjectDetail } from '../../api';
 import {
-  myMembership,
   toProjectCreateRequest,
   toProjectForm,
   toProjectUpdateRequest,
@@ -65,10 +64,15 @@ export default function ProjectFormPage() {
   const myProfileId = account?.profileId;
   const [params] = useSearchParams();
 
-  /** 내가 팀장인 프로젝트 (완료한 프로젝트는 제외) */
-  const [myProjects, setMyProjects] = useState<ProjectDetail[]>([]);
+  /** 내가 팀장인 프로젝트 (완료한 프로젝트는 제외) — 위쪽 칩 목록 */
+  const [myProjects, setMyProjects] = useState<MyProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
   const [selectedId, setSelectedId] = useState<string>(NEW);
+  /** 지금 수정 중인 프로젝트의 상세 (경험 조건·링크까지 있어야 저장할 때 지워지지 않아요) */
+  const [detail, setDetail] = useState<ProjectDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState<ProjectFormValues>(emptyForm);
   const [showErrors, setShowErrors] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -78,19 +82,16 @@ export default function ProjectFormPage() {
   const wantedId = params.get('id');
   useEffect(() => {
     let ignore = false;
-    fetchProjectDetails()
+    projectsApi
+      .myProjects()
       .then((list) => {
         if (ignore) return;
-        const mine = list.filter(
-          (p) => p.lifecycleStatus !== 'COMPLETED' && myMembership(p, myProfileId).isLeader,
-        );
+        const mine = list.filter((p) => p.myAuthority === 'LEADER' && p.lifecycleStatus !== 'COMPLETED');
         setMyProjects(mine);
         const first =
           wantedId === NEW ? undefined : (mine.find((p) => String(p.projectId) === wantedId) ?? mine[0]);
-        if (first) {
-          setSelectedId(String(first.projectId));
-          setForm(toProjectForm(first));
-        }
+        setSelectedId(first ? String(first.projectId) : NEW);
+        setDetailLoading(Boolean(first));
       })
       .catch(() => {
         if (!ignore) toast('내 프로젝트를 불러오지 못했어요. 새 프로젝트는 등록할 수 있어요');
@@ -101,19 +102,60 @@ export default function ProjectFormPage() {
     return () => {
       ignore = true;
     };
-  }, [myProfileId, wantedId, toast]);
+  }, [myProfileId, wantedId, toast, reloadKey]);
 
-  const editing = myProjects.find((p) => String(p.projectId) === selectedId);
+  // 고른 프로젝트의 상세를 불러와 폼 채우기
+  useEffect(() => {
+    if (selectedId === NEW) return;
+    let ignore = false;
+    projectsApi
+      .get(Number(selectedId))
+      .then((res) => {
+        if (ignore) return;
+        setDetail(res);
+        setForm(toProjectForm(res));
+      })
+      .catch(() => {
+        if (!ignore) toast('프로젝트를 불러오지 못했어요');
+      })
+      .finally(() => {
+        if (!ignore) setDetailLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [selectedId, toast]);
+
+  const editing = detail && String(detail.projectId) === selectedId ? detail : undefined;
   const pageTitle = editing ? `${editing.title} 수정` : '새 프로젝트 등록';
 
   const update = (patch: Partial<ProjectFormValues>) => setForm((prev) => ({ ...prev, ...patch }));
 
   const select = (id: string) => {
-    const target = myProjects.find((p) => String(p.projectId) === id);
+    if (id === selectedId) return;
     setSelectedId(id);
-    setForm(target ? toProjectForm(target) : emptyForm());
+    setDetail(null);
+    setDetailLoading(id !== NEW);
+    setForm(emptyForm());
     setShowErrors(false);
     setNotice(null);
+  };
+
+  /** 프로젝트 삭제 (팀장만) */
+  const handleDelete = async () => {
+    if (!editing) return;
+    if (!window.confirm(`'${editing.title}' 프로젝트를 삭제할까요? 삭제하면 되돌릴 수 없어요.`)) return;
+    setDeleting(true);
+    try {
+      await projectsApi.remove(editing.projectId);
+      toast('프로젝트를 삭제했어요');
+      select(NEW);
+      setReloadKey((k) => k + 1);
+    } catch (e) {
+      setNotice({ tone: 'error', text: saveErrorText(e) });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleSave = async () => {
@@ -179,7 +221,12 @@ export default function ProjectFormPage() {
           <BasicInfoSection {...sectionProps} />
           <RecruitSection {...sectionProps} />
           <CollabSection {...sectionProps} />
-          <CurrentTeamSection {...sectionProps} isNew={!editing} members={editing?.members} />
+          <CurrentTeamSection
+            {...sectionProps}
+            isNew={!editing}
+            members={editing?.members}
+            projectId={editing ? String(editing.projectId) : undefined}
+          />
           <ReferenceSection {...sectionProps} />
           <PostSection {...sectionProps} />
 
@@ -189,10 +236,15 @@ export default function ProjectFormPage() {
             </p>
           )}
           <div className={s.footer}>
+            {editing && (
+              <Button variant="ghost" className={s.deleteButton} onClick={handleDelete} disabled={deleting}>
+                {deleting ? '삭제 중…' : '프로젝트 삭제'}
+              </Button>
+            )}
             <Button variant="ghost" onClick={() => navigate('/search')}>
               조건 없이 사람 검색하기
             </Button>
-            <Button onClick={handleSave} disabled={saving || loading}>
+            <Button onClick={handleSave} disabled={saving || loading || detailLoading}>
               {saving ? '저장 중…' : editing ? '저장하고 팀원 추천받기' : '등록하고 팀원 추천받기'}
             </Button>
           </div>

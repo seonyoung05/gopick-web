@@ -65,6 +65,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           applyAccount(null);
         }
       },
+      withdraw: async () => {
+        await authApi.withdraw();
+        applyAccount(null);
+      },
       setProfileId: (profileId: number) => setAccount((prev) => (prev ? { ...prev, profileId } : prev)),
       setProfileName: (name: string) => setProfileName(name),
       refresh,

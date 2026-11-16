@@ -13,6 +13,8 @@ export interface AuthStore {
   login: (body: Credentials) => Promise<AccountResponse>;
   signUp: (body: Credentials) => Promise<AccountResponse>;
   logout: () => Promise<void>;
+  /** 회원 탈퇴. 성공하면 로그아웃 상태가 됨 (실패하면 에러를 던짐) */
+  withdraw: () => Promise<void>;
   /** 프로필을 처음 만든 뒤 profileId를 반영 */
   setProfileId: (profileId: number) => void;
   /** 프로필을 저장한 뒤 이름 갱신 */

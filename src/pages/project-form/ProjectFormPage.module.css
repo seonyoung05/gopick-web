@@ -54,6 +54,12 @@
   padding-top: var(--space-24);
 }
 
+/* 삭제는 왼쪽 끝에 따로 */
+.deleteButton {
+  margin-right: auto;
+  color: var(--red);
+}
+
 .noticeOk,
 .noticeError {
   margin: var(--space-16) 0 0;

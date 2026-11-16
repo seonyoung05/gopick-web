@@ -4,14 +4,13 @@ import { Search, Bell } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AvatarMenu } from '../AvatarMenu';
 import { Badge } from '../../ui/Label';
-import { MOCK_UNREAD_COUNT } from '../../../constants/nav';
 import styles from './Topbar.module.css';
 
 interface TopbarProps {
   unreadCount?: number;
 }
 
-export function Topbar({ unreadCount = MOCK_UNREAD_COUNT }: TopbarProps) {
+export function Topbar({ unreadCount = 0 }: TopbarProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const onSearchPage = pathname.startsWith('/search');

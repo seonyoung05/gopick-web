@@ -15,6 +15,7 @@ import type {
   ConditionMode,
   ProjectAttribute,
   ProjectCreateRequest,
+  ProjectData,
   ProjectDetail,
   ProjectRole,
   ProjectStage,
@@ -73,7 +74,7 @@ const monthDate = (iso: string) => {
 };
 
 /** 생성·상태 변경·단계 변경 중 가장 최근 시각 (최근 활동순 정렬용) */
-export const lastActiveAt = (p: Pick<ProjectDetail, 'createdAt' | 'statusUpdatedAt' | 'stageUpdatedAt'>) =>
+export const lastActiveAt = (p: Pick<ProjectData, 'createdAt' | 'statusUpdatedAt' | 'stageUpdatedAt'>) =>
   [p.createdAt, p.statusUpdatedAt, p.stageUpdatedAt]
     .filter((v): v is string => Boolean(v))
     .sort()
@@ -84,17 +85,17 @@ export const lastActiveAt = (p: Pick<ProjectDetail, 'createdAt' | 'statusUpdated
 const attrs = (list: ProjectAttribute[], category: ProjectAttribute['category']) =>
   list.filter((a) => a.category === category).map((a) => a.value);
 
-const leaderOf = (p: ProjectDetail) => p.members.find((m) => m.authority === 'LEADER');
+const leaderOf = (p: Pick<ProjectData, 'members'>) => p.members.find((m) => m.authority === 'LEADER');
 const memberName = (name: string | null) => name ?? '비공개 프로필';
 
 /** 내가 이 프로젝트의 팀원인지 / 팀장인지 */
-export function myMembership(p: ProjectDetail, myProfileId: number | null | undefined) {
+export function myMembership(p: Pick<ProjectData, 'members'>, myProfileId: number | null | undefined) {
   const me = myProfileId == null ? undefined : p.members.find((m) => m.profileId === myProfileId);
   return { isMember: Boolean(me), isLeader: me?.authority === 'LEADER' };
 }
 
 /** "기획 1명, Backend 1명" */
-export function teamText(p: Pick<ProjectDetail, 'members'>) {
+export function teamText(p: Pick<ProjectData, 'members'>) {
   const counts = new Map<string, number>();
   for (const m of p.members) counts.set(roleLabel(m.role), (counts.get(roleLabel(m.role)) ?? 0) + 1);
   return [...counts].map(([role, n]) => `${role} ${n}명`).join(', ');
@@ -107,7 +108,7 @@ export function skillText(r: Recruitment) {
 }
 
 /** 0~4: 그 단계 진행 중, 5: 완료 */
-export function currentStageIndex(p: Pick<ProjectDetail, 'lifecycleStatus' | 'stage'>) {
+export function currentStageIndex(p: Pick<ProjectData, 'lifecycleStatus' | 'stage'>) {
   if (p.lifecycleStatus === 'COMPLETED') return STAGES.length;
   const i = p.stage ? API_STAGES.indexOf(p.stage) : -1;
   return i === -1 ? 0 : i;
@@ -116,10 +117,10 @@ export function currentStageIndex(p: Pick<ProjectDetail, 'lifecycleStatus' | 'st
 /* ---------- 서버 → 모집 카드 ---------- */
 
 export function toRecruitProject(
-  p: ProjectDetail,
+  p: ProjectData,
   opts: { myProfileId?: number | null; scrapped: boolean },
 ): RecruitProject {
-  const { isLeader } = myMembership(p, opts.myProfileId);
+  const { isLeader, isMember } = myMembership(p, opts.myProfileId);
   const recruiting = p.recruitments.filter((r) => r.remainingCount > 0);
   const remaining = recruiting.reduce((sum, r) => sum + r.remainingCount, 0);
   const collab = attrs(p.attributes, 'COLLAB');
@@ -143,14 +144,13 @@ export function toRecruitProject(
       p.members.length > 0 && `현재 팀 ${teamText(p)}`,
     ].filter((line): line is string => Boolean(line)),
     scrapped: opts.scrapped,
-    // 아직 지원·제안 API가 없어서 '받은 제안 보기(offers)'는 쓰지 않음
-    action: isLeader ? 'mine' : 'apply',
+    action: isLeader ? 'mine' : isMember ? 'member' : 'apply',
   };
 }
 
 /* ---------- 서버 → 진행 중 · 완료 프로젝트 ---------- */
 
-export function toTeamProject(p: ProjectDetail, opts: { scrapped: boolean }): TeamProject {
+export function toTeamProject(p: ProjectData, opts: { scrapped: boolean }): TeamProject {
   const leader = leaderOf(p);
   return {
     id: String(p.projectId),
@@ -163,7 +163,8 @@ export function toTeamProject(p: ProjectDetail, opts: { scrapped: boolean }): Te
     currentStage: currentStageIndex(p),
     scrapped: opts.scrapped,
     members: p.members.map((m) => ({ name: memberName(m.name), role: roleLabel(m.role) })),
-    outputs: p.links.length > 0 ? p.links.map((l) => ({ label: l.type, url: l.url })) : undefined,
+    // 목록에는 링크가 없어서, 상세를 불러오기 전에는 비어 있어요
+    outputs: p.links && p.links.length > 0 ? p.links.map((l) => ({ label: l.type, url: l.url })) : undefined,
     // 세부 과제·활동 기록은 아직 서버에 없어서 빈 값 (화면에서만 체크 가능)
     tasks: STAGES.map(() => []),
     log: [],

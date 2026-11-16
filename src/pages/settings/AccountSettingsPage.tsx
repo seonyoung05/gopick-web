@@ -2,14 +2,14 @@
 import { useState } from 'react';
 import { Button } from '../../components/ui/Button';
 import { LogoutDialog } from '../../components/common/LogoutDialog';
-import { useToast } from '../../components/common/Toast';
+import { WithdrawDialog } from '../../components/common/WithdrawDialog';
 import { useAuth } from '../../stores/auth';
 import styles from './AccountSettingsPage.module.css';
 
 export default function AccountSettingsPage() {
   const { status, account } = useAuth();
-  const toast = useToast();
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   // TODO(5단계): 로그인 확인은 라우팅에서 한 번에 처리
   if (status === 'loading') return null;
@@ -43,14 +43,14 @@ export default function AccountSettingsPage() {
         <section className={styles.card} aria-labelledby="withdraw">
           <h2 id="withdraw">회원 탈퇴</h2>
           <p className={styles.desc}>탈퇴하면 프로필과 활동 기록이 삭제되고 되돌릴 수 없어요.</p>
-          {/* TODO: 회원 탈퇴 흐름은 대표 기능 완성 후 */}
-          <button type="button" className={styles.dangerButton} onClick={() => toast('회원 탈퇴는 준비 중이에요')}>
+          <button type="button" className={styles.dangerButton} onClick={() => setWithdrawOpen(true)}>
             회원 탈퇴
           </button>
         </section>
       </div>
 
       <LogoutDialog open={logoutOpen} onClose={() => setLogoutOpen(false)} />
+      <WithdrawDialog open={withdrawOpen} onClose={() => setWithdrawOpen(false)} />
     </div>
   );
 }
