@@ -26,6 +26,20 @@
   padding: 0 var(--space-8) 22px;
 }
 
+.home {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.home:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
 .logo {
   display: flex;
   gap: 3px;

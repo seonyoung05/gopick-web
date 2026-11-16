@@ -37,8 +37,7 @@ export function authErrorMessage(err: unknown, fallback: string) {
   }
 }
 
-/** 로그인·가입 후 갈 곳: 프로필 없으면 내 프로필, 있으면 원래 가려던 곳(없으면 홈) */
-export function pathAfterAuth(account: AccountResponse | null, from?: string) {
-  if (!account?.profileId) return '/profile';
-  return from ?? '/';
+/** 로그인·가입 후 갈 곳: 프로필이 없으면 내 프로필, 있으면 항상 홈 */
+export function pathAfterAuth(account: AccountResponse | null) {
+  return account?.profileId ? '/' : '/profile';
 }
