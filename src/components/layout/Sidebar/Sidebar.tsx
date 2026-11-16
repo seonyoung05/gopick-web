@@ -1,5 +1,5 @@
 // src/components/layout/Sidebar/Sidebar.tsx
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import clsx from 'clsx';
 import { PanelLeft } from 'lucide-react';
 import { Badge } from '../../ui/Label';
@@ -21,13 +21,16 @@ export function Sidebar({ collapsed = false, onToggle, unreadCount = MOCK_UNREAD
   return (
     <aside className={clsx(styles.sidebar, collapsed && styles.collapsed)}>
       <div className={styles.brand}>
-        <span className={styles.logo} aria-hidden="true">
-          <i style={{ background: 'var(--blue)' }} />
-          <i style={{ background: 'var(--red)' }} />
-          <i style={{ background: 'var(--yellow)' }} />
-          <i style={{ background: 'var(--green)' }} />
-        </span>
-        <span className={clsx(styles.name, 't-h2')}>GoPick</span>
+        {/* 로고를 누르면 홈으로 */}
+        <Link to="/" className={styles.home} aria-label="GoPick 홈으로">
+          <span className={styles.logo} aria-hidden="true">
+            <i style={{ background: 'var(--blue)' }} />
+            <i style={{ background: 'var(--red)' }} />
+            <i style={{ background: 'var(--yellow)' }} />
+            <i style={{ background: 'var(--green)' }} />
+          </span>
+          <span className={clsx(styles.name, 't-h2')}>GoPick</span>
+        </Link>
         <button
           type="button"
           className={styles.toggle}

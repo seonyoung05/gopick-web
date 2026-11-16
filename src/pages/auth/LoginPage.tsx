@@ -1,6 +1,6 @@
 // src/pages/auth/LoginPage.tsx
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Field } from '../../components/common/Field';
 import { Button } from '../../components/ui/Button';
 import { Input, PasswordInput } from '../../components/ui/Input';
@@ -11,7 +11,6 @@ import styles from './AuthPage.module.css';
 
 export default function LoginPage() {
   const { status, account, login } = useAuth();
-  const location = useLocation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,9 +18,8 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  // 로그인돼 있으면: 프로필 없으면 내 프로필, 있으면 원래 가려던 곳(없으면 홈)
-  const from = (location.state as { from?: string } | null)?.from;
-  if (status === 'authenticated') return <Navigate to={pathAfterAuth(account, from)} replace />;
+  // 로그인돼 있으면: 프로필 없으면 내 프로필, 있으면 홈
+  if (status === 'authenticated') return <Navigate to={pathAfterAuth(account)} replace />;
 
   const errors = {
     email: emailError(email),

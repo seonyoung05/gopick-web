@@ -12,8 +12,8 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   if (status === 'loading') return null;
 
   if (status === 'unauthenticated') {
-    // 로그인 후 원래 가려던 곳으로 돌아오게 주소를 기억
-    return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+    // 로그인하면 어디서 왔든 홈부터 시작 (pathAfterAuth)
+    return <Navigate to="/login" replace />;
   }
 
   // 프로필이 없으면 프로필 작성부터 (내 프로필 화면 자체는 예외)
