@@ -1,9 +1,7 @@
 // src/pages/inbox/InboxDetail.tsx
-import { useState } from 'react';
 import { Copy } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Pill, Tag } from '../../components/ui/Label';
-import { Textarea } from '../../components/ui/Input';
 import { FitLists } from '../../components/common/FitLists';
 import { useToast } from '../../components/common/Toast';
 import type { Participation } from '../../types/participation';
@@ -20,16 +18,19 @@ import styles from './InboxPage.module.css';
 
 interface InboxDetailProps {
   item: Participation;
+  /** 수락·거절·취소 요청 중 (버튼 잠금) */
+  busy?: boolean;
   saved: boolean;
   onToggleSave: () => void;
-  onAccept: (reply: string) => void;
-  onReject: (reply: string) => void;
+  onAccept: () => void;
+  onReject: () => void;
   onCancel: () => void;
   onViewProject: () => void;
 }
 
 export function InboxDetail({
   item,
+  busy = false,
   saved,
   onToggleSave,
   onAccept,
@@ -38,7 +39,6 @@ export function InboxDetail({
   onViewProject,
 }: InboxDetailProps) {
   const toast = useToast();
-  const [reply, setReply] = useState('');
 
   const isPending = item.status === 'pending';
   const canRespond = isPending && item.direction === 'received';
@@ -83,17 +83,21 @@ export function InboxDetail({
           <>
             <div className={styles.blockHeadRow}>
               <h3 className={styles.blockTitle}>{item.counterpart.name}</h3>
-              <Button
-                variant={saved ? 'saved' : 'ghost'}
-                size="sm"
-                onClick={onToggleSave}
-                aria-pressed={saved}
-              >
-                {saved ? '★ 저장됨' : '☆ 저장'}
-              </Button>
+              {item.counterpart.isPublic && (
+                <Button
+                  variant={saved ? 'saved' : 'ghost'}
+                  size="sm"
+                  onClick={onToggleSave}
+                  aria-pressed={saved}
+                >
+                  {saved ? '★ 저장됨' : '☆ 저장'}
+                </Button>
+              )}
             </div>
             <p className={styles.blockText}>
-              {item.counterpart.major} | {skillSummary(item.counterpart)}
+              {item.counterpart.isPublic
+                ? `${item.counterpart.major} | ${skillSummary(item.counterpart)}`
+                : '비공개 프로필이라 자세한 정보를 볼 수 없어요.'}
             </p>
             <div className={styles.tags}>
               {item.counterpart.roles.map((r) => (
@@ -120,11 +124,13 @@ export function InboxDetail({
         </div>
       )}
 
-      {/* ---------- 메시지 ---------- */}
-      <div className={styles.messageGroup}>
-        <h3 className={styles.label}>{messageLabel(item)}</h3>
-        <p className={styles.bubble}>{item.message}</p>
-      </div>
+      {/* ---------- 메시지 (서버가 메시지를 받게 되면 표시) ---------- */}
+      {item.message && (
+        <div className={styles.messageGroup}>
+          <h3 className={styles.label}>{messageLabel(item)}</h3>
+          <p className={styles.bubble}>{item.message}</p>
+        </div>
+      )}
 
       {/* ---------- 답장 (있을 때만) ---------- */}
       {item.reply && (
@@ -134,22 +140,7 @@ export function InboxDetail({
         </div>
       )}
 
-      {/* ---------- 답장 입력 (받은 내역 + 대기 중) ---------- */}
-      {canRespond && (
-        <div className={styles.messageGroup}>
-          <label className={styles.label} htmlFor="reply">
-            답장 <span className={styles.optional}>선택</span>
-          </label>
-          <Textarea
-            id="reply"
-            placeholder="예: 제안 감사해요! 함께하고 싶어요."
-            value={reply}
-            maxLength={300}
-            onChange={(e) => setReply(e.target.value)}
-            style={{ minHeight: 66 }}
-          />
-        </div>
-      )}
+      {/* TODO: 서버가 답장을 받게 되면 답장 입력칸 다시 추가 */}
 
       <p className={styles.note}>{noteText(item)}</p>
 
@@ -162,16 +153,18 @@ export function InboxDetail({
             </Button>
           )}
           {canCancel && (
-            <Button variant="ghost" onClick={onCancel}>
+            <Button variant="ghost" onClick={onCancel} disabled={busy}>
               {item.kind === 'offer' ? '제안 취소하기' : '지원 취소하기'}
             </Button>
           )}
           {canRespond && (
             <>
-              <Button variant="ghost" onClick={() => onReject(reply.trim())}>
+              <Button variant="ghost" onClick={onReject} disabled={busy}>
                 거절
               </Button>
-              <Button onClick={() => onAccept(reply.trim())}>수락</Button>
+              <Button onClick={onAccept} disabled={busy}>
+                수락
+              </Button>
             </>
           )}
         </div>

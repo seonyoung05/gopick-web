@@ -4,15 +4,14 @@ import { Modal } from '../Modal';
 import { Field } from '../Field';
 import { Button } from '../../ui/Button';
 import { ChipGroup } from '../../ui/Chip';
-import { Textarea } from '../../ui/Input';
 import type { PersonSummary } from '../../../types/person';
-import type { MyRecruitingProject } from '../../../mocks/myProjects';
+import type { MyRecruitingProject } from '../../../types/participation';
 
 export interface OfferPayload {
   personId: string;
   projectId: string;
+  /** 제안할 역할 (서버 역할 값, 예: BACKEND) */
   recruitmentId: string;
-  message: string;
 }
 
 interface OfferModalProps {
@@ -30,7 +29,7 @@ export function OfferModal({ person, projects, onClose, onSubmit, defaultRecruit
       open={person !== null}
       onClose={onClose}
       title={person ? `${person.name} 님에게 참여 제안` : ''}
-      description="맡길 역할을 고르고 메시지를 남겨 주세요. 수락되면 서로의 연락처가 공개돼요."
+      description="맡길 역할을 골라 주세요. 상대가 수락하면 그 역할로 팀에 합류해요."
     >
       {/* 열릴 때마다 입력값이 초기화되도록 사람별로 새로 그림 */}
       {person && (
@@ -60,9 +59,6 @@ function OfferForm({
   const roleLabel = (r: { role: string; remaining: number }) => `${r.role} ${r.remaining}명 모집`;
   const defaultRole = project?.recruitments.find((r) => r.recruitmentId === defaultRecruitmentId);
   const [roleText, setRoleText] = useState<string | null>(defaultRole ? roleLabel(defaultRole) : null);
-  const [message, setMessage] = useState(
-    `안녕하세요, ${person.name} 님! 프로필을 보고 ${projects[0]?.name ?? ''} 팀에 함께하고 싶어서 제안드려요.`,
-  );
   const [showError, setShowError] = useState(false);
 
   // 모집 중인 내 프로젝트가 없으면 안내만
@@ -88,7 +84,6 @@ function OfferForm({
       personId: person.id,
       projectId: project.id,
       recruitmentId: selected.recruitmentId,
-      message: message.trim(),
     });
   };
 
@@ -118,9 +113,7 @@ function OfferForm({
         />
       </Field>
 
-      <Field label="메시지" hint="선택">
-        <Textarea value={message} maxLength={300} onChange={(e) => setMessage(e.target.value)} />
-      </Field>
+      {/* TODO: 서버가 메시지를 받게 되면 메시지 입력칸 다시 추가 */}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingBottom: 10 }}>
         <Button variant="ghost" onClick={onClose}>취소</Button>

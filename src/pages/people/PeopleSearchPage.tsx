@@ -11,12 +11,14 @@ import { Segment } from '../../components/ui/Segment';
 import { PEOPLE_FILTERS } from '../../constants/filters';
 import { ApiError, ERROR_CODE, profilesApi } from '../../api';
 import { personFromDetail, personFromSearch } from '../../api/mappers/person';
+import { participationErrorText } from '../../api/mappers/participation';
+import { useOfferContext } from '../../hooks/useOfferContext';
+import { RelationAction } from '../../components/common/PersonCard';
 import { useAuth } from '../../stores/auth';
 import { filterPeople, skillSummary } from './filterPeople';
 import styles from './PeopleSearchPage.module.css';
 import { ProfileDetailModal } from '../../components/common/ProfileDetailModal';
 import { OfferModal, type OfferPayload } from '../../components/common/OfferModal';
-import { MY_RECRUITING_PROJECTS } from '../../mocks/myProjects';
 import type { PersonSummary } from '../../types/person';
 
 type LoadStatus = 'loading' | 'error' | 'done';
@@ -37,7 +39,7 @@ export default function PeopleSearchPage() {
   /** 지금 제안을 쓰고 있는 사람 (null이면 닫힘) */
   const [offerPerson, setOfferPerson] = useState<PersonSummary | null>(null);
   /** 제안을 보낸 사람 ID */
-  const [offeredIds, setOfferedIds] = useState<Set<string>>(new Set());
+  const offer = useOfferContext();
   // 공개 프로필 전체 + 내 북마크를 한 번에 불러오기 (필터는 화면에서 적용)
   useEffect(() => {
     let ignore = false; // 화면을 떠난 뒤 늦게 온 응답은 무시
@@ -117,12 +119,14 @@ export default function PeopleSearchPage() {
     setOfferPerson(person);
   };
 
-  const handleOfferSubmit = (payload: OfferPayload) => {
-    // TODO: API 연결 시 participationApi.create(payload.projectId, { type: 'OFFER', ... })
-    console.log('참여 제안', payload);
-    setOfferedIds((prev) => new Set(prev).add(payload.personId));
-    setOfferPerson(null);
-    toast('참여 제안을 보냈어요', 'success');
+  const handleOfferSubmit = async (payload: OfferPayload) => {
+    try {
+      await offer.sendOffer(payload);
+      setOfferPerson(null);
+      toast('참여 제안을 보냈어요', 'success');
+    } catch (e) {
+      toast(participationErrorText(e, 'offer'));
+    }
   };
 
   const resetAll = () => {
@@ -205,15 +209,12 @@ export default function PeopleSearchPage() {
                 onToggleSave={() => toggleSave(person.id, person.name)}
                 onViewProfile={() => openDetail(person)}
                 action={
-                  offeredIds.has(person.id) ? (
-                    <Button variant="ghost" size="sm" block disabled>
-                      제안 보냄
-                    </Button>
-                  ) : (
-                    <Button size="sm" block onClick={() => openOffer(person)}>
-                      참여 제안 보내기
-                    </Button>
-                  )
+                  <RelationAction
+                    relation={offer.relationOf(person.id)}
+                    offered={false}
+                    onOffer={() => openOffer(person)}
+                    onViewApplication={() => navigate('/offers')}
+                  />
                 }
               />
             ))
@@ -226,13 +227,13 @@ export default function PeopleSearchPage() {
         saved={detailPerson ? savedIds.has(detailPerson.id) : false}
         onToggleSave={() => detailPerson && toggleSave(detailPerson.id, detailPerson.name)}
         onOffer={
-          detailPerson && !offeredIds.has(detailPerson.id) ? () => openOffer(detailPerson) : undefined
+          detailPerson && offer.relationOf(detailPerson.id) === 'none' ? () => openOffer(detailPerson) : undefined
         }
       />
 
       <OfferModal
         person={offerPerson}
-        projects={MY_RECRUITING_PROJECTS}
+        projects={offer.projects}
         onClose={() => setOfferPerson(null)}
         onSubmit={handleOfferSubmit}
       />

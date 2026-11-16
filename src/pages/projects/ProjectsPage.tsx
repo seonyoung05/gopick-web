@@ -1,11 +1,20 @@
 // src/pages/projects/ProjectsPage.tsx
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ApiError, ERROR_CODE, fetchProjectDetails, projectsApi, type ProjectDetail as ApiProject } from '../../api';
+import {
+  ApiError,
+  ERROR_CODE,
+  fetchProjectDetails,
+  participationApi,
+  projectsApi,
+  type ProjectDetail as ApiProject,
+} from '../../api';
+import { participationErrorText } from '../../api/mappers/participation';
 import {
   API_STAGES,
   lastActiveAt,
   myMembership,
+  roleToApi,
   toRecruitProject,
   toTeamProject,
 } from '../../api/mappers/project';
@@ -13,7 +22,8 @@ import { useToast } from '../../components/common/Toast';
 import { Button } from '../../components/ui/Button';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
 import { useAuth } from '../../stores/auth';
-import type { ActivityLog, OutputLink, StageTask, TeamProject } from '../../types/project';
+import type { ActivityLog, OutputLink, RecruitProject, StageTask, TeamProject } from '../../types/project';
+import { ApplyModal, type ApplyPayload } from './ApplyModal';
 import { monthDay } from './formatDate';
 import { RecruitCard } from './RecruitCard';
 import { ProjectListItem } from './ProjectListItem';
@@ -60,6 +70,37 @@ export default function ProjectsPage() {
   const [status, setStatus] = useState<LoadStatus>('loading');
   const [reloadKey, setReloadKey] = useState(0);
   const [selected, setSelected] = useState<Partial<Record<TeamTabKey, string>>>({});
+  /** 지원하기 모달을 연 프로젝트 */
+  const [applyTarget, setApplyTarget] = useState<RecruitProject | null>(null);
+  /** 내가 지원해 두고 아직 답을 기다리는 프로젝트 */
+  const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    let ignore = false;
+    participationApi
+      .sent()
+      .then((sent) => {
+        if (ignore) return;
+        setAppliedIds(
+          new Set(sent.filter((r) => r.type === 'APPLY' && r.status === 'PENDING').map((r) => String(r.projectId))),
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const submitApply = async ({ projectId, role }: ApplyPayload) => {
+    try {
+      await participationApi.create(Number(projectId), { type: 'APPLY', role: roleToApi(role) });
+      setAppliedIds((prev) => new Set(prev).add(projectId));
+      setApplyTarget(null);
+      toast('지원했어요. 등록자가 수락하면 팀에 합류해요', 'success');
+    } catch (e) {
+      toast(participationErrorText(e, 'apply'));
+    }
+  };
 
   // 전체 프로젝트(상세 포함) + 내 스크랩 불러오기
   useEffect(() => {
@@ -275,8 +316,8 @@ export default function ProjectsPage() {
             key={p.id}
             project={p}
             onToggleScrap={() => toggleScrap(p.id)}
-            // TODO: 지원 API가 생기면 지원 모달(M2)을 연결
-            onApply={() => toast('지원하기는 준비 중이에요')}
+            applied={appliedIds.has(p.id)}
+            onApply={() => setApplyTarget(p)}
             onEdit={() => navigate(`/manage?id=${p.id}`)}
             onRecommend={() => navigate('/recommend')}
             onStart={() => startProject(p.id)}
@@ -302,6 +343,8 @@ export default function ProjectsPage() {
       />
 
       {renderBody()}
+
+      <ApplyModal project={applyTarget} onClose={() => setApplyTarget(null)} onSubmit={submitApply} />
     </div>
   );
 }

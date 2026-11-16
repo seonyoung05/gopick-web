@@ -8,7 +8,8 @@ import { ProfileDetailModal } from '../../components/common/ProfileDetailModal';
 import { OfferModal, type OfferPayload } from '../../components/common/OfferModal';
 import { useToast } from '../../components/common/Toast';
 import { Button } from '../../components/ui/Button';
-import { MY_RECRUITING_PROJECTS } from '../../mocks/myProjects';
+import { participationErrorText } from '../../api/mappers/participation';
+import { useOfferContext } from '../../hooks/useOfferContext';
 import type { PersonSummary } from '../../types/person';
 import { skillSummary } from '../people/filterPeople';
 import styles from './SavedPage.module.css';
@@ -55,7 +56,7 @@ export function SavedProfilesTab({ onCountChange }: SavedProfilesTabProps) {
   const [status, setStatus] = useState<LoadStatus>('loading');
   const [reloadKey, setReloadKey] = useState(0);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
-  const [offeredIds, setOfferedIds] = useState<Set<string>>(new Set());
+  const offer = useOfferContext();
   const [detailPerson, setDetailPerson] = useState<PersonSummary | null>(null);
   const [offerPerson, setOfferPerson] = useState<PersonSummary | null>(null);
 
@@ -114,12 +115,14 @@ export function SavedProfilesTab({ onCountChange }: SavedProfilesTabProps) {
     setOfferPerson(person);
   };
 
-  const handleOfferSubmit = (payload: OfferPayload) => {
-    // TODO: 제안 API가 생기면 participationApi.create(...)
-    console.log('참여 제안', payload);
-    setOfferedIds((prev) => new Set(prev).add(payload.personId));
-    setOfferPerson(null);
-    toast('참여 제안을 보냈어요', 'success');
+  const handleOfferSubmit = async (payload: OfferPayload) => {
+    try {
+      await offer.sendOffer(payload);
+      setOfferPerson(null);
+      toast('참여 제안을 보냈어요', 'success');
+    } catch (e) {
+      toast(participationErrorText(e, 'offer'));
+    }
   };
 
   if (status === 'loading') return <div className={styles.empty}>저장한 프로필을 불러오는 중이에요…</div>;
@@ -168,10 +171,9 @@ export function SavedProfilesTab({ onCountChange }: SavedProfilesTabProps) {
             onToggleSave={() => toggleSave(person.id, person.name)}
             onViewProfile={() => setDetailPerson(person)}
             action={
-              // TODO: 제안·지원 API가 생기면 실제 관계(offered/applied/rejected)로
               <RelationAction
-                relation="none"
-                offered={offeredIds.has(person.id)}
+                relation={offer.relationOf(person.id)}
+                offered={false}
                 onOffer={() => openOffer(person)}
                 onViewApplication={() => navigate('/offers')}
               />
@@ -185,12 +187,14 @@ export function SavedProfilesTab({ onCountChange }: SavedProfilesTabProps) {
         onClose={() => setDetailPerson(null)}
         saved={detailPerson ? savedIds.has(detailPerson.id) : false}
         onToggleSave={() => detailPerson && toggleSave(detailPerson.id, detailPerson.name)}
-        onOffer={detailPerson && !offeredIds.has(detailPerson.id) ? () => openOffer(detailPerson) : undefined}
+        onOffer={
+          detailPerson && offer.relationOf(detailPerson.id) === 'none' ? () => openOffer(detailPerson) : undefined
+        }
       />
 
       <OfferModal
         person={offerPerson}
-        projects={MY_RECRUITING_PROJECTS}
+        projects={offer.projects}
         onClose={() => setOfferPerson(null)}
         onSubmit={handleOfferSubmit}
       />
