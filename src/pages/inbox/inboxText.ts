@@ -7,9 +7,9 @@ const kindText = (p: Participation) => (p.kind === 'offer' ? '제안' : '지원'
 export const showsProject = (p: Participation) =>
   (p.direction === 'received' && p.kind === 'offer') || (p.direction === 'sent' && p.kind === 'apply');
 
-/** 10/06, 9/24 형태 */
+/** 10/06, 9/24 형태 ("2026-10-06" 또는 "2026-10-06T12:00:00") */
 export const shortDate = (iso: string) => {
-  const [, m, d] = iso.split('-');
+  const [, m, d] = iso.slice(0, 10).split('-');
   return `${Number(m)}/${d}`;
 };
 
@@ -55,22 +55,23 @@ export function noteText(p: Participation) {
   if (p.status === 'pending') {
     if (p.direction === 'received') {
       return p.kind === 'offer'
-        ? `수락하면 ${p.project.name} 팀에 합류하고, ${name} 님과 서로의 연락처가 공개돼요.`
-        : `수락하면 ${name} 님이 팀원으로 추가되고 ${p.role} 모집 인원이 1명 줄어요. 서로의 연락처도 공개돼요.`;
+        ? `수락하면 ${p.role} 역할로 ${p.project.name} 팀에 합류해요.`
+        : `수락하면 ${name} 님이 ${p.role} 역할로 팀에 합류해요.`;
     }
     return p.kind === 'offer'
-      ? '상대가 아직 답하지 않았어요. 수락되면 서로의 연락처가 공개돼요.'
-      : `등록자가 수락하면 팀에 합류하고, ${p.project.ownerName} 님과 서로의 연락처가 공개돼요.`;
+      ? `상대가 아직 답하지 않았어요. 수락하면 ${p.role} 역할로 팀에 합류해요.`
+      : `등록자(${p.project.ownerName} 님)가 수락하면 ${p.role} 역할로 팀에 합류해요.`;
   }
   if (p.status === 'accepted') {
-    return p.kind === 'offer' && p.direction === 'received'
-      ? `${p.project.name} 팀에 합류했어요.`
-      : '수락된 ' + kind + '이에요. 아래 연락처로 연락해 보세요.';
+    if (p.direction === 'received') {
+      return p.kind === 'offer' ? `${p.project.name} 팀에 합류했어요.` : `${name} 님이 팀에 합류했어요.`;
+    }
+    return p.kind === 'offer' ? `${name} 님이 제안을 수락해 팀에 합류했어요.` : `지원이 수락돼 ${p.project.name} 팀에 합류했어요.`;
   }
   if (p.status === 'declined') {
     return p.direction === 'received'
       ? `거절한 ${kind}이에요.`
-      : `거절된 ${kind}이에요. 같은 방향으로는 다시 보낼 수 없어요.`;
+      : `거절된 ${kind}이에요. 필요하면 다시 보낼 수 있어요.`;
   }
   return p.direction === 'sent' ? `취소한 ${kind}이에요. 필요하면 다시 보낼 수 있어요.` : `상대가 취소한 ${kind}이에요.`;
 }

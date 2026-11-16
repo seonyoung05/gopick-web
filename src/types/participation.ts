@@ -41,3 +41,18 @@ export interface Participation {
   /** 수락된 경우에만 공개되는 상대 연락처 */
   contact?: { type: ContactType; value: string };
 }
+/** 참여 제안을 보낼 수 있는 내 프로젝트 (내가 팀장 + 완료 전) */
+export interface MyRecruitment {
+  /** 서버 역할 값 (예: BACKEND). 제안을 보낼 때 그대로 보냄 */
+  recruitmentId: string;
+  /** 화면 표시용 역할 (예: Backend) */
+  role: string;
+  /** 남은 모집 인원 */
+  remaining: number;
+}
+
+export interface MyRecruitingProject {
+  id: string;
+  name: string;
+  recruitments: MyRecruitment[];
+}

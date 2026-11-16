@@ -46,12 +46,25 @@ export interface ProjectSummary {
 }
 
 export interface ProjectMember {
-  profileId: number;
+  /** 탈퇴한 회원이면 null (이름은 "탈퇴한 회원입니다") */
+  profileId: number | null;
   name: string | null; // 다른 사람의 비공개 프로필이면 null
   isPublic: boolean;
   role: ProjectRole;
   authority: 'LEADER' | 'MEMBER';
   joinedAt: string;
+}
+
+/** 목록(GET /projects)·내 프로젝트 한 줄: 기본 정보 + 팀원·모집·속성 */
+export interface ProjectListItem extends ProjectSummary {
+  members: ProjectMember[];
+  recruitments: Recruitment[];
+  attributes: ProjectAttribute[];
+}
+
+/** GET /me/projects 한 줄 */
+export interface MyProject extends ProjectListItem {
+  myAuthority: 'LEADER' | 'MEMBER';
 }
 
 export interface ProjectDetail extends ProjectSummary {
@@ -111,6 +124,8 @@ export const projectsApi = {
   scrap: (id: number) => api.post<void>(`/projects/${id}/scraps`),
   unscrap: (id: number) => api.delete<void>(`/projects/${id}/scraps`),
   myScraps: () => api.get<ProjectSummary[]>('/me/scrapped-projects'),
+  /** 내가 팀원(팀장 포함)인 프로젝트 + 내 권한 */
+  myProjects: () => api.get<MyProject[]>('/me/projects'),
 };
 
 /** 목록 + 각 프로젝트 상세

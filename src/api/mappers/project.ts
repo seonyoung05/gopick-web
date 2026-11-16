@@ -89,19 +89,19 @@ const memberName = (name: string | null) => name ?? '비공개 프로필';
 
 /** 내가 이 프로젝트의 팀원인지 / 팀장인지 */
 export function myMembership(p: ProjectDetail, myProfileId: number | null | undefined) {
-  const me = p.members.find((m) => m.profileId === myProfileId);
+  const me = myProfileId == null ? undefined : p.members.find((m) => m.profileId === myProfileId);
   return { isMember: Boolean(me), isLeader: me?.authority === 'LEADER' };
 }
 
 /** "기획 1명, Backend 1명" */
-function teamText(p: ProjectDetail) {
+export function teamText(p: Pick<ProjectDetail, 'members'>) {
   const counts = new Map<string, number>();
   for (const m of p.members) counts.set(roleLabel(m.role), (counts.get(roleLabel(m.role)) ?? 0) + 1);
   return [...counts].map(([role, n]) => `${role} ${n}명`).join(', ');
 }
 
 /** 모집 역할 기술 문구: "스택 무관" / "React 우대" / "Python, SQL 필수" */
-function skillText(r: Recruitment) {
+export function skillText(r: Recruitment) {
   if (r.techMode === 'NONE' || r.technologies.length === 0) return '스택 무관';
   return `${r.technologies.map((t) => t.technology).join(', ')} ${API_TO_CONDITION[r.techMode]}`;
 }

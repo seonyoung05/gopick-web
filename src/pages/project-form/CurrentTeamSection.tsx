@@ -68,11 +68,13 @@ export function CurrentTeamSection({ form, update, isNew, members = [] }: Curren
       </div>
 
       <ul className={s.memberList}>
-        {members.map((m) => {
+        {members.map((m, i) => {
           const name = m.name ?? '비공개 프로필';
+          // 탈퇴한 회원은 profileId가 null이라 순서로 구분
+          const key = m.profileId ?? `left-${i}`;
           return (
-            <li key={m.profileId} className={s.memberRow}>
-              <Avatar name={name} seed={m.profileId} size="md" color={m.name ? undefined : 'muted'} />
+            <li key={key} className={s.memberRow}>
+              <Avatar name={name} seed={key} size="md" color={m.name ? undefined : 'muted'} />
               <strong>{name}</strong>
               <span className={s.memberRole}>{roleLabel(m.role)}</span>
               {m.authority === 'LEADER' && <Tag className={s.leaderTag}>팀장</Tag>}
