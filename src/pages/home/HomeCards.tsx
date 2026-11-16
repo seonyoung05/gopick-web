@@ -9,6 +9,8 @@ import styles from './HomeCards.module.css';
 
 interface RecruitMiniCardProps {
   project: RecruitProject;
+  /** 이미 지원하고 답을 기다리는 중 */
+  applied?: boolean;
   onToggleScrap: () => void;
   onDetail: () => void;
   onApply: () => void;
@@ -21,6 +23,7 @@ interface RecruitMiniCardProps {
 /** 팀원 모집 중인 프로젝트 카드 */
 export function RecruitMiniCard({
   project: p,
+  applied = false,
   onToggleScrap,
   onDetail,
   onApply,
@@ -68,9 +71,13 @@ export function RecruitMiniCard({
             <Button variant="ghost" size="sm" block onClick={onDetail}>
               자세히 보기
             </Button>
-            {p.action === 'apply' ? (
-              <Button size="sm" block onClick={onApply}>
-                지원하기
+            {p.action === 'member' ? (
+              <Button size="sm" block variant="ghost" disabled>
+                참여 중
+              </Button>
+            ) : p.action === 'apply' ? (
+              <Button size="sm" block onClick={onApply} disabled={applied} variant={applied ? 'ghost' : undefined}>
+                {applied ? '지원 보냄' : '지원하기'}
               </Button>
             ) : (
               <Button size="sm" block onClick={onOffers}>

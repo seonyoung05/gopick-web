@@ -21,4 +21,6 @@ export const authApi = {
   logout: () => api.post<void>('/auth/logout'),
   /** 현재 로그인한 계정 (비로그인이면 401 UNAUTHENTICATED) */
   getMe: () => api.get<AccountResponse>('/me'),
+  /** 회원 탈퇴 (204). 진행 중 프로젝트의 팀장이면 409 */
+  withdraw: () => api.delete<void>('/me'),
 };

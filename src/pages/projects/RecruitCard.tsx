@@ -18,13 +18,29 @@ interface RecruitCardProps {
   onEdit?: () => void;
   onRecommend?: () => void;
   onStart?: () => void;
+  /** 이미 팀원일 때: 프로젝트 나가기 */
+  onLeave?: () => void;
 }
 
-type ActionsProps = Pick<RecruitCardProps, 'onApply' | 'applied' | 'onEdit' | 'onRecommend' | 'onStart'> & {
+type ActionsProps = Pick<RecruitCardProps, 'onApply' | 'applied' | 'onEdit' | 'onRecommend' | 'onStart' | 'onLeave'> & {
   action: RecruitProject['action'];
 };
 
-function Actions({ action, onApply, applied = false, onEdit, onRecommend, onStart }: ActionsProps) {
+function Actions({ action, onApply, applied = false, onEdit, onRecommend, onStart, onLeave }: ActionsProps) {
+  if (action === 'member') {
+    return (
+      <>
+        <Button size="sm" variant="ghost" disabled>
+          참여 중
+        </Button>
+        {onLeave && (
+          <Button size="sm" variant="ghost" onClick={onLeave}>
+            프로젝트 나가기
+          </Button>
+        )}
+      </>
+    );
+  }
   if (action === 'apply') {
     return applied ? (
       <Button size="sm" variant="ghost" disabled>

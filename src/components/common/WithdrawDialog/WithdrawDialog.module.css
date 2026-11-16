@@ -1,0 +1,37 @@
+/* src/components/common/WithdrawDialog/WithdrawDialog.module.css */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 14px 16px 14px 32px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--sub);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.error {
+  margin: 12px 0 0;
+  color: var(--red);
+  font-size: 14px;
+}
+
+/* 되돌릴 수 없는 작업이라 빨간 버튼 */
+.danger {
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--red);
+  color: var(--on-color, #fff);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.danger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
