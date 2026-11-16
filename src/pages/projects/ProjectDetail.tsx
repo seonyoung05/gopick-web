@@ -165,9 +165,15 @@ export function ProjectDetail({
 
       <h4 className={styles.h}>구성원</h4>
       <ul className={styles.members}>
-        {p.members.map((m) => (
-          <li key={m.name} className={styles.member}>
-            <Avatar name={m.name} size="sm" />
+        {p.members.map((m, i) => (
+          <li key={`${m.profileId ?? m.name}-${i}`} className={styles.member}>
+            <Avatar
+              name={m.name}
+              // 탑바·프로필과 같은 색이 되도록 profileId 기준 (탈퇴한 회원은 회색)
+              seed={m.profileId ?? undefined}
+              color={m.profileId === null ? 'muted' : undefined}
+              size="sm"
+            />
             <strong>{m.name}</strong>
             <span>{m.role}</span>
           </li>

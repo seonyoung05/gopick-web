@@ -34,6 +34,8 @@ export interface RecruitProject {
 }
 
 export interface Member {
+  /** 아바타 색 기준 (어디서나 같은 사람은 같은 색). 탈퇴한 회원이면 null */
+  profileId?: number | null;
   name: string;
   role: string;
 }

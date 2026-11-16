@@ -162,7 +162,7 @@ export function toTeamProject(p: ProjectData, opts: { scrapped: boolean }): Team
     description: p.description ?? '',
     currentStage: currentStageIndex(p),
     scrapped: opts.scrapped,
-    members: p.members.map((m) => ({ name: memberName(m.name), role: roleLabel(m.role) })),
+    members: p.members.map((m) => ({ profileId: m.profileId, name: memberName(m.name), role: roleLabel(m.role) })),
     // 목록에는 링크가 없어서, 상세를 불러오기 전에는 비어 있어요
     outputs: p.links && p.links.length > 0 ? p.links.map((l) => ({ label: l.type, url: l.url })) : undefined,
     // 세부 과제·활동 기록은 아직 서버에 없어서 빈 값 (화면에서만 체크 가능)
