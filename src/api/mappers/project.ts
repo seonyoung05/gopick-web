@@ -89,7 +89,7 @@ const memberName = (name: string | null) => name ?? '비공개 프로필';
 
 /** 내가 이 프로젝트의 팀원인지 / 팀장인지 */
 export function myMembership(p: ProjectDetail, myProfileId: number | null | undefined) {
-  const me = p.members.find((m) => m.profileId === myProfileId);
+  const me = myProfileId == null ? undefined : p.members.find((m) => m.profileId === myProfileId);
   return { isMember: Boolean(me), isLeader: me?.authority === 'LEADER' };
 }
 

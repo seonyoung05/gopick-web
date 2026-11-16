@@ -234,6 +234,7 @@ export default function PeopleSearchPage() {
       <OfferModal
         person={offerPerson}
         projects={offer.projects}
+        status={offer.status}
         onClose={() => setOfferPerson(null)}
         onSubmit={handleOfferSubmit}
       />

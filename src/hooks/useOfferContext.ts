@@ -1,17 +1,22 @@
 // src/hooks/useOfferContext.ts
 // 사람 카드에서 "참여 제안 보내기"에 필요한 것들을 한곳에서:
-// - 제안할 수 있는 내 프로젝트 (GET /me/projects 중 내가 팀장 + 완료 전 + 모집 역할 있음)
+// - 제안할 수 있는 내 프로젝트 (GET /me/projects 중 내가 팀장 + 완료 전)
+//   역할은 모집 중인 역할이 먼저, 모집 정보가 없으면 모든 역할 (서버는 모집 역할이 아니어도 제안을 받아요)
 // - 사람별 관계 (내가 보낸 대기 중 제안 → offered, 내 프로젝트에 온 대기 중 지원 → applied)
 // - 제안 보내기
 import { useCallback, useEffect, useState } from 'react';
 import { participationApi, projectsApi, type ProjectRole } from '../api';
-import { roleLabel } from '../api/mappers/project';
+import { roleLabel, roleToApi } from '../api/mappers/project';
+import { ROLES } from '../constants/projectForm';
 import type { OfferPayload } from '../components/common/OfferModal';
 import type { MyRecruitingProject } from '../types/participation';
 import type { RecommendRelation } from '../types/recommendation';
 
+type LoadStatus = 'loading' | 'error' | 'done';
+
 export function useOfferContext() {
   const [projects, setProjects] = useState<MyRecruitingProject[]>([]);
+  const [status, setStatus] = useState<LoadStatus>('loading');
   const [offered, setOffered] = useState<Set<string>>(new Set());
   const [applied, setApplied] = useState<Set<string>>(new Set());
 
@@ -25,19 +30,23 @@ export function useOfferContext() {
         setProjects(
           list
             .filter((p) => p.myAuthority === 'LEADER' && p.lifecycleStatus !== 'COMPLETED')
-            .map((p) => ({
-              id: String(p.projectId),
-              name: p.title,
-              recruitments: p.recruitments.map((r) => ({
-                recruitmentId: r.role,
-                role: roleLabel(r.role),
-                remaining: r.remainingCount,
-              })),
-            }))
-            .filter((p) => p.recruitments.length > 0),
+            .map((p) => {
+              const open = p.recruitments.filter((r) => r.remainingCount > 0);
+              return {
+                id: String(p.projectId),
+                name: p.title,
+                recruitments:
+                  open.length > 0
+                    ? open.map((r) => ({ recruitmentId: r.role, role: roleLabel(r.role), remaining: r.remainingCount }))
+                    : ROLES.map((role) => ({ recruitmentId: roleToApi(role), role, remaining: 0 })),
+              };
+            }),
         );
+        setStatus('done');
       })
-      .catch(() => undefined); // 실패하면 "모집 중인 내 프로젝트가 없어요"로 보임
+      .catch(() => {
+        if (!ignore) setStatus('error');
+      });
 
     Promise.all([participationApi.sent(), participationApi.received()])
       .then(([sent, received]) => {
@@ -80,5 +89,5 @@ export function useOfferContext() {
     setOffered((prev) => new Set(prev).add(payload.personId));
   }, []);
 
-  return { projects, relationOf, sendOffer };
+  return { projects, status, relationOf, sendOffer };
 }

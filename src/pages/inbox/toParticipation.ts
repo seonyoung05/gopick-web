@@ -16,7 +16,7 @@ export function counterpartIdOf(
 ): number | undefined {
   if (direction === 'received') return req.type === 'APPLY' ? req.participantProfileId : req.senderProfileId;
   if (req.type === 'OFFER') return req.participantProfileId;
-  return project?.members.find((m) => m.authority === 'LEADER')?.profileId;
+  return project?.members.find((m) => m.authority === 'LEADER')?.profileId ?? undefined;
 }
 
 /** 프로필을 못 불러올 때(비공개 등) 쓰는 이름만 있는 사람 */

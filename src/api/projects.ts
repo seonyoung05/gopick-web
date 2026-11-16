@@ -46,7 +46,8 @@ export interface ProjectSummary {
 }
 
 export interface ProjectMember {
-  profileId: number;
+  /** 탈퇴한 회원이면 null (이름은 "탈퇴한 회원입니다") */
+  profileId: number | null;
   name: string | null; // 다른 사람의 비공개 프로필이면 null
   isPublic: boolean;
   role: ProjectRole;
