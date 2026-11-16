@@ -60,6 +60,8 @@ export interface OutputLink {
 export interface TeamProject {
   id: string;
   title: string;
+  /** 내가 팀원(팀장 포함)인 프로젝트 */
+  mine?: boolean;
   /** 소속 (예: "GDGoC 1차 프로젝트 7팀") */
   group: string;
   /** 완료 프로젝트의 기간 (예: "2026.03 ~ 2026.06") */

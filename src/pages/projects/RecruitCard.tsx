@@ -73,7 +73,7 @@ export function RecruitCard({ project: p, onToggleScrap, ...actions }: RecruitCa
       <div className={styles.top}>
         <Status status="recruit" />
         <div className={styles.topRight}>
-          {p.action === 'mine' && <MineLabel />}
+          {(p.action === 'mine' || p.action === 'member') && <MineLabel />}
           <ScrapButton scrapped={p.scrapped} onToggle={onToggleScrap} />
         </div>
       </div>

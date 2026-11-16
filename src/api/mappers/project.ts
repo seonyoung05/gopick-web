@@ -150,11 +150,15 @@ export function toRecruitProject(
 
 /* ---------- 서버 → 진행 중 · 완료 프로젝트 ---------- */
 
-export function toTeamProject(p: ProjectData, opts: { scrapped: boolean }): TeamProject {
+export function toTeamProject(
+  p: ProjectData,
+  opts: { scrapped: boolean; myProfileId?: number | null },
+): TeamProject {
   const leader = leaderOf(p);
   return {
     id: String(p.projectId),
     title: p.title,
+    mine: myMembership(p, opts.myProfileId).isMember,
     group: leader ? `${memberName(leader.name)} 님의 팀` : 'GoPick 프로젝트',
     period:
       p.lifecycleStatus === 'COMPLETED' ? `${monthDate(p.createdAt)} ~ ${monthDate(p.statusUpdatedAt)}` : undefined,

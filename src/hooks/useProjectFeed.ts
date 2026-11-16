@@ -65,10 +65,10 @@ export function useProjectFeed() {
         .map((p) => toRecruitProject(p, { myProfileId, scrapped: scrapped(p) })),
       ongoing: sorted
         .filter((p) => p.lifecycleStatus === 'IN_PROGRESS')
-        .map((p) => toTeamProject(p, { scrapped: scrapped(p) })),
+        .map((p) => toTeamProject(p, { scrapped: scrapped(p), myProfileId })),
       done: sorted
         .filter((p) => p.lifecycleStatus === 'COMPLETED')
-        .map((p) => toTeamProject(p, { scrapped: scrapped(p) })),
+        .map((p) => toTeamProject(p, { scrapped: scrapped(p), myProfileId })),
     };
   }, [projects, scrapIds, myProfileId]);
 
