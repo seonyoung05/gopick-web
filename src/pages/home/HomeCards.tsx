@@ -37,7 +37,7 @@ export function RecruitMiniCard({
       <div className={styles.top}>
         <Status status="recruit" />
         <div className={styles.topRight}>
-          {p.action === 'mine' && <MineLabel />}
+          {(p.action === 'mine' || p.action === 'member') && <MineLabel />}
           <ScrapButton iconOnly scrapped={p.scrapped} onToggle={onToggleScrap} />
         </div>
       </div>

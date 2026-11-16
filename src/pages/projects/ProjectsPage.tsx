@@ -20,6 +20,7 @@ import {
 import { useToast } from '../../components/common/Toast';
 import { Button } from '../../components/ui/Button';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
+import { Checkbox } from '../../components/ui/Checkbox';
 import { useAuth } from '../../stores/auth';
 import type { ActivityLog, OutputLink, RecruitProject, StageTask, TeamProject } from '../../types/project';
 import { ApplyModal, type ApplyPayload } from './ApplyModal';
@@ -125,8 +126,21 @@ export default function ProjectsPage() {
   };
 
   // 탭별로 나누고 최근 활동순 정렬
+  // "내 프로젝트만" 보기 (주소에 ?mine=1 로 남겨서 새로고침해도 유지)
+  const mineOnly = params.get('mine') === '1';
+  const setMineOnly = (on: boolean) => {
+    const next = new URLSearchParams(params);
+    if (on) next.set('mine', '1');
+    else next.delete('mine');
+    setParams(next);
+  };
+
   const lists = useMemo(() => {
-    const sorted = [...projects].sort((a, b) => lastActiveAt(b).localeCompare(lastActiveAt(a)));
+    const isMine = (p: ApiProject) => myMembership(p, myProfileId).isMember;
+    // 최근 활동순 + 내 프로젝트는 맨 위로
+    const sorted = [...projects]
+      .filter((p) => !mineOnly || isMine(p))
+      .sort((a, b) => Number(isMine(b)) - Number(isMine(a)) || lastActiveAt(b).localeCompare(lastActiveAt(a)));
     const scrapped = (p: ApiProject) => scrapIds.has(String(p.projectId));
     return {
       // 준비 중인 프로젝트 중 공개 모집 중인 것 + 내가 팀원인 것(모집을 닫아 둔 내 프로젝트도 보이게)
@@ -137,12 +151,12 @@ export default function ProjectsPage() {
         .map((p) => toRecruitProject(p, { myProfileId, scrapped: scrapped(p) })),
       ongoing: sorted
         .filter((p) => p.lifecycleStatus === 'IN_PROGRESS')
-        .map((p) => toTeamProject(p, { scrapped: scrapped(p) })),
+        .map((p) => toTeamProject(p, { scrapped: scrapped(p), myProfileId })),
       done: sorted
         .filter((p) => p.lifecycleStatus === 'COMPLETED')
-        .map((p) => toTeamProject(p, { scrapped: scrapped(p) })),
+        .map((p) => toTeamProject(p, { scrapped: scrapped(p), myProfileId })),
     };
-  }, [projects, scrapIds, myProfileId]);
+  }, [projects, scrapIds, myProfileId, mineOnly]);
 
   const findProject = (id: string) => projects.find((p) => String(p.projectId) === id);
 
@@ -367,13 +381,15 @@ export default function ProjectsPage() {
         모집 중 · 진행 중 · 완료로 나눠 보여줘요. 각 탭 안에서는 최근 활동순이고, 모든 팀의 진행 정보는 공개돼요.
       </p>
 
-      <Tabs
-        className={styles.tabs}
-        aria-label="프로젝트 상태"
-        items={tabItems}
-        value={tab}
-        onChange={(value) => setParams({ tab: value })}
-      />
+      <div className={styles.tabsRow}>
+        <Tabs
+          aria-label="프로젝트 상태"
+          items={tabItems}
+          value={tab}
+          onChange={(value) => setParams(mineOnly ? { tab: value, mine: '1' } : { tab: value })}
+        />
+        <Checkbox checked={mineOnly} onChange={setMineOnly} label="내 프로젝트만" />
+      </div>
 
       {renderBody()}
 

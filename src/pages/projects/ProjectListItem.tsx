@@ -1,5 +1,6 @@
 // src/pages/projects/ProjectListItem.tsx
 import clsx from 'clsx';
+import { MineLabel } from '../../components/ui/Label';
 import type { TeamProject } from '../../types/project';
 import { ScrapButton } from './ScrapButton';
 import { StageDots } from './StageTracker';
@@ -16,7 +17,10 @@ export function ProjectListItem({ project: p, selected, onSelect, onToggleScrap 
   return (
     <div className={clsx(styles.item, selected && styles.selected)}>
       <button type="button" className={styles.main} aria-pressed={selected} onClick={onSelect}>
-        <strong className="t-body-strong">{p.title}</strong>
+        <span className={styles.titleRow}>
+          <strong className="t-body-strong">{p.title}</strong>
+          {p.mine && <MineLabel />}
+        </span>
         <span className={styles.group}>{p.group}</span>
         <StageDots currentStage={p.currentStage} />
         <span className={styles.last}>최근 활동 {p.lastActive}</span>
