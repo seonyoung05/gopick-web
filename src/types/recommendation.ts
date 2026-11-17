@@ -30,5 +30,7 @@ export interface Recommendation {
   rank: number; // 동점이면 같은 숫자
   matched: MatchReason[];
   unmatched: MatchReason[];
+  /** AI가 쓴 한 줄 추천 이유 (없을 수 있음) */
+  summary?: string;
   relation: RecommendRelation;
 }

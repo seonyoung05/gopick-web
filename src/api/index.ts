@@ -15,3 +15,4 @@ export type {
 export * from './projects';
 export * from './participation';
 export * from './notifications';
+export * from './recommendations';

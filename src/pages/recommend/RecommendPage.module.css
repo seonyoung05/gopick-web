@@ -190,3 +190,76 @@
   color: var(--sub);
   font-size: 14px;
 }
+/* ---------- 프로젝트 · 역할 칩, 결과 정보 줄 ---------- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.head .chips { margin: -8px 0 22px; }
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--blue-deep);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* AI 추천 한 줄 이유 */
+.summary {
+  margin: 4px 0 0;
+  padding: 8px 12px;
+  border-radius: var(--r-md);
+  background: var(--blue-soft);
+  color: var(--blue-deep);
+  font-size: 14px;
+}
+
+/* ---------- AI 추천 기다리는 중 ---------- */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 56px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--sub);
+  text-align: center;
+}
+
+.loading strong { color: var(--ink); }
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 8px;
+  border: 3px solid var(--blue-soft);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 3s; }
+}
+
+.empty p { margin: 0 0 12px; }
