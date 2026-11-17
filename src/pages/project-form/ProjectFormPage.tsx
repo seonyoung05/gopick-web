@@ -13,6 +13,7 @@ import { useToast } from '../../components/common/Toast';
 import { Button } from '../../components/ui/Button';
 import { Chip } from '../../components/ui/Chip';
 import { useAuth } from '../../stores/auth';
+import { getRecruitPost, saveRecruitPost } from '../../stores/recruitPost';
 import { LeaveProjectModal } from '../projects/LeaveProjectModal';
 import { toLeaveTarget } from '../projects/leaveTarget';
 import { useLeaveProject } from '../projects/useLeaveProject';
@@ -118,7 +119,7 @@ export default function ProjectFormPage() {
       .then((res) => {
         if (ignore) return;
         setDetail(res);
-        setForm(toProjectForm(res));
+        setForm({ ...toProjectForm(res), draft: getRecruitPost(res.projectId) });
       })
       .catch(() => {
         if (!ignore) toast('프로젝트를 불러오지 못했어요');
@@ -193,11 +194,13 @@ export default function ProjectFormPage() {
     try {
       if (editing) {
         await projectsApi.update(editing.projectId, toProjectUpdateRequest(form));
+        saveRecruitPost(editing.projectId, form.draft);
         toast('프로젝트를 저장했어요', 'success');
         // 진행 중 프로젝트는 추천으로 넘어가지 않고 이 화면에 그대로
         if (ongoing) return;
       } else {
-        await projectsApi.create(toProjectCreateRequest(form));
+        const created = await projectsApi.create(toProjectCreateRequest(form));
+        saveRecruitPost(created.projectId, form.draft);
         toast('프로젝트를 등록했어요', 'success');
       }
       // TODO: 추천 API가 생기면 이 프로젝트 기준으로 추천 받기 (?projectId=)

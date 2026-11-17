@@ -29,6 +29,10 @@ export interface RecruitProject {
   purposes: string[];
   /** "자세히 보기"를 펼치면 보이는 줄들 */
   details: string[];
+  /** 모집글 보기 "상세 안내" 칸 (없으면 그 칸을 숨겨요) */
+  extra?: string;
+  wish?: string;
+  team?: string;
   scrapped: boolean;
   action: RecruitAction;
 }

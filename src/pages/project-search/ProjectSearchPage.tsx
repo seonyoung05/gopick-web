@@ -15,6 +15,7 @@ import type { RecruitProject } from '../../types/project';
 import { ApplyModal, type ApplyPayload } from '../projects/ApplyModal';
 import { ProjectListItem } from '../projects/ProjectListItem';
 import { RecruitCard } from '../projects/RecruitCard';
+import { RecruitDetailModal } from '../projects/RecruitDetailModal';
 import {
   SORT_OPTIONS,
   filterRecruit,
@@ -39,6 +40,8 @@ export default function ProjectSearchPage() {
 
   /** 지금 지원 모달을 열어 둔 프로젝트 (null이면 닫힘) */
   const [applyTarget, setApplyTarget] = useState<RecruitProject | null>(null);
+  /** 모집글 보기 모달을 열어 둔 프로젝트 */
+  const [viewTarget, setViewTarget] = useState<RecruitProject | null>(null);
 
   // 상태를 하나도 안 고르면 전부 보여줘요
   const statuses = filters.status ?? [];
@@ -180,6 +183,7 @@ export default function ProjectSearchPage() {
                   project={p}
                   applied={appliedIds.has(p.id)}
                   onToggleScrap={() => feed.toggleScrap(p.id)}
+                  onView={() => setViewTarget(p)}
                   onApply={() => setApplyTarget(p)}
                 />
               ))}
@@ -222,6 +226,15 @@ export default function ProjectSearchPage() {
         </section>
       </div>
 
+      <RecruitDetailModal
+        project={viewTarget}
+        applied={viewTarget ? appliedIds.has(viewTarget.id) : false}
+        onClose={() => setViewTarget(null)}
+        onApply={(p) => {
+          setViewTarget(null);
+          setApplyTarget(p);
+        }}
+      />
       <ApplyModal project={applyTarget} onClose={() => setApplyTarget(null)} onSubmit={handleApply} />
     </div>
   );

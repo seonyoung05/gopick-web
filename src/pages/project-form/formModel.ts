@@ -150,8 +150,8 @@ export function buildDraft(form: ProjectFormValues): string {
   const tags = [...form.fields, ...form.purposes].join(' · ');
   const head = `[${tags || '프로젝트'}] ${form.name || '(프로젝트명)'} 팀원을 모집해요`;
   const parts = [head, form.description];
-  if (form.background) parts.push(`■ 이 프로젝트를 하는 이유\n${form.background}`);
-  if (form.goal) parts.push(`■ 우리가 만들고 싶은 것\n${form.goal}`);
+  if (form.background) parts.push(`■ 프로젝트 추진 배경\n${form.background}`);
+  if (form.goal) parts.push(`■ 구체적인 목표\n${form.goal}`);
   if (form.wantedTeam) parts.push(`■ 이런 분과 함께하고 싶어요\n${form.wantedTeam}`);
   return parts.filter(Boolean).join('\n\n');
 }

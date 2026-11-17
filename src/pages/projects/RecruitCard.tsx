@@ -1,6 +1,4 @@
 // src/pages/projects/RecruitCard.tsx
-import { useId, useState } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Status, Tag, MineLabel } from '../../components/ui/Label';
 import type { RecruitProject } from '../../types/project';
@@ -10,6 +8,8 @@ import styles from './RecruitCard.module.css';
 interface RecruitCardProps {
   project: RecruitProject;
   onToggleScrap: () => void;
+  /** 모집글 보기 (제목 또는 "모집글 보기" 버튼 클릭) */
+  onView: () => void;
   /** 지원하기 클릭 (지원 모달은 공통 Modal 병합 후 연결) */
   onApply: () => void;
   /** 이미 지원을 보낸 프로젝트면 버튼을 비활성으로 보여줘요 */
@@ -69,10 +69,7 @@ function Actions({ action, onApply, applied = false, onEdit, onRecommend, onStar
   return <Button size="sm">받은 제안 보기</Button>;
 }
 
-export function RecruitCard({ project: p, onToggleScrap, ...actions }: RecruitCardProps) {
-  const [open, setOpen] = useState(false);
-  const detailId = useId();
-
+export function RecruitCard({ project: p, onToggleScrap, onView, ...actions }: RecruitCardProps) {
   return (
     <article className={styles.card}>
       <div className={styles.top}>
@@ -83,7 +80,11 @@ export function RecruitCard({ project: p, onToggleScrap, ...actions }: RecruitCa
         </div>
       </div>
 
-      <h3 className={`t-h3 ${styles.title}`}>{p.title}</h3>
+      <h3 className={`t-h3 ${styles.title}`}>
+        <button type="button" className={styles.titleButton} onClick={onView}>
+          {p.title}
+        </button>
+      </h3>
       <p className={styles.meta}>
         {p.author} 님이 {p.date}에 등록 | 현재 {p.current}명, 목표 {p.target}명 | 최근 활동 {p.lastActive}
       </p>
@@ -109,25 +110,10 @@ export function RecruitCard({ project: p, onToggleScrap, ...actions }: RecruitCa
         ))}
       </div>
 
-      <button
-        type="button"
-        className={styles.more}
-        aria-expanded={open}
-        aria-controls={detailId}
-        onClick={() => setOpen((v) => !v)}
-      >
-        {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-        자세히 보기
-      </button>
-      {open && (
-        <div id={detailId} className={styles.details}>
-          {p.details.map((line) => (
-            <p key={line}>{line}</p>
-          ))}
-        </div>
-      )}
-
       <div className={styles.actions}>
+        <Button size="sm" variant="ghost" onClick={onView}>
+          모집글 보기
+        </Button>
         <Actions action={p.action} {...actions} />
       </div>
     </article>
