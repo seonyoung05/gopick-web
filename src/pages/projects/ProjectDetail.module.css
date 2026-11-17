@@ -272,3 +272,22 @@
   gap: 8px;
   margin-top: 12px;
 }
+
+/* 활동 기록 아래, 나가기 버튼 */
+.leaveControls {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+/* 프로젝트 나가기: 연한 빨간색 (팀 Button의 ghost 위에 덮어써요) */
+.leaveButton.leaveButton {
+  background: var(--red-soft);
+  border-color: #f5c6c2;
+  color: var(--red);
+}
+.leaveButton.leaveButton:hover:not(:disabled) {
+  background: #f9d6d2;
+}

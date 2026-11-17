@@ -96,3 +96,13 @@
   gap: var(--space-8);
   margin-top: var(--space-12);
 }
+
+/* 프로젝트 나가기: 연한 빨간색 (팀 Button의 ghost 위에 덮어써요) */
+.leaveButton.leaveButton {
+  background: var(--red-soft);
+  border-color: #f5c6c2;
+  color: var(--red);
+}
+.leaveButton.leaveButton:hover:not(:disabled) {
+  background: #f9d6d2;
+}

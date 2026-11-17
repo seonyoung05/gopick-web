@@ -34,7 +34,7 @@ function Actions({ action, onApply, applied = false, onEdit, onRecommend, onStar
           참여 중
         </Button>
         {onLeave && (
-          <Button size="sm" variant="ghost" onClick={onLeave}>
+          <Button size="sm" variant="ghost" className={styles.leaveButton} onClick={onLeave}>
             프로젝트 나가기
           </Button>
         )}
@@ -59,7 +59,7 @@ function Actions({ action, onApply, applied = false, onEdit, onRecommend, onStar
         <Button size="sm" variant="ghost" onClick={onRecommend}>추천 팀원 보기</Button>
         <Button size="sm" onClick={onStart}>모집 마치고 진행 시작</Button>
         {onLeave && (
-          <Button size="sm" variant="ghost" onClick={onLeave}>
+          <Button size="sm" variant="ghost" className={styles.leaveButton} onClick={onLeave}>
             프로젝트 나가기
           </Button>
         )}
