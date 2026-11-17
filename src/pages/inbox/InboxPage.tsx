@@ -1,6 +1,6 @@
 // src/pages/inbox/InboxPage.tsx
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   participationApi,
   profilesApi,
@@ -79,12 +79,31 @@ export default function InboxPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
+  // 🔔 알림에서 ?tab=received|sent&id=요청번호 로 들어오면 그 탭의 그 항목을 열어 줘요
+  // (이 화면에 있는 동안 다른 알림을 눌러도 주소가 바뀌니까 목록을 새로 불러와요)
+  const [params] = useSearchParams();
+  const linkTab = params.get('tab');
+  const linkId = params.get('id');
 
   useEffect(() => {
     let ignore = false;
     Promise.all([loadInbox(), profilesApi.myBookmarks().catch(() => [])])
-      .then(([list, bookmarks]) => {
+      .then(([loaded, bookmarks]) => {
         if (ignore) return;
+        let list = loaded;
+        if (linkTab === 'received' || linkTab === 'sent') {
+          const found = linkId ? list.find((p) => p.direction === linkTab && p.id === linkId) : undefined;
+          setTab(linkTab);
+          setSelectedId(found?.id ?? null);
+          if (found) {
+            const seen = loadSeen();
+            seen.add(seenKey(found));
+            saveSeen(seen);
+            list = list.map((p) => (p.id === found.id && p.direction === found.direction ? { ...p, read: true } : p));
+          } else if (linkId) {
+            toast('확인할 수 없는 요청입니다');
+          }
+        }
         setItems(list);
         setSavedIds(new Set(bookmarks.map((b) => String(b.profileId))));
         setStatus('done');
@@ -95,7 +114,7 @@ export default function InboxPage() {
     return () => {
       ignore = true;
     };
-  }, [reloadKey]);
+  }, [reloadKey, linkTab, linkId, toast]);
 
   const retry = () => {
     setStatus('loading');
@@ -104,8 +123,10 @@ export default function InboxPage() {
 
   const list = useMemo(() => items.filter((p) => p.direction === tab).sort(byNewest), [items, tab]);
   const selected = list.find((p) => p.id === selectedId) ?? null;
-  const unreadCount = (dir: ParticipationDirection) =>
-    items.filter((p) => p.direction === dir && !p.read).length;
+  // 받은 내역: 답해야 하는(대기 중) 요청 수 = 사이드바 배지와 같은 수
+  // 보낸 내역: 상대가 답했는데 아직 열어 보지 않은 수
+  const tabCount = (dir: ParticipationDirection) =>
+    items.filter((p) => p.direction === dir && (dir === 'received' ? p.status === 'pending' : !p.read)).length;
 
   /** 한 항목만 바꾸는 도우미 */
   const patch = (id: string, change: Partial<Participation>) =>
@@ -224,8 +245,8 @@ export default function InboxPage() {
         value={tab}
         onChange={changeTab}
         items={[
-          { value: 'received', label: '받은 내역', count: unreadCount('received') },
-          { value: 'sent', label: '보낸 내역', count: unreadCount('sent') },
+          { value: 'received', label: '받은 내역', count: tabCount('received') },
+          { value: 'sent', label: '보낸 내역', count: tabCount('sent') },
         ]}
       />
 

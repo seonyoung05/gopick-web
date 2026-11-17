@@ -12,4 +12,6 @@ export type {
   ProfileSearchQuery,
   BookmarkedProfile,
 } from './profiles';
-export * from './projects';export * from './participation';
+export * from './projects';
+export * from './participation';
+export * from './notifications';
