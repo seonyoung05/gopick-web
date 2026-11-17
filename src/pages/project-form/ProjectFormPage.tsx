@@ -14,6 +14,9 @@ import { Button } from '../../components/ui/Button';
 import { Chip } from '../../components/ui/Chip';
 import { useAuth } from '../../stores/auth';
 import { getRecruitPost, saveRecruitPost } from '../../stores/recruitPost';
+import { LeaveProjectModal } from '../projects/LeaveProjectModal';
+import { toLeaveTarget } from '../projects/leaveTarget';
+import { useLeaveProject } from '../projects/useLeaveProject';
 import { BasicInfoSection } from './BasicInfoSection';
 import { CollabSection } from './CollabSection';
 import { CurrentTeamSection } from './CurrentTeamSection';
@@ -61,7 +64,7 @@ function saveErrorText(e: unknown) {
 export default function ProjectFormPage() {
   const navigate = useNavigate();
   const toast = useToast();
-  const { account } = useAuth();
+  const { account, profileName } = useAuth();
   const myProfileId = account?.profileId;
   const [params] = useSearchParams();
 
@@ -74,6 +77,8 @@ export default function ProjectFormPage() {
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  /** 프로젝트 탈퇴 모달이 열려 있는지 */
+  const [leaveOpen, setLeaveOpen] = useState(false);
   const [form, setForm] = useState<ProjectFormValues>(emptyForm);
   const [showErrors, setShowErrors] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -143,6 +148,17 @@ export default function ProjectFormPage() {
     setShowErrors(false);
     setNotice(null);
   };
+
+  // 탈퇴가 끝나면 목록을 다시 불러와요 (내가 더 이상 팀장이 아닌 프로젝트는 목록에서 빠져요)
+  const { leave, delegateAndLeave } = useLeaveProject({
+    myProfileId,
+    author: profileName ?? '나',
+    onDone: () => {
+      select(NEW);
+      setReloadKey((k) => k + 1);
+    },
+  });
+  const leaveTarget = editing && leaveOpen ? toLeaveTarget(editing, myProfileId) : null;
 
   /** 프로젝트 삭제 (팀장만) */
   const handleDelete = async () => {
@@ -250,9 +266,14 @@ export default function ProjectFormPage() {
           )}
           <div className={s.footer}>
             {editing && (
-              <Button variant="ghost" className={s.deleteButton} onClick={handleDelete} disabled={deleting}>
-                {deleting ? '삭제 중…' : '프로젝트 삭제'}
-              </Button>
+              <div className={s.dangerActions}>
+                <Button variant="ghost" className={s.dangerButton} onClick={() => setLeaveOpen(true)}>
+                  프로젝트 탈퇴
+                </Button>
+                <Button variant="ghost" onClick={handleDelete} disabled={deleting}>
+                  {deleting ? '삭제 중…' : '프로젝트 삭제'}
+                </Button>
+              </div>
             )}
             {ongoing && editing ? (
               // 진행 중: 추천 대신 이 프로젝트의 진행 현황으로
@@ -278,6 +299,13 @@ export default function ProjectFormPage() {
 
         <TeamSummary form={form} />
       </div>
+
+      <LeaveProjectModal
+        target={leaveTarget}
+        onClose={() => setLeaveOpen(false)}
+        onLeave={() => leave(editing!)}
+        onDelegateAndLeave={(targetProfileId) => delegateAndLeave(editing!, targetProfileId)}
+      />
     </div>
   );
 }

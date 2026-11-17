@@ -25,6 +25,9 @@ import { useAuth } from '../../stores/auth';
 import type { ActivityLog, OutputLink, RecruitProject, StageTask, TeamProject } from '../../types/project';
 import { ApplyModal, type ApplyPayload } from './ApplyModal';
 import { monthDay } from './formatDate';
+import { LeaveProjectModal } from './LeaveProjectModal';
+import { toLeaveTarget } from './leaveTarget';
+import { useLeaveProject } from './useLeaveProject';
 import { RecruitCard } from './RecruitCard';
 import { RecruitDetailModal } from './RecruitDetailModal';
 import { ProjectListItem } from './ProjectListItem';
@@ -79,6 +82,8 @@ export default function ProjectsPage() {
   const [applyTarget, setApplyTarget] = useState<RecruitProject | null>(null);
   /** 모집글 보기 모달을 연 프로젝트 */
   const [viewTarget, setViewTarget] = useState<RecruitProject | null>(null);
+  /** 나가기 모달을 연 프로젝트 id */
+  const [leaveId, setLeaveId] = useState<string | null>(null);
   /** 내가 지원해 두고 아직 답을 기다리는 프로젝트 */
   const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
 
@@ -166,6 +171,8 @@ export default function ProjectsPage() {
   }, [projects, scrapIds, myProfileId, mineOnly]);
 
   const findProject = (id: string) => projects.find((p) => String(p.projectId) === id);
+  const leaveRaw = leaveId ? findProject(leaveId) : undefined;
+  const leaveTarget = leaveRaw ? toLeaveTarget(leaveRaw, myProfileId) : null;
 
   // 진행 중·완료 탭에서 보고 있는 프로젝트는 상세를 불러와 결과물 링크까지 채워요 (목록에는 링크가 없어요)
   const teamTab = tab === 'recruit' ? null : tab;
@@ -235,19 +242,12 @@ export default function ProjectsPage() {
     }
   };
 
-  /** 프로젝트 나가기 (팀장이 아닌 팀원) */
-  const leaveProject = async (id: string) => {
-    const title = findProject(id)?.title ?? '이 프로젝트';
-    if (!window.confirm(`'${title}'에서 나갈까요? 다시 참여하려면 지원하거나 제안을 받아야 해요.`)) return;
-    try {
-      await projectsApi.leave(Number(id));
-      toast('프로젝트에서 나왔어요');
-      setStatus('loading');
-      setReloadKey((k) => k + 1);
-    } catch (e) {
-      toast(errorText(e, '프로젝트에서 나가지 못했어요'));
-    }
+  const reloadAll = () => {
+    setStatus('loading');
+    setReloadKey((k) => k + 1);
   };
+
+  const { leave, delegateAndLeave } = useLeaveProject({ myProfileId, author, onDone: reloadAll });
 
   const completeProject = async (id: string, outputs: OutputLink[]) => {
     try {
@@ -327,7 +327,7 @@ export default function ProjectsPage() {
           }
           onChangeStage={canEdit ? (index) => changeStage(current.id, index) : undefined}
           onComplete={canEdit && isLeader ? (outputs) => completeProject(current.id, outputs) : undefined}
-          onLeave={key === 'ongoing' && isMember && !isLeader ? () => leaveProject(current.id) : undefined}
+          onLeave={key === 'ongoing' && isMember ? () => setLeaveId(current.id) : undefined}
         />
       </div>
     );
@@ -375,7 +375,7 @@ export default function ProjectsPage() {
             onEdit={() => navigate(`/manage?id=${p.id}`)}
             onRecommend={() => navigate('/recommend')}
             onStart={() => startProject(p.id)}
-            onLeave={() => leaveProject(p.id)}
+            onLeave={() => setLeaveId(p.id)}
           />
         ))}
       </div>
@@ -384,7 +384,7 @@ export default function ProjectsPage() {
 
   return (
     <div className={styles.page}>
-      <h1 className={`t-h1 ${styles.heading}`}>프로젝트 목록</h1>
+      <h1 className={`t-h1 ${styles.heading}`}>프로젝트</h1>
       <p className={styles.sub}>
         모집 중 · 진행 중 · 완료로 나눠 보여줘요. 각 탭 안에서는 최근 활동순이고, 모든 팀의 진행 정보는 공개돼요.
       </p>
@@ -411,6 +411,12 @@ export default function ProjectsPage() {
         }}
       />
       <ApplyModal project={applyTarget} onClose={() => setApplyTarget(null)} onSubmit={submitApply} />
+      <LeaveProjectModal
+        target={leaveTarget}
+        onClose={() => setLeaveId(null)}
+        onLeave={() => leave(leaveRaw!)}
+        onDelegateAndLeave={(targetProfileId) => delegateAndLeave(leaveRaw!, targetProfileId)}
+      />
     </div>
   );
 }

@@ -205,18 +205,11 @@ export function ProjectDetail({
         onSelect={editable ? onChangeStage : undefined}
         onComplete={editable && onComplete && !isDone ? () => setCompleting(true) : undefined}
       />
-      {((onComplete && !isDone) || onLeave) && (
+      {onComplete && !isDone && (
         <div className={styles.stageControls}>
-          {onComplete && !isDone && (
-            <Button size="sm" variant="ghost" onClick={() => setCompleting(true)}>
-              프로젝트 완료로 바꾸기
-            </Button>
-          )}
-          {onLeave && (
-            <Button size="sm" variant="ghost" onClick={onLeave}>
-              프로젝트 나가기
-            </Button>
-          )}
+          <Button size="sm" variant="ghost" onClick={() => setCompleting(true)}>
+            프로젝트 완료로 바꾸기
+          </Button>
         </div>
       )}
       {onComplete && (
@@ -265,6 +258,14 @@ export function ProjectDetail({
           </li>
         ))}
       </ol>
+
+      {onLeave && (
+        <div className={styles.leaveControls}>
+          <Button size="sm" variant="ghost" className={styles.leaveButton} onClick={onLeave}>
+            프로젝트 나가기
+          </Button>
+        </div>
+      )}
     </section>
   );
 }
