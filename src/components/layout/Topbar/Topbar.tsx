@@ -1,20 +1,16 @@
 // src/components/layout/Topbar/Topbar.tsx
 import clsx from 'clsx';
-import { Search, Bell } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AvatarMenu } from '../AvatarMenu';
-import { Badge } from '../../ui/Label';
+import { NotificationMenu } from '../NotificationMenu';
 import styles from './Topbar.module.css';
 
-interface TopbarProps {
-  unreadCount?: number;
-}
-
-export function Topbar({ unreadCount = 0 }: TopbarProps) {
+/** 상단바: 검색 · 알림 · 내 계정 */
+export function Topbar() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const onSearchPage = pathname.startsWith('/search');
-  const onOffersPage = pathname.startsWith('/offers');
 
   return (
     <header className={styles.topbar}>
@@ -30,17 +26,7 @@ export function Topbar({ unreadCount = 0 }: TopbarProps) {
         >
           <Search size={22} aria-hidden="true" />
         </button>
-        <button
-          type="button"
-          className={clsx(styles.iconButton, onOffersPage && styles.iconButtonActive)}
-          aria-label={unreadCount > 0 ? `알림, 새 알림 ${unreadCount}개` : '알림'}
-          aria-current={onOffersPage ? 'page' : undefined}
-          title="제안·지원 확인"
-          onClick={() => navigate('/offers')}
-        >
-          <Bell size={22} aria-hidden="true" />
-          <Badge count={unreadCount} className={styles.bellBadge} />
-        </button>
+        <NotificationMenu />
         <AvatarMenu />
       </div>
     </header>

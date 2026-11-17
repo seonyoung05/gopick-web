@@ -9,7 +9,7 @@ import styles from './AppLayout.module.css';
 /** 사이드바 + 상단바 + 본문(Outlet). 라우터의 layout route로 사용 */
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
-  // 화면을 옮길 때마다 새 소식 개수를 다시 셈 (제안·지원함에서 읽거나 수락한 뒤 반영)
+  // 화면을 옮길 때마다 답을 기다리는 요청 수를 다시 셈 (제안·지원함에서 수락·거절한 뒤 반영)
   const { pathname } = useLocation();
   const { total } = useInboxSummary(pathname);
 
@@ -17,7 +17,7 @@ export function AppLayout() {
     <div className={styles.layout}>
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} unreadCount={total} />
       <div className={styles.main}>
-        <Topbar unreadCount={total} />
+        <Topbar />
         <main className={styles.content}>
           <Outlet />
         </main>
