@@ -28,44 +28,64 @@
 }
 
 /* 히어로 */
+/* gif(1240×400)에서 둥근 카드 부분(여백 25px 안쪽, 1190×350)만 잘라서 보여줘요 */
 .hero {
+  position: relative;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
+  aspect-ratio: 1190 / 350;
+  border-radius: 22px;
   background: var(--surface);
 }
 
-.stripe {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  height: 5px;
+.heroImg {
+  position: absolute;
+  top: calc(-25 / 350 * 100%);
+  left: calc(-25 / 1190 * 100%);
+  width: calc(1240 / 1190 * 100%);
+  height: auto;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
 }
 
-.stripe i:nth-child(1) { background: var(--blue); }
-.stripe i:nth-child(2) { background: var(--red); }
-.stripe i:nth-child(3) { background: var(--yellow); }
-.stripe i:nth-child(4) { background: var(--green); }
-
-.heroBody {
-  padding: 52px 41px 52px;
+/* gif 속 버튼 자리에 겹치는 투명한 실제 버튼 (위치는 gif 기준 비율이에요) */
+.heroHit {
+  position: absolute;
+  top: calc((320 - 25) / 350 * 100%);
+  height: calc(46 / 350 * 100%);
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
 }
 
-.heroBody h1 {
-  margin: 0;
+.heroHit:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--blue);
 }
 
-.heroDesc {
-  max-width: 620px;
-  margin: 16px 0 0;
-  color: var(--sub);
-  font-size: 17px;
-  line-height: 1.55;
+.heroHitPrimary {
+  left: calc((89 - 25) / 1190 * 100%);
+  width: calc(163 / 1190 * 100%);
 }
 
-.cta {
-  display: flex;
-  gap: 10px;
-  margin-top: 24px;
+.heroHitSecondary {
+  left: calc((264 - 25) / 1190 * 100%);
+  width: calc(137 / 1190 * 100%);
+}
+
+/* 화면에는 안 보이고 화면 읽기 프로그램에만 읽히는 글자 */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* 구역 */
@@ -115,9 +135,6 @@
     grid-template-columns: 1fr;
   }
 
-  .heroBody {
-    padding: 32px 24px;
-  }
 }
 
 /* 구역이 비었거나 불러오는 중일 때 안내 */
