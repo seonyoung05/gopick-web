@@ -14,6 +14,9 @@ import styles from './NotificationMenu.module.css';
 const POLL_MS = 60_000;
 /** 목록에 보여 줄 최대 개수 */
 const MAX_ITEMS = 50;
+/** 읽은 알림을 '이전 알림'에 남겨 두는 기간 */
+const KEEP_READ_DAYS = 7;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const REQUEST_GONE = '이미 처리됐거나 사라져서 확인할 수 없는 요청이에요.';
 const PROJECT_GONE = '삭제됐거나 볼 수 없는 프로젝트예요.';
@@ -28,6 +31,8 @@ export function NotificationMenu() {
 
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationResponse[] | null>(null);
+  /** 마지막으로 불러온 시각 (이전 알림 7일 기준) */
+  const [loadedAt, setLoadedAt] = useState(0);
   const [failed, setFailed] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -38,6 +43,7 @@ export function NotificationMenu() {
       .list()
       .then((list) => {
         setItems(list);
+        setLoadedAt(Date.now());
         setFailed(false);
       })
       .catch(() => setFailed(true)); // 배지는 지난 값을 그대로 둠
@@ -80,7 +86,8 @@ export function NotificationMenu() {
 
   const markRead = (n: NotificationResponse) => {
     if (n.read) return;
-    setItems((prev) => prev?.map((x) => (x.id === n.id ? { ...x, read: true } : x)) ?? prev);
+    const readAt = new Date().toISOString();
+    setItems((prev) => prev?.map((x) => (x.id === n.id ? { ...x, read: true, readAt } : x)) ?? prev);
     notificationsApi.read(n.id).catch(() => undefined); // 실패하면 다음에 불러올 때 다시 안 읽음으로 보여요
   };
 
@@ -121,34 +128,62 @@ export function NotificationMenu() {
     navigate(target.to);
   };
 
+  /** 알림 한 줄 */
+  const renderItem = (n: NotificationResponse) => {
+    const kind = KIND[n.type] ?? KIND.PROJECT_STAGE_CHANGED; // 모르는 종류가 와도 화면이 깨지지 않게
+    const Icon = kind.icon;
+    return (
+      <li key={n.id}>
+        <button
+          type="button"
+          className={clsx(styles.item, n.read ? styles.read : styles.unread)}
+          onClick={() => openItem(n)}
+          disabled={busyId === n.id}
+        >
+          <span className={clsx(styles.icon, styles[kind.tone])}>
+            <Icon size={16} aria-hidden="true" />
+          </span>
+          <span className={styles.body}>
+            <span className={styles.text}>{notificationText(n)}</span>
+            <span className={styles.time}>{timeAgo(n.createdAt)}</span>
+          </span>
+          {!n.read && <span className={styles.dot} aria-label="안 읽음" />}
+        </button>
+      </li>
+    );
+  };
+
   const renderList = () => {
     if (items === null) {
       return <li className={styles.empty}>{failed ? '알림을 불러오지 못했어요.' : '불러오는 중이에요…'}</li>;
     }
-    if (items.length === 0) return <li className={styles.empty}>아직 알림이 없어요</li>;
-    return items.slice(0, MAX_ITEMS).map((n) => {
-      const kind = KIND[n.type] ?? KIND.PROJECT_STAGE_CHANGED; // 모르는 종류가 와도 화면이 깨지지 않게
-      const Icon = kind.icon;
-      return (
-        <li key={n.id}>
-          <button
-            type="button"
-            className={clsx(styles.item, !n.read && styles.unread)}
-            onClick={() => openItem(n)}
-            disabled={busyId === n.id}
-          >
-            <span className={clsx(styles.icon, styles[kind.tone])}>
-              <Icon size={16} aria-hidden="true" />
-            </span>
-            <span className={styles.body}>
-              <span className={styles.text}>{notificationText(n)}</span>
-              <span className={styles.time}>{timeAgo(n.createdAt)}</span>
-            </span>
-            {!n.read && <span className={styles.dot} aria-label="안 읽음" />}
-          </button>
-        </li>
-      );
-    });
+    // 새 알림: 안 읽은 것 전부 / 이전 알림: 읽은 것 중 최근 7일 (받았거나 읽은 때 기준)
+    const fresh = items.filter((n) => !n.read).slice(0, MAX_ITEMS);
+    const since = loadedAt - KEEP_READ_DAYS * DAY_MS;
+    const earlier = items
+      .filter((n) => n.read && new Date(n.readAt ?? n.createdAt).getTime() >= since)
+      .slice(0, Math.max(0, MAX_ITEMS - fresh.length));
+
+    if (fresh.length === 0 && earlier.length === 0) {
+      return <li className={styles.empty}>최근 {KEEP_READ_DAYS}일 동안 받은 알림이 없어요</li>;
+    }
+    return (
+      <>
+        {fresh.length > 0 && (
+          <li>
+            <h3 className={styles.groupTitle}>새 알림</h3>
+            <ul className={styles.group}>{fresh.map(renderItem)}</ul>
+          </li>
+        )}
+        {earlier.length > 0 && (
+          <li>
+            <h3 className={styles.groupTitle}>이전 알림</h3>
+            <ul className={styles.group}>{earlier.map(renderItem)}</ul>
+            <p className={styles.keepNote}>읽은 알림은 {KEEP_READ_DAYS}일 동안 보여요</p>
+          </li>
+        )}
+      </>
+    );
   };
 
   return (
