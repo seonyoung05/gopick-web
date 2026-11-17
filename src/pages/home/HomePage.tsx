@@ -136,7 +136,7 @@ export default function HomePage() {
               onDetail={() => navigate('/projects?tab=recruit')}
               onApply={() => setApplyTarget(p)}
               onEdit={() => navigate(`/manage?id=${p.id}`)}
-              onRecommend={() => navigate('/recommend')}
+              onRecommend={() => navigate(`/recommend?projectId=${p.id}`)}
               onStart={() => navigate('/projects?tab=recruit')}
               onOffers={() => navigate('/offers')}
             />

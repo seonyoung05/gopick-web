@@ -52,6 +52,7 @@ export function MatchCard({
             <Tag key={r}>{r}</Tag>
           ))}
         </div>
+        {rec.summary && <p className={styles.summary}>{rec.summary}</p>}
         <div className={styles.fit}>
           <FitLists matched={rec.matched} unmatched={rec.unmatched} />
         </div>

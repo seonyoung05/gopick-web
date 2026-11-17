@@ -373,7 +373,7 @@ export default function ProjectsPage() {
             onView={() => setViewTarget(p)}
             onApply={() => setApplyTarget(p)}
             onEdit={() => navigate(`/manage?id=${p.id}`)}
-            onRecommend={() => navigate('/recommend')}
+            onRecommend={() => navigate(`/recommend?projectId=${p.id}`)}
             onStart={() => startProject(p.id)}
             onLeave={() => setLeaveId(p.id)}
           />

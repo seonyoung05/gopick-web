@@ -192,7 +192,9 @@ export default function ProjectFormPage() {
     setSaving(true);
     setNotice(null);
     try {
+      let projectId: number;
       if (editing) {
+        projectId = editing.projectId;
         await projectsApi.update(editing.projectId, toProjectUpdateRequest(form));
         saveRecruitPost(editing.projectId, form.draft);
         toast('프로젝트를 저장했어요', 'success');
@@ -200,11 +202,12 @@ export default function ProjectFormPage() {
         if (ongoing) return;
       } else {
         const created = await projectsApi.create(toProjectCreateRequest(form));
+        projectId = created.projectId;
         saveRecruitPost(created.projectId, form.draft);
         toast('프로젝트를 등록했어요', 'success');
       }
-      // TODO: 추천 API가 생기면 이 프로젝트 기준으로 추천 받기 (?projectId=)
-      navigate('/recommend');
+      // 저장한 프로젝트 기준으로 추천 받기
+      navigate(`/recommend?projectId=${projectId}`);
     } catch (e) {
       setNotice({ tone: 'error', text: saveErrorText(e) });
     } finally {
