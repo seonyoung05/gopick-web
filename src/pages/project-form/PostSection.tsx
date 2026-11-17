@@ -1,14 +1,43 @@
 // src/pages/project-form/PostSection.tsx
 import { useState } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ApiError, ERROR_CODE, recruitPostApi } from '../../api';
+import { toRecruitPostDraftRequest } from '../../api/mappers/project';
 import { Button } from '../../components/ui/Button';
 import { Textarea } from '../../components/ui/Input';
 import { FieldLabel } from './FormParts';
-import { buildDraft, buildPrompt, type SectionProps } from './formModel';
+import type { SectionProps } from './formModel';
 import s from './FormSections.module.css';
 
+function draftErrorText(e: unknown) {
+  if (e instanceof ApiError && e.code === ERROR_CODE.NETWORK_ERROR) {
+    return '서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.';
+  }
+  return 'AI가 모집글을 만들지 못했어요. 잠시 후 다시 시도해 주세요.';
+}
+
 export function PostSection({ form, update }: SectionProps) {
-  const [showPrompt, setShowPrompt] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const generate = async () => {
+    if (!form.name.trim()) {
+      setError('프로젝트명을 먼저 적어 주세요.');
+      return;
+    }
+    // 고친 초안을 덮어쓰기 전에 한 번 확인
+    if (form.draft?.trim() && !window.confirm('지금 초안을 지우고 새로 만들까요? 직접 고친 내용도 사라져요.')) return;
+
+    setGenerating(true);
+    setError(null);
+    try {
+      const { post } = await recruitPostApi.draft(toRecruitPostDraftRequest(form));
+      update({ draft: post });
+    } catch (e) {
+      setError(draftErrorText(e));
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   return (
     <section className={s.section}>
@@ -47,19 +76,33 @@ export function PostSection({ form, update }: SectionProps) {
         />
       </div>
 
-      <Button variant="ai" block onClick={() => update({ draft: buildDraft(form) })}>
-        {form.draft === null ? '모집글 초안 만들기' : '모집글 초안 다시 만들기'}
+      <Button variant="ai" block onClick={generate} disabled={generating} aria-busy={generating}>
+        {generating
+          ? 'AI가 모집글을 쓰고 있어요…'
+          : form.draft === null
+            ? 'AI로 모집글 초안 만들기'
+            : 'AI로 모집글 초안 다시 만들기'}
       </Button>
-      <p className={s.aiNote}>생성형 AI 연동 전이라, 지금은 입력한 내용을 정해진 구조로 정리한 예시 초안을 보여줘요.</p>
+      {error ? (
+        <p className={s.aiError} role="alert">
+          {error}
+        </p>
+      ) : (
+        <p className={s.aiNote}>
+          {generating
+            ? '입력한 내용을 정리하느라 몇 초 걸릴 수 있어요.'
+            : '위에 입력한 내용만으로 AI가 초안을 써요. 입력에 없는 경험·일정·혜택은 지어내지 않아요.'}
+        </p>
+      )}
 
       {form.draft !== null && (
         <div className={s.draft}>
           <div className={s.draftHead}>
             <strong>모집글 초안</strong>
-            <span className={s.draftBadge}>예시 · AI 연동 전</span>
+            <span className={s.draftBadge}>AI 작성</span>
           </div>
           <p className={s.draftSub}>
-            자유롭게 수정할 수 있어요. 등록하면 프로젝트 카드의 '모집글 보기'에 들어가요. (서버 저장 전이라 지금은 이 브라우저에서만 보여요)
+            자유롭게 수정할 수 있어요. 저장하면 프로젝트 카드의 '모집글 보기'에 올라가요.
           </p>
           <Textarea
             className={s.draftText}
@@ -67,16 +110,6 @@ export function PostSection({ form, update }: SectionProps) {
             value={form.draft}
             onChange={(e) => update({ draft: e.target.value })}
           />
-          <button
-            type="button"
-            className={s.promptToggle}
-            aria-expanded={showPrompt}
-            onClick={() => setShowPrompt((v) => !v)}
-          >
-            {showPrompt ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            AI에 보낼 프롬프트 보기 (연동 시 사용)
-          </button>
-          {showPrompt && <pre className={s.prompt}>{buildPrompt(form)}</pre>}
         </div>
       )}
     </section>

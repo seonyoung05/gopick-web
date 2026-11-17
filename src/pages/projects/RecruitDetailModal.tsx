@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { Modal } from '../../components/common/Modal';
 import { Button } from '../../components/ui/Button';
 import { Status, Tag } from '../../components/ui/Label';
-import { getRecruitPost, parseRecruitPost } from '../../stores/recruitPost';
+import { parseRecruitPost } from '../../stores/recruitPost';
 import type { RecruitProject } from '../../types/project';
 import styles from './RecruitDetailModal.module.css';
 
@@ -77,8 +77,7 @@ function Header({ project: p }: { project: RecruitProject }) {
 }
 
 function Body({ project: p }: { project: RecruitProject }) {
-  const saved = getRecruitPost(p.id);
-  const post = saved ? parseRecruitPost(saved) : null;
+  const post = p.post ? parseRecruitPost(p.post) : null;
 
   // 인원: 남은 모집 인원은 역할별 모집 수의 합
   const remaining = p.roles.reduce((sum, r) => sum + r.count, 0);

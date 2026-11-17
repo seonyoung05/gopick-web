@@ -32,6 +32,8 @@ export interface RecruitProject {
   /** 모집글 보기 "상세 안내" 칸 (없으면 그 칸을 숨겨요) */
   extra?: string;
   wish?: string;
+  /** 모집글 본문 (서버 post, 없으면 모달은 설명만 보여요) */
+  post?: string;
   team?: string;
   scrapped: boolean;
   action: RecruitAction;

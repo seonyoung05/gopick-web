@@ -1,39 +1,6 @@
 // src/stores/recruitPost.ts
-// 모집글(AI 초안) 임시 저장소.
-// TODO: 서버에 모집글 본문 필드가 생기면 이 파일을 API 호출로 교체해요.
-//       지금은 이 브라우저(localStorage)에만 저장돼서 다른 기기·다른 사람에게는 안 보여요.
-const KEY = 'gopick:recruit-posts';
-
-type PostMap = Record<string, string>;
-
-function readAll(): PostMap {
-  try {
-    const raw = localStorage.getItem(KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : {};
-    return parsed && typeof parsed === 'object' ? (parsed as PostMap) : {};
-  } catch {
-    return {};
-  }
-}
-
-/** 프로젝트의 모집글. 없으면 null */
-export function getRecruitPost(projectId: number | string): string | null {
-  return readAll()[String(projectId)] ?? null;
-}
-
-/** 모집글 저장. 비어 있으면 지워요 */
-export function saveRecruitPost(projectId: number | string, text: string | null) {
-  const all = readAll();
-  const value = text?.trim();
-  if (value) all[String(projectId)] = value;
-  else delete all[String(projectId)];
-  try {
-    localStorage.setItem(KEY, JSON.stringify(all));
-  } catch {
-    // 저장소를 못 쓰는 환경이면 조용히 건너뜀 (등록 자체는 그대로 진행)
-  }
-}
-
+// 모집글 본문(서버 post) → 모집글 보기 모달용 구조로 나누기
+// 서버 AI 모집글 형식: 제목 → 한 줄 소개 → "■ 소제목" 단락들 → "■ 이런 분과 함께하고 싶어요" 목록
 export interface ParsedPost {
   /** 첫 줄 (예: "[웹 · 포트폴리오] Vocarchive 팀원을 모집해요") */
   title: string;

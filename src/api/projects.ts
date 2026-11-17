@@ -37,6 +37,8 @@ export interface ProjectSummary {
   goal: string;
   wish: string;
   extra: string;
+  /** AI로 만든(작성자가 다듬은) 모집글 본문. 없으면 null */
+  post: string | null;
   lifecycleStatus: LifecycleStatus;
   stage: ProjectStage | null;
   recruiting: boolean;
@@ -76,9 +78,10 @@ export interface ProjectDetail extends ProjectListItem {
 /** 화면에서 다루는 프로젝트: 목록에서 받았으면 경험 조건·링크가 없고, 상세를 받으면 채워져요 */
 export type ProjectData = ProjectListItem & Partial<Pick<ProjectDetail, 'experience' | 'links'>>;
 
-type ProjectText = Partial<
-  Pick<ProjectSummary, 'description' | 'background' | 'goal' | 'wish' | 'extra'>
->;
+type ProjectText = Partial<Pick<ProjectSummary, 'description' | 'background' | 'goal' | 'wish' | 'extra'>> & {
+  /** 모집글 본문 (지우려면 빈 문자열. null은 보내면 안 됨) */
+  post?: string;
+};
 
 export interface ProjectCreateRequest extends ProjectText {
   title: string;
@@ -139,4 +142,23 @@ export const projectsApi = {
   remove: (id: number) => api.delete<void>(`/projects/${id}`),
   /** 프로젝트에서 나가기 (204). 준비 중 프로젝트의 팀장이 나가면 프로젝트가 삭제돼요 */
   leave: (id: number) => api.delete<void>(`/projects/${id}/members/me`),
+};
+/* ---------- 모집글 AI 초안 ---------- */
+
+/** POST /projects/recruit-post/draft 에 보내는 폼 내용 (등록 전 새 프로젝트도 가능) */
+export interface RecruitPostDraftRequest {
+  title: string;
+  description: string;
+  fields: string[];
+  purposes: string[];
+  recruitments: Recruitment[];
+  collaborations: string[];
+  background: string;
+  goal: string;
+  wish: string;
+}
+
+export const recruitPostApi = {
+  /** AI가 쓴 모집글 초안. 몇 초 걸릴 수 있어요 */
+  draft: (body: RecruitPostDraftRequest) => api.post<{ post: string }>('/projects/recruit-post/draft', body),
 };

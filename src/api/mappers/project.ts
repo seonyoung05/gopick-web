@@ -21,6 +21,7 @@ import type {
   ProjectStage,
   ProjectUpdateRequest,
   Recruitment,
+  RecruitPostDraftRequest,
 } from '../projects';
 
 /* ---------- 값 사전 ---------- */
@@ -145,6 +146,7 @@ export function toRecruitProject(
     ].filter((line): line is string => Boolean(line)),
     extra: p.extra || undefined,
     wish: p.wish || undefined,
+    post: p.post || undefined,
     team: p.members.length > 0 ? teamText(p) : undefined,
     scrapped: opts.scrapped,
     action: isLeader ? 'mine' : isMember ? 'member' : 'apply',
@@ -215,6 +217,7 @@ export function toProjectForm(p: ProjectDetail): ProjectFormValues {
     background: p.background ?? '',
     goal: p.goal ?? '',
     wantedTeam: p.wish ?? '',
+    draft: p.post || null,
   };
 }
 
@@ -249,6 +252,8 @@ function toCommonBody(form: ProjectFormValues): Required<Omit<ProjectUpdateReque
     goal: form.goal.trim(),
     wish: form.wantedTeam.trim(),
     extra: form.extraNote.trim(),
+    // 초안을 만들지 않았거나 다 지웠으면 빈 문자열 (서버는 null을 받지 않아요)
+    post: form.draft?.trim() ?? '',
     attributes,
     experience: { mode: CONDITION_TO_API[form.experience], types: [], fields: [] },
     recruitments,
@@ -261,6 +266,22 @@ function toCommonBody(form: ProjectFormValues): Required<Omit<ProjectUpdateReque
 /** 새 프로젝트 등록 (form.myRole: 등록하는 본인의 역할 → 그 역할의 팀장이 됨) */
 export function toProjectCreateRequest(form: ProjectFormValues): ProjectCreateRequest {
   return { ...toCommonBody(form), role: roleToApi(form.myRole), recruiting: true };
+}
+
+/** 모집글 AI 초안 요청 (등록 전에도 폼 내용만으로 만들 수 있어요) */
+export function toRecruitPostDraftRequest(form: ProjectFormValues): RecruitPostDraftRequest {
+  const body = toCommonBody(form);
+  return {
+    title: body.title,
+    description: body.description,
+    fields: form.fields,
+    purposes: form.purposes,
+    recruitments: body.recruitments,
+    collaborations: form.collab,
+    background: body.background,
+    goal: body.goal,
+    wish: body.wish,
+  };
 }
 
 /** 기존 프로젝트 수정 (목록은 보낸 값으로 전체 교체) */

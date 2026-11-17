@@ -144,34 +144,6 @@ export function requiredItems(form: ProjectFormValues): RequiredItem[] {
   ];
 }
 
-// ---------- 모집글 초안 (AI 연동 전 목업) ----------
-
-export function buildDraft(form: ProjectFormValues): string {
-  const tags = [...form.fields, ...form.purposes].join(' · ');
-  const head = `[${tags || '프로젝트'}] ${form.name || '(프로젝트명)'} 팀원을 모집해요`;
-  const parts = [head, form.description];
-  if (form.background) parts.push(`■ 프로젝트 추진 배경\n${form.background}`);
-  if (form.goal) parts.push(`■ 구체적인 목표\n${form.goal}`);
-  if (form.wantedTeam) parts.push(`■ 이런 분과 함께하고 싶어요\n${form.wantedTeam}`);
-  return parts.filter(Boolean).join('\n\n');
-}
-
-/** 연동 시 AI에 보낼 프롬프트 (미리보기용) */
-export function buildPrompt(form: ProjectFormValues): string {
-  const roles = form.roles.map((r) => roleSummary(r, form.roleDetails[r])).join(' / ') || '미정';
-  return [
-    '아래 정보로 팀원 모집글을 친근한 말투로 써 주세요.',
-    `프로젝트명: ${form.name || '-'}`,
-    `설명: ${form.description || '-'}`,
-    `분야: ${form.fields.join(', ') || '-'} / 목적: ${form.purposes.join(', ') || '-'}`,
-    `모집: ${roles}`,
-    `협업 선호: ${form.collab.join(', ') || '-'}`,
-    `추진 배경: ${form.background || '-'}`,
-    `목표: ${form.goal || '-'}`,
-    `원하는 팀원: ${form.wantedTeam || '-'}`,
-  ].join('\n');
-}
-
 /** 각 섹션 컴포넌트가 공통으로 받는 props */
 export interface SectionProps {
   form: ProjectFormValues;
