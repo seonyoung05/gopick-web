@@ -1,0 +1,116 @@
+/* src/pages/projects/LeaveProjectModal.module.css */
+/* 요약 박스: 내용 크기에 맞춰 줄이고, 줄 구분선은 없어요 */
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: fit-content;
+  min-width: 170px;
+  max-width: 100%;
+  margin: 0;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.row dt {
+  color: var(--sub);
+  font-size: 13px;
+}
+
+.row dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+}
+
+/* 안내 박스: 정보(파랑) · 주의(노랑) */
+.noticeInfo,
+.noticeWarn {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.noticeInfo {
+  background: var(--blue-soft);
+  color: var(--blue-deep);
+}
+
+.noticeWarn {
+  background: var(--yellow-soft);
+  color: var(--yellow-ink);
+}
+
+/* 요약이 없는 모달(L2)은 위 여백이 필요 없어요 */
+.noticeWarn:first-child {
+  margin-top: 0;
+}
+
+/* ---------- 새 팀장 선택 ---------- */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.option {
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-md);
+}
+
+.option:has(input:checked) {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+
+/* 팀 Checkbox는 체크 색이 초록이라, 이 모달에서만 디자인대로 파랑으로 덮어써요 */
+.optionCheck input:checked + span[aria-hidden] {
+  border-color: var(--blue);
+  background: var(--blue);
+}
+
+.optionCheck {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.info span {
+  color: var(--sub);
+  font-size: 13px;
+}
+
+/* ---------- 위험 동작 버튼 (팀 Button에 danger 변형이 없어서 이 모달에서만 덧입혀요) ---------- */
+button.danger {
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff;
+}
+
+button.danger:hover:not(:disabled) {
+  border-color: #b3261e;
+  background: #b3261e;
+}
