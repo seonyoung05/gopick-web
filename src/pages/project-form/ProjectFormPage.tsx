@@ -267,7 +267,7 @@ export default function ProjectFormPage() {
                 <Button variant="ghost" className={s.dangerButton} onClick={() => setLeaveOpen(true)}>
                   프로젝트 탈퇴
                 </Button>
-                <Button variant="ghost" className={s.dangerButton} onClick={handleDelete} disabled={deleting}>
+                <Button variant="ghost" onClick={handleDelete} disabled={deleting}>
                   {deleting ? '삭제 중…' : '프로젝트 삭제'}
                 </Button>
               </div>
