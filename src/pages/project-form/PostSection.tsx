@@ -59,7 +59,7 @@ export function PostSection({ form, update }: SectionProps) {
             <span className={s.draftBadge}>예시 · AI 연동 전</span>
           </div>
           <p className={s.draftSub}>
-            자유롭게 수정할 수 있어요. 등록하면 프로젝트 카드의 '모집글 보기'에 들어가요.
+            자유롭게 수정할 수 있어요. 등록하면 프로젝트 카드의 '모집글 보기'에 들어가요. (서버 저장 전이라 지금은 이 브라우저에서만 보여요)
           </p>
           <Textarea
             className={s.draftText}

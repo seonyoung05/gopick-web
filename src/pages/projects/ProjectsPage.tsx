@@ -26,6 +26,7 @@ import type { ActivityLog, OutputLink, RecruitProject, StageTask, TeamProject } 
 import { ApplyModal, type ApplyPayload } from './ApplyModal';
 import { monthDay } from './formatDate';
 import { RecruitCard } from './RecruitCard';
+import { RecruitDetailModal } from './RecruitDetailModal';
 import { ProjectListItem } from './ProjectListItem';
 import { ProjectDetail } from './ProjectDetail';
 import styles from './ProjectsPage.module.css';
@@ -76,6 +77,8 @@ export default function ProjectsPage() {
   });
   /** 지원하기 모달을 연 프로젝트 */
   const [applyTarget, setApplyTarget] = useState<RecruitProject | null>(null);
+  /** 모집글 보기 모달을 연 프로젝트 */
+  const [viewTarget, setViewTarget] = useState<RecruitProject | null>(null);
   /** 내가 지원해 두고 아직 답을 기다리는 프로젝트 */
   const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
 
@@ -367,6 +370,7 @@ export default function ProjectsPage() {
             project={p}
             onToggleScrap={() => toggleScrap(p.id)}
             applied={appliedIds.has(p.id)}
+            onView={() => setViewTarget(p)}
             onApply={() => setApplyTarget(p)}
             onEdit={() => navigate(`/manage?id=${p.id}`)}
             onRecommend={() => navigate('/recommend')}
@@ -397,6 +401,15 @@ export default function ProjectsPage() {
 
       {renderBody()}
 
+      <RecruitDetailModal
+        project={viewTarget}
+        applied={viewTarget ? appliedIds.has(viewTarget.id) : false}
+        onClose={() => setViewTarget(null)}
+        onApply={(p) => {
+          setViewTarget(null);
+          setApplyTarget(p);
+        }}
+      />
       <ApplyModal project={applyTarget} onClose={() => setApplyTarget(null)} onSubmit={submitApply} />
     </div>
   );

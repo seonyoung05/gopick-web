@@ -143,6 +143,9 @@ export function toRecruitProject(
       collab.length > 0 && `협업 선호 ${collab.join(', ')}`,
       p.members.length > 0 && `현재 팀 ${teamText(p)}`,
     ].filter((line): line is string => Boolean(line)),
+    extra: p.extra || undefined,
+    wish: p.wish || undefined,
+    team: p.members.length > 0 ? teamText(p) : undefined,
     scrapped: opts.scrapped,
     action: isLeader ? 'mine' : isMember ? 'member' : 'apply',
   };
