@@ -5,6 +5,8 @@ import { Button } from '../../components/ui/Button';
 import { useInboxSummary } from '../../hooks/useInboxSummary';
 import { useProjectFeed } from '../../hooks/useProjectFeed';
 import type { RecruitProject } from '../../types/project';
+import heroGif from '../../assets/home-hero.gif';
+import heroStatic from '../../assets/home-hero-static.png';
 import { ApplyModal } from '../projects/ApplyModal';
 import { ArchiveMiniCard, OngoingMiniCard, RecruitMiniCard } from './HomeCards';
 import styles from './HomePage.module.css';
@@ -68,30 +70,30 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* 히어로는 움직이는 gif 한 장이에요. 글자는 화면 읽기용으로 숨겨 두고, 버튼 자리에 투명한 실제 버튼을 겹쳐요 */}
       <section className={styles.hero} aria-label="GoPick 소개">
-        <div className={styles.stripe} aria-hidden="true">
-          <i />
-          <i />
-          <i />
-          <i />
-        </div>
-        <div className={styles.heroBody}>
-          <h1 className="t-display">
-            기술, 관심사, 경험으로
-            <br />
-            함께할 팀원을 찾아보세요
-          </h1>
-          <p className={styles.heroDesc}>
-            GoPick은 GDGoC 구성원의 프로필을 바탕으로 프로젝트에 맞는 팀원을 탐색·추천하고, 팀이 꾸려진 뒤에는
-            진행 상황까지 한곳에서 보여줍니다.
-          </p>
-          <div className={styles.cta}>
-            <Button onClick={() => navigate('/manage?id=new')}>프로젝트 모집 등록</Button>
-            <Button variant="ghost" onClick={() => navigate('/profile')}>
-              내 프로필 작성
-            </Button>
-          </div>
-        </div>
+        <picture>
+          {/* 움직임을 줄이도록 설정한 사용자에게는 멈춘 그림을 보여줘요 */}
+          <source media="(prefers-reduced-motion: reduce)" srcSet={heroStatic} />
+          <img className={styles.heroImg} src={heroGif} alt="" />
+        </picture>
+        <h1 className={styles.srOnly}>기술, 관심사, 경험으로 함께할 팀원을 찾아보세요</h1>
+        <p className={styles.srOnly}>
+          GoPick은 GDGoC 구성원의 프로필을 바탕으로 프로젝트에 맞는 팀원을 탐색·추천하고, 팀이 꾸려진 뒤에는 진행
+          상황까지 한곳에서 보여줍니다.
+        </p>
+        <button
+          type="button"
+          className={`${styles.heroHit} ${styles.heroHitPrimary}`}
+          aria-label="프로젝트 모집 등록"
+          onClick={() => navigate('/manage?id=new')}
+        />
+        <button
+          type="button"
+          className={`${styles.heroHit} ${styles.heroHitSecondary}`}
+          aria-label="내 프로필 작성"
+          onClick={() => navigate('/profile')}
+        />
       </section>
 
       <Section title="팀원 모집 중인 프로젝트" to="/projects?tab=recruit">
