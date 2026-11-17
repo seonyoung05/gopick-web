@@ -27,65 +27,260 @@
   margin-right: 4px;
 }
 
-/* 히어로 */
-/* gif(1240×400)에서 둥근 카드 부분(여백 25px 안쪽, 1190×350)만 잘라서 보여줘요 */
+/* 히어로
+   원래 gif(카드 폭 1190 기준)와 같은 비율·색으로, 글자와 도형은 코드로 그려서 어떤 화면 배율에서도 선명해요.
+   --u 는 "gif 화면 1픽셀"에 해당하는 길이예요. */
 .hero {
-  position: relative;
+  container-type: inline-size;
   overflow: hidden;
-  aspect-ratio: 1190 / 350;
-  border-radius: 22px;
+  border: 1px solid var(--line);
+  border-radius: calc(100cqw * 24 / 1190);
   background: var(--surface);
 }
 
-.heroImg {
+.stage {
+  --u: calc(100cqw / 1190);
+  position: relative;
+  min-height: calc(350 * var(--u));
+}
+
+/* 위쪽 4색 띠: 왼쪽부터 차례로 차올라요 */
+.stripe {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: max(4px, calc(6 * var(--u)));
+}
+
+.stripe i {
+  transform-origin: left center;
+  animation: grow 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stripe i:nth-child(1) { background: #1d75e8; animation-delay: 0.1s; }
+.stripe i:nth-child(2) { background: #d93125; animation-delay: 0.25s; }
+.stripe i:nth-child(3) { background: #f9ad08; animation-delay: 0.4s; }
+.stripe i:nth-child(4) { background: #1e7f3b; animation-delay: 0.55s; }
+
+.heroBody {
   position: absolute;
-  top: calc(-25 / 350 * 100%);
-  left: calc(-25 / 1190 * 100%);
-  width: calc(1240 / 1190 * 100%);
-  height: auto;
-  max-width: none;
+  top: calc(29.5 * var(--u));
+  left: calc(64 * var(--u));
+  z-index: 1;
+}
+
+.heroBody h1 {
+  margin: 0;
+}
+
+.heroTitle {
+  color: #11162b;
+  font-size: clamp(30px, calc(60 * var(--u)), 70px);
+  font-weight: 800;
+  line-height: 1.233;
+  letter-spacing: -0.03em;
+  animation: rise 0.6s ease-out 0.3s both;
+}
+
+/* 제목의 형광펜: 모서리가 둥근 상자가 왼쪽에서 오른쪽으로 그어져요 */
+.hl {
+  padding: 0 0.1em;
+  margin: 0 -0.1em;
+  border-radius: 0.06em;
+  color: inherit;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 0 90%;
+  background-size: 100% 40%;
+  animation: mark 0.55s ease-out both;
+}
+
+.hlBlue {
+  background-image: linear-gradient(#d5e2f9, #d5e2f9);
+  animation-delay: 0.9s;
+}
+
+.hlRed {
+  background-image: linear-gradient(#f3d4d0, #f3d4d0);
+  animation-delay: 1.1s;
+}
+
+.hlYellow {
+  background-image: repeating-linear-gradient(135deg, #fad287 0 1px, #fff4dc 1px 2.2px);
+  animation-delay: 1.3s;
+}
+
+/* "팀원": 빨강 → 주황 → 초록 → 파랑 → 보라 → 주황으로 계속 흘러요 (gif에서 잰 색, 끝 색이 처음 빨강과 이어져요) */
+.flow {
+  background: linear-gradient(
+    90deg,
+    #d93325 0%, #d93325 11.6%, #dc421f 20.3%, #df650f 29%, #e0750e 31.9%, #a67914 37.7%, #5e7c27 43.5%,
+    #1a7d3e 49.3%, #197b7d 55.1%, #1a77be 60.9%, #1b73c9 66.7%, #286fd7 69.6%, #4763ba 72.5%, #c13d3e 75.4%,
+    #d93525 78.3%, #da3d22 84.1%, #dd4e15 89.9%, #df5615 92.8%, #d93325 100%
+  );
+  background-size: 288% 100%;
+  background-repeat: repeat-x;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: flow 9.6s linear 0.5s infinite;
+}
+
+.heroDesc {
+  margin: calc(18 * var(--u)) 0 0;
+  color: #4c5563;
+  font-size: clamp(13px, calc(17.1 * var(--u)), 22px);
+  line-height: 1.55;
+  animation: rise 0.6s ease-out 1s both;
+}
+
+.cta > button {
+  padding: calc(11 * var(--u)) calc(20 * var(--u));
+  border-radius: calc(10 * var(--u));
+  font-size: clamp(14px, calc(16.2 * var(--u)), 20px);
+}
+
+.cta {
+  display: flex;
+  gap: 10px;
+  margin-top: calc(24 * var(--u));
+  animation: rise 0.6s ease-out 1.15s both;
+}
+
+/* 오른쪽: 물결과 떠다니는 칩 (꾸미기용) */
+.orbit {
+  position: absolute;
+  top: calc(15 * var(--u));
+  left: calc(830 * var(--u));
+  z-index: 0;
+  width: calc(320 * var(--u));
+  height: calc(320 * var(--u));
   pointer-events: none;
-  user-select: none;
 }
 
-/* gif 속 버튼 자리에 겹치는 투명한 실제 버튼 (위치는 gif 기준 비율이에요) */
-.heroHit {
+.rings {
   position: absolute;
-  top: calc((320 - 25) / 350 * 100%);
-  height: calc(46 / 350 * 100%);
-  padding: 0;
-  border: none;
-  border-radius: 10px;
-  background: transparent;
-  cursor: pointer;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
-.heroHit:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--blue);
+.ringOuter,
+.ringInner {
+  fill: none;
+  stroke: #e1e5ee;
+  stroke-width: 1.3;
+  stroke-dasharray: 3 5;
 }
 
-.heroHitPrimary {
-  left: calc((89 - 25) / 1190 * 100%);
-  width: calc(163 / 1190 * 100%);
+.core {
+  fill: #1d75e8;
 }
 
-.heroHitSecondary {
-  left: calc((264 - 25) / 1190 * 100%);
-  width: calc(137 / 1190 * 100%);
-}
-
-/* 화면에는 안 보이고 화면 읽기 프로그램에만 읽히는 글자 */
-.srOnly {
+.chip {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
+  animation: pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(1.2s + var(--i) * 0.18s);
+}
+
+.chipBody {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(9 * var(--u));
+  padding: calc(9 * var(--u)) calc(16 * var(--u)) calc(9 * var(--u)) calc(15 * var(--u));
+  border: 1px solid #eef0f6;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 calc(3 * var(--u)) calc(10 * var(--u)) rgba(25, 31, 53, 0.09);
+  color: #191f35;
+  font-size: clamp(10px, calc(14.5 * var(--u)), 18px);
+  font-weight: 700;
+  line-height: 1.4;
   white-space: nowrap;
-  border: 0;
+  animation: bob 4.5s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.9s);
+}
+
+.chipDot {
+  display: block;
+  width: calc(9 * var(--u));
+  height: calc(9 * var(--u));
+  min-width: 6px;
+  min-height: 6px;
+  border-radius: 50%;
+}
+
+@keyframes grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes mark {
+  from { background-size: 0% 40%; }
+  to { background-size: 100% 40%; }
+}
+
+@keyframes flow {
+  from { background-position: 0% 0; }
+  to { background-position: 153.19% 0; }
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* 움직임을 줄이도록 설정한 사용자에게는 멈춘 모습으로 보여줘요 */
+@media (prefers-reduced-motion: reduce) {
+  .hero *,
+  .hero *::before,
+  .hero *::after {
+    animation: none !important;
+  }
+
+  .flow {
+    background-position: 100% 0;
+  }
+}
+
+/* 히어로 카드가 좁아지면(폭 800px 이하) 비율 배치를 풀고 글자 위주로 보여줘요.
+   화면 폭이 아니라 카드 폭 기준이라, 중간 폭 화면에서도 글자와 칩이 겹치지 않아요 */
+@container (max-width: 800px) {
+  .stage {
+    min-height: 0;
+  }
+
+  .heroBody {
+    position: static;
+    padding: 32px 24px;
+  }
+
+  .heroTitle {
+    font-size: 34px;
+  }
+
+  .heroDesc {
+    font-size: 15px;
+  }
+
+  .descBreak {
+    display: none;
+  }
+
+  .orbit {
+    display: none;
+  }
 }
 
 /* 구역 */
@@ -134,7 +329,6 @@
   .grid2 {
     grid-template-columns: 1fr;
   }
-
 }
 
 /* 구역이 비었거나 불러오는 중일 때 안내 */
