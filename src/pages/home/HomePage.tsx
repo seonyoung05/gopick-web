@@ -1,12 +1,10 @@
 // src/pages/home/HomePage.tsx
-import { useState, type ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { useInboxSummary } from '../../hooks/useInboxSummary';
 import { useProjectFeed } from '../../hooks/useProjectFeed';
 import type { RecruitProject } from '../../types/project';
-import heroGif from '../../assets/home-hero.gif';
-import heroStatic from '../../assets/home-hero-static.png';
 import { ApplyModal } from '../projects/ApplyModal';
 import { ArchiveMiniCard, OngoingMiniCard, RecruitMiniCard } from './HomeCards';
 import styles from './HomePage.module.css';
@@ -15,6 +13,15 @@ import styles from './HomePage.module.css';
 const RECRUIT_LIMIT = 3;
 const ONGOING_LIMIT = 3;
 const DONE_LIMIT = 2;
+
+/** 히어로 오른쪽 칩: 위치는 물결 원(320×320 기준) 안의 비율이에요 */
+const ORBIT_CHIPS: { label: string; color: string; style: CSSProperties & { '--i': number } }[] = [
+  { label: 'UI/UX', color: 'var(--blue)', style: { left: '13%', top: '11%', '--i': 0 } },
+  { label: 'Python', color: 'var(--red)', style: { left: '56%', top: '26%', '--i': 1 } },
+  { label: 'GeoAI', color: 'var(--yellow)', style: { left: '4%', top: '44%', '--i': 2 } },
+  { label: 'Backend', color: 'var(--green)', style: { left: '57%', top: '62%', '--i': 3 } },
+  { label: '스터디 매칭', color: 'var(--blue)', style: { left: '22%', top: '80%', '--i': 4 } },
+];
 
 function Section({ title, to, children }: { title: string; to: string; children: ReactNode }) {
   return (
@@ -70,30 +77,51 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 히어로는 움직이는 gif 한 장이에요. 글자는 화면 읽기용으로 숨겨 두고, 버튼 자리에 투명한 실제 버튼을 겹쳐요 */}
       <section className={styles.hero} aria-label="GoPick 소개">
-        <picture>
-          {/* 움직임을 줄이도록 설정한 사용자에게는 멈춘 그림을 보여줘요 */}
-          <source media="(prefers-reduced-motion: reduce)" srcSet={heroStatic} />
-          <img className={styles.heroImg} src={heroGif} alt="" />
-        </picture>
-        <h1 className={styles.srOnly}>기술, 관심사, 경험으로 함께할 팀원을 찾아보세요</h1>
-        <p className={styles.srOnly}>
-          GoPick은 GDGoC 구성원의 프로필을 바탕으로 프로젝트에 맞는 팀원을 탐색·추천하고, 팀이 꾸려진 뒤에는 진행
-          상황까지 한곳에서 보여줍니다.
-        </p>
-        <button
-          type="button"
-          className={`${styles.heroHit} ${styles.heroHitPrimary}`}
-          aria-label="프로젝트 모집 등록"
-          onClick={() => navigate('/manage?id=new')}
-        />
-        <button
-          type="button"
-          className={`${styles.heroHit} ${styles.heroHitSecondary}`}
-          aria-label="내 프로필 작성"
-          onClick={() => navigate('/profile')}
-        />
+        <div className={styles.stage}>
+          <div className={styles.stripe} aria-hidden="true">
+            <i />
+            <i />
+            <i />
+            <i />
+          </div>
+          <div className={styles.heroBody}>
+            <h1 className={styles.heroTitle}>
+              <mark className={`${styles.hl} ${styles.hlBlue}`}>기술</mark>,{' '}
+              <mark className={`${styles.hl} ${styles.hlRed}`}>관심사</mark>,{' '}
+              <mark className={`${styles.hl} ${styles.hlYellow}`}>경험</mark>으로
+              <br />
+              함께할 <span className={styles.flow}>팀원</span>을 찾아보세요
+            </h1>
+            <p className={styles.heroDesc}>
+              GoPick은 GDGoC 구성원의 프로필을 바탕으로 프로젝트에 맞는 팀원을 탐색·추천하고,{' '}
+              <br className={styles.descBreak} />팀이 꾸려진 뒤에는 진행 상황까지 한곳에서 보여줍니다.
+            </p>
+            <div className={styles.cta}>
+              <Button onClick={() => navigate('/manage?id=new')}>프로젝트 모집 등록</Button>
+              <Button variant="ghost" onClick={() => navigate('/profile')}>
+                내 프로필 작성
+              </Button>
+            </div>
+          </div>
+
+          {/* 팀원과 기술이 모이는 장면 (꾸미기용이라 화면 읽기에서는 빼요) */}
+          <div className={styles.orbit} aria-hidden="true">
+            <svg className={styles.rings} viewBox="0 0 320 320">
+              <circle className={styles.ringOuter} cx="160" cy="160" r="158" />
+              <circle className={styles.ringInner} cx="160" cy="160" r="106" />
+              <circle className={styles.core} cx="160" cy="160" r="5.5" />
+            </svg>
+            {ORBIT_CHIPS.map((c) => (
+              <span key={c.label} className={styles.chip} style={c.style}>
+                <span className={styles.chipBody}>
+                  <i className={styles.chipDot} style={{ background: c.color }} />
+                  {c.label}
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
       </section>
 
       <Section title="팀원 모집 중인 프로젝트" to="/projects?tab=recruit">
