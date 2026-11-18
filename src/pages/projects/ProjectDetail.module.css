@@ -273,31 +273,6 @@
   margin-top: 12px;
 }
 
-/* 세부 과제 저장 (활동 기록 바로 위) */
-.saveRow {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-/* 저장 버튼: 연두색 (팀 Button 위에 덮어써요) */
-.saveButton.saveButton {
-  background: #34a853;
-  border-color: #34a853;
-  color: #fff;
-}
-.saveButton.saveButton:hover:not(:disabled) {
-  background: #2d9449;
-  border-color: #2d9449;
-}
-
-.saveHint {
-  font-size: 12px;
-  color: var(--yellow, #f9ab00);
-}
-
 /* 활동 기록 아래, 나가기 버튼 */
 .leaveControls {
   display: flex;

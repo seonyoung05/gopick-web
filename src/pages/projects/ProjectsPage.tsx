@@ -80,42 +80,26 @@ export default function ProjectsPage() {
   // 활동 기록에 남길 이름 (프로필이 아직 없으면 '나')
   const author = profileName ?? '나';
   // 활동 기록 API가 아직 없어서, 새 기록은 이 화면 안에서만 보관해요 (새로고침하면 사라져요)
-  const [savedLogs, setSavedLogs] = useState<Record<string, ActivityLog[]>>(loadSavedLogs);
-  const [newLogs, setNewLogs] = useState<Record<string, ActivityLog[]>>(savedLogs);
-  const isLogsDirty = (id: string) =>
-    JSON.stringify(newLogs[id] ?? []) !== JSON.stringify(savedLogs[id] ?? []);
-  const saveLogs = (id: string) => {
-    const next = { ...savedLogs, [id]: newLogs[id] ?? [] };
+  // 서버 API가 아직 없어서, 바뀔 때마다 이 브라우저(localStorage)에 바로 저장해요
+  const [newLogs, setNewLogs] = useState<Record<string, ActivityLog[]>>(loadSavedLogs);
+  const [taskEdits, setTaskEdits] = useState<Record<string, StageTask[][]>>(loadSavedTasks);
+  const persist = (key: string, value: unknown) => {
     try {
-      localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(next));
+      localStorage.setItem(key, JSON.stringify(value));
     } catch {
       toast('저장하지 못했어요. 브라우저 저장 공간을 확인해 주세요');
-      return;
     }
-    setSavedLogs(next);
-    toast('활동 기록을 저장했어요', 'success');
   };
-  // 세부 과제 API가 아직 없어서, '저장'하면 이 브라우저(localStorage)에 보관해요
-  const [savedTasks, setSavedTasks] = useState<Record<string, StageTask[][]>>(loadSavedTasks);
-  // 저장 전 수정 내용 (저장해 둔 값에서 시작)
-  const [taskEdits, setTaskEdits] = useState<Record<string, StageTask[][]>>(savedTasks);
-  const editTasks = (base: TeamProject, fn: (tasks: StageTask[][]) => StageTask[][]) =>
-    setTaskEdits((prev) => ({ ...prev, [base.id]: fn(prev[base.id] ?? base.tasks) }));
-  const isTasksDirty = (base: TeamProject) =>
-    JSON.stringify(taskEdits[base.id] ?? base.tasks) !== JSON.stringify(savedTasks[base.id] ?? base.tasks);
-  const saveTasks = (base: TeamProject) => {
-    const next = { ...savedTasks, [base.id]: taskEdits[base.id] ?? base.tasks };
-    try {
-      localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      toast('저장하지 못했어요. 브라우저 저장 공간을 확인해 주세요');
-      return;
-    }
-    setSavedTasks(next);
-    toast('세부 과제를 저장했어요', 'success');
+  const editTasks = (base: TeamProject, fn: (tasks: StageTask[][]) => StageTask[][]) => {
+    const next = { ...taskEdits, [base.id]: fn(taskEdits[base.id] ?? base.tasks) };
+    setTaskEdits(next);
+    persist(TASKS_STORAGE_KEY, next);
   };
-  const addLog = (id: string, text: string) =>
-    setNewLogs((prev) => ({ ...prev, [id]: [{ date: monthDay(), author, text }, ...(prev[id] ?? [])] }));
+  const addLog = (id: string, text: string) => {
+    const next = { ...newLogs, [id]: [{ date: monthDay(), author, text }, ...(newLogs[id] ?? [])] };
+    setNewLogs(next);
+    persist(LOGS_STORAGE_KEY, next);
+  };
   const myProfileId = account?.profileId;
 
   const [params, setParams] = useSearchParams();
@@ -378,10 +362,6 @@ export default function ProjectsPage() {
           onRemoveTask={(stage, ti) =>
             editTasks(current, (all) => all.map((list, si) => (si === stage ? list.filter((_, i) => i !== ti) : list)))
           }
-          logsDirty={isLogsDirty(base.id)}
-          onSaveLogs={() => saveLogs(base.id)}
-          tasksDirty={isTasksDirty(base)}
-          onSaveTasks={() => saveTasks(base)}
           onChangeStage={canEdit ? (index) => changeStage(current.id, index) : undefined}
           onComplete={canEdit && isLeader ? (outputs) => completeProject(current.id, outputs) : undefined}
           onLeave={key === 'ongoing' && isMember ? () => setLeaveId(current.id) : undefined}
