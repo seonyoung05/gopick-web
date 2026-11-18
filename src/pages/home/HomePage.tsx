@@ -1,8 +1,9 @@
 // src/pages/home/HomePage.tsx
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { UserRound } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { useInboxSummary } from '../../hooks/useInboxSummary';
+import { useProfileGate } from '../../components/common/ProfileGate';
 import { useProjectFeed } from '../../hooks/useProjectFeed';
 import type { RecruitProject } from '../../types/project';
 import { ApplyModal } from '../projects/ApplyModal';
@@ -39,15 +40,14 @@ function Section({ title, to, children }: { title: string; to: string; children:
 
 export default function HomePage() {
   const navigate = useNavigate();
+  // 프로필이 없으면 목록 구경만 (지원·자세히 보기·스크랩·등록은 안내 모달)
+  const { hasProfile, requireProfile } = useProfileGate();
 
   const feed = useProjectFeed();
   const recruit = feed.recruit.slice(0, RECRUIT_LIMIT);
   const ongoing = feed.ongoing.slice(0, ONGOING_LIMIT);
   const done = feed.done.slice(0, DONE_LIMIT);
   const [applyTarget, setApplyTarget] = useState<RecruitProject | null>(null);
-
-  // 아직 열어 보지 않은 받은 제안 · 내 프로젝트에 들어온 지원
-  const { receivedOffers: offerCount, receivedApplies: applyCount } = useInboxSummary();
 
   /** 구역이 비었거나 불러오는 중일 때 */
   const emptyText = (text: string) => (
@@ -59,20 +59,25 @@ export default function HomePage() {
           : text}
     </p>
   );
-  const news = [
-    offerCount > 0 && `받은 참여 제안 ${offerCount}건`,
-    applyCount > 0 && `내 프로젝트 지원 ${applyCount}건`,
-  ].filter(Boolean);
+  /** 프로필이 있을 때만 실행 */
+  const gated = (action: string, run: () => void) => () => {
+    if (requireProfile(action)) run();
+  };
 
   return (
     <div className={styles.page}>
-      {news.length > 0 && (
+      {/* 프로필이 없는 계정: 프로필을 만들도록 안내 (만들면 사라져요) */}
+      {!hasProfile && (
         <div className={styles.notice}>
+          <span className={styles.noticeIcon} aria-hidden="true">
+            <UserRound size={20} />
+          </span>
           <p>
-            <strong>새 소식</strong> {news.join(', ')}이 있어요.
+            <strong>프로필을 만들면 팀원 추천과 지원을 할 수 있어요</strong>
+            <span>기술·관심사·경험을 적어 두면 나에게 맞는 프로젝트와 팀원을 찾아드려요.</span>
           </p>
-          <Button size="sm" onClick={() => navigate('/offers')}>
-            확인하기
+          <Button size="sm" onClick={() => navigate('/profile')}>
+            프로필 만들기
           </Button>
         </div>
       )}
@@ -98,7 +103,9 @@ export default function HomePage() {
               <br className={styles.descBreak} />팀이 꾸려진 뒤에는 진행 상황까지 한곳에서 보여줍니다.
             </p>
             <div className={styles.cta}>
-              <Button onClick={() => navigate('/manage?id=new')}>프로젝트 모집 등록</Button>
+              <Button onClick={gated('프로젝트를 등록하려면', () => navigate('/manage?id=new'))}>
+                프로젝트 모집 등록
+              </Button>
               <Button variant="ghost" onClick={() => navigate('/profile')}>
                 내 프로필 작성
               </Button>
@@ -132,9 +139,9 @@ export default function HomePage() {
               key={p.id}
               project={p}
               applied={feed.appliedIds.has(p.id)}
-              onToggleScrap={() => feed.toggleScrap(p.id)}
-              onDetail={() => navigate('/projects?tab=recruit')}
-              onApply={() => setApplyTarget(p)}
+              onToggleScrap={gated('스크랩하려면', () => feed.toggleScrap(p.id))}
+              onDetail={gated('자세히 보려면', () => navigate('/projects?tab=recruit'))}
+              onApply={gated('지원하려면', () => setApplyTarget(p))}
               onEdit={() => navigate(`/manage?id=${p.id}`)}
               onRecommend={() => navigate(`/recommend?projectId=${p.id}`)}
               onStart={() => navigate('/projects?tab=recruit')}
@@ -151,8 +158,8 @@ export default function HomePage() {
             <OngoingMiniCard
               key={p.id}
               project={p}
-              onToggleScrap={() => feed.toggleScrap(p.id)}
-              onView={() => navigate('/projects?tab=ongoing')}
+              onToggleScrap={gated('스크랩하려면', () => feed.toggleScrap(p.id))}
+              onView={gated('자세히 보려면', () => navigate(`/projects?tab=ongoing&project=${p.id}`))}
             />
           ))}
         </div>
@@ -165,8 +172,8 @@ export default function HomePage() {
             <ArchiveMiniCard
               key={p.id}
               project={p}
-              onToggleScrap={() => feed.toggleScrap(p.id)}
-              onView={() => navigate('/projects?tab=done')}
+              onToggleScrap={gated('스크랩하려면', () => feed.toggleScrap(p.id))}
+              onView={gated('자세히 보려면', () => navigate(`/projects?tab=done&project=${p.id}`))}
             />
           ))}
         </div>
