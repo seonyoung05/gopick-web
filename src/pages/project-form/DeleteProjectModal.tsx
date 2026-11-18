@@ -6,7 +6,7 @@ import styles from '../projects/LeaveProjectModal.module.css';
 
 interface DeleteProjectModalProps {
   /** 삭제할 프로젝트 (null이면 닫힘) */
-  target: { title: string; status: string; memberCount: number } | null;
+  target: { title: string; status: string; memberCount: number; archived?: boolean } | null;
   busy: boolean;
   onClose: () => void;
   onDelete: () => void;
@@ -46,9 +46,13 @@ export function DeleteProjectModal({ target, busy, onClose, onDelete }: DeletePr
         ))}
       </dl>
       <p className={styles.noticeWarn}>
-        {target.memberCount > 1
-          ? '모집글이 목록에서 사라지고, 다른 팀원들에게 프로젝트 삭제 알림이 가요.'
-          : '모집글이 목록에서 사라지고, 이 프로젝트로 다시 지원받을 수 없어요.'}
+        {target.archived
+          ? target.memberCount > 1
+            ? '완료한 프로젝트가 아카이브에서 사라지고, 다른 팀원들에게 프로젝트 삭제 알림이 가요.'
+            : '완료한 프로젝트가 아카이브에서 사라져요.'
+          : target.memberCount > 1
+            ? '모집글이 목록에서 사라지고, 다른 팀원들에게 프로젝트 삭제 알림이 가요.'
+            : '모집글이 목록에서 사라지고, 이 프로젝트로 다시 지원받을 수 없어요.'}
       </p>
     </Modal>
   );

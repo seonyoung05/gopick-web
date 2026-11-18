@@ -26,6 +26,7 @@ import { useAuth } from '../../stores/auth';
 import type { ActivityLog, OutputLink, RecruitProject, StageTask, TeamProject } from '../../types/project';
 import { ApplyModal, type ApplyPayload } from './ApplyModal';
 import { monthDay } from './formatDate';
+import { DeleteProjectModal } from '../project-form/DeleteProjectModal';
 import { LeaveProjectModal } from './LeaveProjectModal';
 import { toLeaveTarget } from './leaveTarget';
 import { useLeaveProject } from './useLeaveProject';
@@ -127,6 +128,9 @@ export default function ProjectsPage() {
   const [viewTarget, setViewTarget] = useState<RecruitProject | null>(null);
   /** 나가기 모달을 연 프로젝트 id */
   const [leaveId, setLeaveId] = useState<string | null>(null);
+  /** 삭제 확인 모달을 연 완료 프로젝트 id (팀장만) */
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   /** 내가 지원해 두고 아직 답을 기다리는 프로젝트 */
   const [appliedIds, setAppliedIds] = useState<Set<string>>(new Set());
 
@@ -215,6 +219,7 @@ export default function ProjectsPage() {
   }, [projects, scrapIds, myProfileId, mineOnly]);
 
   const findProject = (id: string) => projects.find((p) => String(p.projectId) === id);
+  const deleteRaw = deleteId ? findProject(deleteId) : undefined;
   const leaveRaw = leaveId ? findProject(leaveId) : undefined;
   const leaveTarget = leaveRaw ? toLeaveTarget(leaveRaw, myProfileId) : null;
 
@@ -292,6 +297,23 @@ export default function ProjectsPage() {
   };
 
   const { leave, delegateAndLeave } = useLeaveProject({ myProfileId, author, onDone: reloadAll });
+
+  const deleteProject = async () => {
+    if (!deleteId) return;
+    setDeleting(true);
+    try {
+      await projectsApi.remove(Number(deleteId));
+      setDeleteId(null);
+      toast('프로젝트를 삭제했어요');
+      // 목록에서 바로 빼요 (고르고 있던 프로젝트가 사라지면 첫 번째가 선택돼요)
+      setProjects((prev) => prev.filter((p) => String(p.projectId) !== deleteId));
+    } catch (e) {
+      setDeleteId(null);
+      toast(errorText(e, '프로젝트를 삭제하지 못했어요. 잠시 후 다시 시도해 주세요'));
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const completeProject = async (id: string, outputs: OutputLink[]) => {
     try {
@@ -382,6 +404,7 @@ export default function ProjectsPage() {
             onChangeStage={canEdit ? (index) => changeStage(current.id, index) : undefined}
             onComplete={canEdit && isLeader ? (outputs) => completeProject(current.id, outputs) : undefined}
             onLeave={key === 'ongoing' && isMember ? () => setLeaveId(current.id) : undefined}
+            onDelete={key === 'done' && isLeader ? () => setDeleteId(current.id) : undefined}
           />
         )}
       </div>
@@ -466,6 +489,16 @@ export default function ProjectsPage() {
         }}
       />
       <ApplyModal project={applyTarget} onClose={() => setApplyTarget(null)} onSubmit={submitApply} />
+      <DeleteProjectModal
+        target={
+          deleteRaw
+            ? { title: deleteRaw.title, status: '완료', memberCount: deleteRaw.members.length, archived: true }
+            : null
+        }
+        busy={deleting}
+        onClose={() => setDeleteId(null)}
+        onDelete={deleteProject}
+      />
       <LeaveProjectModal
         target={leaveTarget}
         onClose={() => setLeaveId(null)}
