@@ -25,8 +25,8 @@ interface ScrapsTabProps {
 export function ScrapsTab({ onCountChange }: ScrapsTabProps) {
   const toast = useToast();
   const navigate = useNavigate();
-  /** 화면에 들어올 때의 목록 (해제해도 이번 방문 동안은 카드 유지) */
-  const [items, setItems] = useState<ProjectSummary[] | null>(null);
+  /** 화면에 들어올 때 불러온 목록 (실제로 보이는 카드는 scrapIds에 든 것만) */
+  const [loaded, setLoaded] = useState<ProjectSummary[] | null>(null);
   const [scrapIds, setScrapIds] = useState<Set<number>>(new Set());
   const [failed, setFailed] = useState(false);
 
@@ -36,7 +36,7 @@ export function ScrapsTab({ onCountChange }: ScrapsTabProps) {
       .myScraps()
       .then((list) => {
         if (ignore) return;
-        setItems(list);
+        setLoaded(list);
         setScrapIds(new Set(list.map((p) => p.projectId)));
       })
       .catch(() => {
@@ -74,7 +74,9 @@ export function ScrapsTab({ onCountChange }: ScrapsTabProps) {
       </div>
     );
   }
-  if (items === null) return <div className={styles.empty}>불러오는 중이에요…</div>;
+  if (loaded === null) return <div className={styles.empty}>불러오는 중이에요…</div>;
+  // 해제한 카드는 바로 빼서, 탭 숫자·본문 숫자·카드 목록이 항상 같게 해요
+  const items = loaded.filter((p) => scrapIds.has(p.projectId));
   if (items.length === 0) {
     return (
       <div className={styles.empty}>

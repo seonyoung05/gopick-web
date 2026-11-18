@@ -51,8 +51,8 @@ export function SavedProfilesTab({ onCountChange }: SavedProfilesTabProps) {
   const toast = useToast();
   const navigate = useNavigate();
 
-  // 화면에 들어올 때의 저장 목록 (해제해도 이번 방문 동안은 카드 유지, 최근 저장순)
-  const [items, setItems] = useState<PersonSummary[]>([]);
+  // 화면에 들어올 때 불러온 저장 목록 (최근 저장순). 실제로 보이는 카드는 savedIds에 든 것만
+  const [loaded, setLoaded] = useState<PersonSummary[]>([]);
   const [status, setStatus] = useState<LoadStatus>('loading');
   const [reloadKey, setReloadKey] = useState(0);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
@@ -67,7 +67,7 @@ export function SavedProfilesTab({ onCountChange }: SavedProfilesTabProps) {
       .then((bookmarks) => Promise.all(bookmarks.map(loadPerson)))
       .then((people) => {
         if (ignore) return;
-        setItems(people);
+        setLoaded(people);
         setSavedIds(new Set(people.map((p) => p.id)));
         setStatus('done');
       })
@@ -84,6 +84,8 @@ export function SavedProfilesTab({ onCountChange }: SavedProfilesTabProps) {
     setReloadKey((k) => k + 1);
   };
 
+  // 해제한 카드는 바로 빼서, 탭 숫자·본문 숫자·카드 목록이 항상 같게 해요
+  const items = loaded.filter((p) => savedIds.has(p.id));
   const privateCount = items.filter((p) => !p.isPublic).length;
 
   const toggleSave = async (id: string, name: string) => {
