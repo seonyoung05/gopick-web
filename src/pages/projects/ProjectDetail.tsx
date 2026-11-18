@@ -119,6 +119,8 @@ interface ProjectDetailProps {
   onComplete?: (outputs: OutputLink[]) => void;
   /** 있으면 '프로젝트 나가기' 버튼 표시 (팀장이 아닌 팀원) */
   onLeave?: () => void;
+  /** 있으면 '프로젝트 삭제' 버튼 표시 (완료된 프로젝트의 팀장) */
+  onDelete?: () => void;
   /** 활동 기록에 표시될 내 이름 */
   author: string;
   /** 활동 기록을 새로 남길 때 (editable일 때만 쓰여요) */
@@ -135,6 +137,7 @@ export function ProjectDetail({
   onChangeStage,
   onComplete,
   onLeave,
+  onDelete,
   author,
   onAddLog,
 }: ProjectDetailProps) {
@@ -259,11 +262,18 @@ export function ProjectDetail({
         ))}
       </ol>
 
-      {onLeave && (
+      {(onLeave || onDelete) && (
         <div className={styles.leaveControls}>
-          <Button size="sm" variant="ghost" className={styles.leaveButton} onClick={onLeave}>
-            프로젝트 나가기
-          </Button>
+          {onLeave && (
+            <Button size="sm" variant="ghost" className={styles.leaveButton} onClick={onLeave}>
+              프로젝트 나가기
+            </Button>
+          )}
+          {onDelete && (
+            <Button size="sm" variant="ghost" className={styles.leaveButton} onClick={onDelete}>
+              프로젝트 삭제
+            </Button>
+          )}
         </div>
       )}
     </section>
