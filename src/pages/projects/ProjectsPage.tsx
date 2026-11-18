@@ -41,6 +41,30 @@ type LoadStatus = 'loading' | 'error' | 'done';
 
 const TAB_KEYS: readonly TabKey[] = ['recruit', 'ongoing', 'done'];
 
+const TASKS_STORAGE_KEY = 'gopick:stage-tasks';
+
+/** 저장해 둔 세부 과제 (없거나 읽을 수 없으면 빈 값) */
+function loadSavedTasks(): Record<string, StageTask[][]> {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(TASKS_STORAGE_KEY) ?? '{}');
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, StageTask[][]>) : {};
+  } catch {
+    return {};
+  }
+}
+
+const LOGS_STORAGE_KEY = 'gopick:activity-logs';
+
+/** 저장해 둔 활동 기록 (없거나 읽을 수 없으면 빈 값) */
+function loadSavedLogs(): Record<string, ActivityLog[]> {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(LOGS_STORAGE_KEY) ?? '{}');
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, ActivityLog[]>) : {};
+  } catch {
+    return {};
+  }
+}
+
 /** 서버 에러 → 안내 문구 */
 function errorText(e: unknown, fallback: string) {
   if (!(e instanceof ApiError)) return fallback;
@@ -62,13 +86,26 @@ export default function ProjectsPage() {
   // 활동 기록에 남길 이름 (프로필이 아직 없으면 '나')
   const author = profileName ?? '나';
   // 활동 기록 API가 아직 없어서, 새 기록은 이 화면 안에서만 보관해요 (새로고침하면 사라져요)
-  const [newLogs, setNewLogs] = useState<Record<string, ActivityLog[]>>({});
-  // 세부 과제 API가 아직 없어서, 과제 수정은 이 화면 안에서만 보관해요 (새로고침하면 사라져요)
-  const [taskEdits, setTaskEdits] = useState<Record<string, StageTask[][]>>({});
-  const editTasks = (base: TeamProject, fn: (tasks: StageTask[][]) => StageTask[][]) =>
-    setTaskEdits((prev) => ({ ...prev, [base.id]: fn(prev[base.id] ?? base.tasks) }));
-  const addLog = (id: string, text: string) =>
-    setNewLogs((prev) => ({ ...prev, [id]: [{ date: monthDay(), author, text }, ...(prev[id] ?? [])] }));
+  // 서버 API가 아직 없어서, 바뀔 때마다 이 브라우저(localStorage)에 바로 저장해요
+  const [newLogs, setNewLogs] = useState<Record<string, ActivityLog[]>>(loadSavedLogs);
+  const [taskEdits, setTaskEdits] = useState<Record<string, StageTask[][]>>(loadSavedTasks);
+  const persist = (key: string, value: unknown) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      toast('저장하지 못했어요. 브라우저 저장 공간을 확인해 주세요');
+    }
+  };
+  const editTasks = (base: TeamProject, fn: (tasks: StageTask[][]) => StageTask[][]) => {
+    const next = { ...taskEdits, [base.id]: fn(taskEdits[base.id] ?? base.tasks) };
+    setTaskEdits(next);
+    persist(TASKS_STORAGE_KEY, next);
+  };
+  const addLog = (id: string, text: string) => {
+    const next = { ...newLogs, [id]: [{ date: monthDay(), author, text }, ...(newLogs[id] ?? [])] };
+    setNewLogs(next);
+    persist(LOGS_STORAGE_KEY, next);
+  };
   const myProfileId = account?.profileId;
 
   const [params, setParams] = useSearchParams();
