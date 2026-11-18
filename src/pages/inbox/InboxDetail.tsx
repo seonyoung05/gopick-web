@@ -26,6 +26,8 @@ interface InboxDetailProps {
   onReject: () => void;
   onCancel: () => void;
   onViewProject: () => void;
+  /** 상대 프로필 상세 열기 (공개 프로필만) */
+  onViewProfile: () => void;
 }
 
 export function InboxDetail({
@@ -37,6 +39,7 @@ export function InboxDetail({
   onReject,
   onCancel,
   onViewProject,
+  onViewProfile,
 }: InboxDetailProps) {
   const toast = useToast();
 
@@ -45,9 +48,10 @@ export function InboxDetail({
   const canCancel = isPending && item.direction === 'sent';
 
   const copyContact = async () => {
-    if (!item.contact) return;
+    const contact = item.counterpart.contact;
+    if (!contact) return;
     try {
-      await navigator.clipboard.writeText(item.contact.value);
+      await navigator.clipboard.writeText(contact.id);
       toast('연락처를 복사했어요', 'success');
     } catch {
       toast('복사하지 못했어요. 직접 선택해서 복사해 주세요', 'error');
@@ -84,14 +88,19 @@ export function InboxDetail({
             <div className={styles.blockHeadRow}>
               <h3 className={styles.blockTitle}>{item.counterpart.name}</h3>
               {item.counterpart.isPublic && (
-                <Button
-                  variant={saved ? 'saved' : 'ghost'}
-                  size="sm"
-                  onClick={onToggleSave}
-                  aria-pressed={saved}
-                >
-                  {saved ? '★ 저장됨' : '☆ 저장'}
-                </Button>
+                <div className={styles.headButtons}>
+                  <Button variant="ghost" size="sm" onClick={onViewProfile}>
+                    프로필 보기
+                  </Button>
+                  <Button
+                    variant={saved ? 'saved' : 'ghost'}
+                    size="sm"
+                    onClick={onToggleSave}
+                    aria-pressed={saved}
+                  >
+                    {saved ? '★ 저장됨' : '☆ 저장'}
+                  </Button>
+                </div>
               )}
             </div>
             <p className={styles.blockText}>
@@ -110,12 +119,12 @@ export function InboxDetail({
       </div>
 
       {/* ---------- 연락처 (수락됐을 때만) ---------- */}
-      {item.status === 'accepted' && item.contact && (
+      {item.status === 'accepted' && item.counterpart.contact && (
         <div className={styles.contact}>
           <div>
             <strong>연락처가 공개됐어요</strong>
             <p>
-              {item.contact.type} · {item.contact.value}
+              {item.counterpart.contact.platform} · {item.counterpart.contact.id}
             </p>
           </div>
           <Button variant="ghost" size="sm" icon={<Copy />} onClick={copyContact}>

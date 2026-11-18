@@ -255,3 +255,8 @@
   justify-content: flex-end;
   gap: 8px;
 }
+/* 상대 카드: 프로필 보기 · 저장 */
+.headButtons {
+  display: flex;
+  gap: 8px;
+}

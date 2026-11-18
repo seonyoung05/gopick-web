@@ -55,6 +55,7 @@ export function personFromDetail(res: ProfileDetailResponse): PersonSummary {
     collab: prefs('COLLAB'),
     intro: res.intro ?? '',
     teamTendency: res.teamTendency ?? undefined,
+    contact: res.contactId ? { platform: res.contactPlatform || '연락처', id: res.contactId } : undefined,
     experiences,
   };
 }

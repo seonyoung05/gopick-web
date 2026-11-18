@@ -1,5 +1,4 @@
 // src/types/participation.ts
-import type { ContactType } from '../constants/contact';
 import type { PersonSummary } from './person';
 import type { MatchReason } from './recommendation';
 
@@ -38,8 +37,6 @@ export interface Participation {
   read: boolean;
   matched: MatchReason[];
   unmatched: MatchReason[];
-  /** 수락된 경우에만 공개되는 상대 연락처 */
-  contact?: { type: ContactType; value: string };
 }
 /** 참여 제안을 보낼 수 있는 내 프로젝트 (내가 팀장 + 완료 전) */
 export interface MyRecruitment {

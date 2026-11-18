@@ -18,6 +18,7 @@ import type { Participation, ParticipationDirection } from '../../types/particip
 import type { PersonSummary } from '../../types/person';
 import { InboxItem } from './InboxItem';
 import { InboxDetail } from './InboxDetail';
+import { ProfileDetailModal } from '../../components/common/ProfileDetailModal';
 import { isRead, loadSeen, saveSeen, seenKey } from './seenStore';
 import { counterpartIdOf, toParticipation, unknownPerson } from './toParticipation';
 import styles from './InboxPage.module.css';
@@ -79,6 +80,7 @@ export default function InboxPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
+  const [profilePerson, setProfilePerson] = useState<PersonSummary | null>(null);
   // 🔔 알림에서 ?tab=received|sent&id=요청번호 로 들어오면 그 탭의 그 항목을 열어 줘요
   // (이 화면에 있는 동안 다른 알림을 눌러도 주소가 바뀌니까 목록을 새로 불러와요)
   const [params] = useSearchParams();
@@ -158,6 +160,13 @@ export default function InboxPage() {
       const res = await participationApi.resolve(Number(item.project.id), Number(item.id), next);
       const status = res.status === 'ACCEPTED' ? 'accepted' : res.status === 'REJECTED' ? 'declined' : 'canceled';
       patch(item.id, { status, read: true });
+      // 수락하면 서버가 연락처를 열어 줘요 → 상대 프로필을 다시 불러와 연락처 반영
+      if (status === 'accepted' && item.counterpart.isPublic) {
+        profilesApi
+          .get(Number(item.counterpart.id))
+          .then((res) => patch(item.id, { counterpart: personFromDetail(res) }))
+          .catch(() => undefined);
+      }
       const seen = loadSeen();
       seen.add(seenKey({ id: item.id, status }));
       saveSeen(seen);
@@ -266,11 +275,18 @@ export default function InboxPage() {
             onReject={() => reject(selected)}
             onCancel={() => cancel(selected)}
             onViewProject={() => navigate('/projects?tab=recruit')}
+            onViewProfile={() => setProfilePerson(selected.counterpart)}
           />
         ) : (
           <div className={styles.placeholder}>왼쪽에서 항목을 골라 주세요.</div>
         )}
       </div>
+      <ProfileDetailModal
+        person={profilePerson}
+        onClose={() => setProfilePerson(null)}
+        saved={profilePerson ? savedIds.has(profilePerson.id) : false}
+        onToggleSave={() => profilePerson && toggleSave(profilePerson)}
+      />
     </div>
   );
 }
