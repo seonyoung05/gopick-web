@@ -113,6 +113,14 @@ interface ProjectDetailProps {
   onAddTask: (stage: number, text: string) => void;
   /** 단계의 세부 과제를 지울 때 (editable일 때만 쓰여요) */
   onRemoveTask: (stage: number, taskIndex: number) => void;
+  /** 저장하지 않은 활동 기록이 있는지 */
+  logsDirty: boolean;
+  /** 활동 기록을 저장할 때 (editable일 때만 쓰여요) */
+  onSaveLogs: () => void;
+  /** 저장하지 않은 세부 과제 수정이 있는지 */
+  tasksDirty: boolean;
+  /** 세부 과제를 저장할 때 (editable일 때만 쓰여요) */
+  onSaveTasks: () => void;
   /** 있으면 진행 단계를 눌러 바꿀 수 있음 (진행 중 프로젝트의 팀원) */
   onChangeStage?: (stage: number) => void;
   /** 있으면 '프로젝트 완료' 버튼 표시 (진행 중 프로젝트의 팀장). 산출물(GitHub 필수)을 받아 호출돼요 */
@@ -132,6 +140,10 @@ export function ProjectDetail({
   onToggleTask,
   onAddTask,
   onRemoveTask,
+  logsDirty,
+  onSaveLogs,
+  tasksDirty,
+  onSaveTasks,
   onChangeStage,
   onComplete,
   onLeave,
@@ -245,6 +257,15 @@ export function ProjectDetail({
         ))}
       </div>
 
+      {editable && (
+        <div className={styles.saveRow}>
+          {tasksDirty && <span className={styles.saveHint}>저장하지 않은 변경이 있어요</span>}
+          <Button size="sm" className={styles.saveButton} disabled={!tasksDirty} onClick={onSaveTasks}>
+            세부 과제 저장
+          </Button>
+        </div>
+      )}
+
       <h4 className={styles.h}>활동 기록</h4>
       {editable && <LogComposer author={author} onSubmit={onAddLog} />}
       {p.log.length === 0 && <p className={styles.notice}>아직 활동 기록이 없어요.</p>}
@@ -258,6 +279,14 @@ export function ProjectDetail({
           </li>
         ))}
       </ol>
+      {editable && (
+        <div className={styles.saveRow}>
+          {logsDirty && <span className={styles.saveHint}>저장하지 않은 기록이 있어요</span>}
+          <Button size="sm" className={styles.saveButton} disabled={!logsDirty} onClick={onSaveLogs}>
+            활동 기록 저장
+          </Button>
+        </div>
+      )}
 
       {onLeave && (
         <div className={styles.leaveControls}>
