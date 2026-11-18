@@ -189,7 +189,8 @@ export function toProjectForm(p: ProjectDetail): ProjectFormValues {
   for (const r of p.recruitments) {
     roleDetails[roleLabel(r.role)] = {
       ...emptyRoleDetail(),
-      count: Math.max(1, r.remainingCount),
+      // 0명 = 이 역할은 모집 완료 (수락으로 다 찬 경우). 그대로 불러와서 그대로 저장해요
+      count: r.remainingCount,
       condition: API_TO_CONDITION[r.techMode],
       techs: r.technologies.map((t) => t.technology),
       levels: Object.fromEntries(r.technologies.map((t) => [t.technology, minToLevel(t.minLevel)])),

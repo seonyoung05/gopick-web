@@ -37,9 +37,10 @@ export function RoleCard({ role, detail, onChange, showErrors }: RoleCardProps) 
     <div className={s.roleCard}>
       <div className={s.roleHead}>
         <strong>{role}</strong>
+        {detail.count === 0 && <span className={s.roleDone}>모집 완료</span>}
         <Stepper
           value={detail.count}
-          min={1}
+          min={0}
           max={9}
           onChange={(count) => onChange({ ...detail, count })}
           aria-label={`${role} 모집 인원`}

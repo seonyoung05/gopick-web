@@ -296,3 +296,14 @@
 .leaderTag {
   margin-left: auto;
 }
+
+/* 남은 모집 인원 0 = 모집 완료 */
+.roleDone {
+  margin: 0 8px 0 auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--green-soft, #e6f4ea);
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 700;
+}
