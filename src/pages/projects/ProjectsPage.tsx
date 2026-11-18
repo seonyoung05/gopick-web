@@ -18,6 +18,7 @@ import {
   toTeamProject,
 } from '../../api/mappers/project';
 import { useToast } from '../../components/common/Toast';
+import { useProfileGate } from '../../components/common/ProfileGate';
 import { Button } from '../../components/ui/Button';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
 import { Checkbox } from '../../components/ui/Checkbox';
@@ -41,6 +42,30 @@ type LoadStatus = 'loading' | 'error' | 'done';
 
 const TAB_KEYS: readonly TabKey[] = ['recruit', 'ongoing', 'done'];
 
+const TASKS_STORAGE_KEY = 'gopick:stage-tasks';
+
+/** 저장해 둔 세부 과제 (없거나 읽을 수 없으면 빈 값) */
+function loadSavedTasks(): Record<string, StageTask[][]> {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(TASKS_STORAGE_KEY) ?? '{}');
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, StageTask[][]>) : {};
+  } catch {
+    return {};
+  }
+}
+
+const LOGS_STORAGE_KEY = 'gopick:activity-logs';
+
+/** 저장해 둔 활동 기록 (없거나 읽을 수 없으면 빈 값) */
+function loadSavedLogs(): Record<string, ActivityLog[]> {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(LOGS_STORAGE_KEY) ?? '{}');
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, ActivityLog[]>) : {};
+  } catch {
+    return {};
+  }
+}
+
 /** 서버 에러 → 안내 문구 */
 function errorText(e: unknown, fallback: string) {
   if (!(e instanceof ApiError)) return fallback;
@@ -53,17 +78,35 @@ function errorText(e: unknown, fallback: string) {
 export default function ProjectsPage() {
   const toast = useToast();
   const navigate = useNavigate();
+  // 프로필이 없으면 목록 구경만 (자세히 보기·지원·스크랩·등록은 안내 모달)
+  const { hasProfile, requireProfile } = useProfileGate();
+  const gated = (action: string, run: () => void) => () => {
+    if (requireProfile(action)) run();
+  };
   const { account, profileName } = useAuth();
   // 활동 기록에 남길 이름 (프로필이 아직 없으면 '나')
   const author = profileName ?? '나';
   // 활동 기록 API가 아직 없어서, 새 기록은 이 화면 안에서만 보관해요 (새로고침하면 사라져요)
-  const [newLogs, setNewLogs] = useState<Record<string, ActivityLog[]>>({});
-  // 세부 과제 API가 아직 없어서, 과제 수정은 이 화면 안에서만 보관해요 (새로고침하면 사라져요)
-  const [taskEdits, setTaskEdits] = useState<Record<string, StageTask[][]>>({});
-  const editTasks = (base: TeamProject, fn: (tasks: StageTask[][]) => StageTask[][]) =>
-    setTaskEdits((prev) => ({ ...prev, [base.id]: fn(prev[base.id] ?? base.tasks) }));
-  const addLog = (id: string, text: string) =>
-    setNewLogs((prev) => ({ ...prev, [id]: [{ date: monthDay(), author, text }, ...(prev[id] ?? [])] }));
+  // 서버 API가 아직 없어서, 바뀔 때마다 이 브라우저(localStorage)에 바로 저장해요
+  const [newLogs, setNewLogs] = useState<Record<string, ActivityLog[]>>(loadSavedLogs);
+  const [taskEdits, setTaskEdits] = useState<Record<string, StageTask[][]>>(loadSavedTasks);
+  const persist = (key: string, value: unknown) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      toast('저장하지 못했어요. 브라우저 저장 공간을 확인해 주세요');
+    }
+  };
+  const editTasks = (base: TeamProject, fn: (tasks: StageTask[][]) => StageTask[][]) => {
+    const next = { ...taskEdits, [base.id]: fn(taskEdits[base.id] ?? base.tasks) };
+    setTaskEdits(next);
+    persist(TASKS_STORAGE_KEY, next);
+  };
+  const addLog = (id: string, text: string) => {
+    const next = { ...newLogs, [id]: [{ date: monthDay(), author, text }, ...(newLogs[id] ?? [])] };
+    setNewLogs(next);
+    persist(LOGS_STORAGE_KEY, next);
+  };
   const myProfileId = account?.profileId;
 
   const [params, setParams] = useSearchParams();
@@ -121,7 +164,8 @@ export default function ProjectsPage() {
   // 전체 프로젝트(팀원·모집 포함) + 내 스크랩 불러오기
   useEffect(() => {
     let ignore = false;
-    Promise.all([projectsApi.list(), projectsApi.myScraps()])
+    // 프로필이 없으면 스크랩 목록은 실패할 수 있어서 빈 목록으로
+    Promise.all([projectsApi.list(), projectsApi.myScraps().catch(() => [])])
       .then(([list, scraps]) => {
         if (ignore) return;
         setProjects(list);
@@ -325,33 +369,44 @@ export default function ProjectsPage() {
               project={p}
               selected={p.id === current.id}
               onSelect={() => setSelected((s) => ({ ...s, [key]: p.id }))}
-              onToggleScrap={() => toggleScrap(p.id)}
+              onToggleScrap={gated('스크랩하려면', () => toggleScrap(p.id))}
             />
           ))}
         </div>
-        <ProjectDetail
-          key={current.id}
-          project={current}
-          editable={canEdit}
-          author={author}
-          onAddLog={(text) => addLog(current.id, text)}
-          onToggleScrap={() => toggleScrap(current.id)}
-          onToggleTask={(stage, ti, done) =>
-            editTasks(current, (all) =>
-              all.map((list, si) => (si === stage ? list.map((t, i) => (i === ti ? { ...t, done } : t)) : list)),
-            )
-          }
-          onAddTask={(stage, text) =>
-            editTasks(current, (all) => all.map((list, si) => (si === stage ? [...list, { text, done: false }] : list)))
-          }
-          onRemoveTask={(stage, ti) =>
-            editTasks(current, (all) => all.map((list, si) => (si === stage ? list.filter((_, i) => i !== ti) : list)))
-          }
-          onChangeStage={canEdit ? (index) => changeStage(current.id, index) : undefined}
-          onComplete={canEdit && isLeader ? (outputs) => completeProject(current.id, outputs) : undefined}
-          onLeave={key === 'ongoing' && isMember ? () => setLeaveId(current.id) : undefined}
-          onDelete={key === 'done' && isLeader ? () => setDeleteId(current.id) : undefined}
-        />
+        {!hasProfile ? (
+          // 프로필이 없으면 진행 상황 대신 안내
+          <div className={styles.profileNeeded}>
+            <strong>{current.title}의 진행 상황은 프로필을 만들면 볼 수 있어요</strong>
+            <p>단계별 진행, 팀원, 활동 기록을 확인하려면 프로필이 필요해요.</p>
+            <Button size="sm" onClick={() => navigate('/profile')}>
+              프로필 만들기
+            </Button>
+          </div>
+        ) : (
+          <ProjectDetail
+            key={current.id}
+            project={current}
+            editable={canEdit}
+            author={author}
+            onAddLog={(text) => addLog(current.id, text)}
+            onToggleScrap={() => toggleScrap(current.id)}
+            onToggleTask={(stage, ti, done) =>
+              editTasks(current, (all) =>
+                all.map((list, si) => (si === stage ? list.map((t, i) => (i === ti ? { ...t, done } : t)) : list)),
+              )
+            }
+            onAddTask={(stage, text) =>
+              editTasks(current, (all) => all.map((list, si) => (si === stage ? [...list, { text, done: false }] : list)))
+            }
+            onRemoveTask={(stage, ti) =>
+              editTasks(current, (all) => all.map((list, si) => (si === stage ? list.filter((_, i) => i !== ti) : list)))
+            }
+            onChangeStage={canEdit ? (index) => changeStage(current.id, index) : undefined}
+            onComplete={canEdit && isLeader ? (outputs) => completeProject(current.id, outputs) : undefined}
+            onLeave={key === 'ongoing' && isMember ? () => setLeaveId(current.id) : undefined}
+            onDelete={key === 'done' && isLeader ? () => setDeleteId(current.id) : undefined}
+          />
+        )}
       </div>
     );
   };
@@ -378,7 +433,7 @@ export default function ProjectsPage() {
           <strong>모집 중인 프로젝트가 없어요</strong>
           직접 프로젝트를 등록하고 팀원을 모아 보세요.
           <div className={styles.emptyAction}>
-            <Button size="sm" onClick={() => navigate('/manage')}>
+            <Button size="sm" onClick={gated('프로젝트를 등록하려면', () => navigate('/manage'))}>
               프로젝트 등록하기
             </Button>
           </div>
@@ -391,10 +446,10 @@ export default function ProjectsPage() {
           <RecruitCard
             key={p.id}
             project={p}
-            onToggleScrap={() => toggleScrap(p.id)}
+            onToggleScrap={gated('스크랩하려면', () => toggleScrap(p.id))}
             applied={appliedIds.has(p.id)}
-            onView={() => setViewTarget(p)}
-            onApply={() => setApplyTarget(p)}
+            onView={gated('자세히 보려면', () => setViewTarget(p))}
+            onApply={gated('지원하려면', () => setApplyTarget(p))}
             onEdit={() => navigate(`/manage?id=${p.id}`)}
             onRecommend={() => navigate(`/recommend?projectId=${p.id}`)}
             onStart={() => startProject(p.id)}
@@ -419,7 +474,7 @@ export default function ProjectsPage() {
           value={tab}
           onChange={(value) => setParams(mineOnly ? { tab: value, mine: '1' } : { tab: value })}
         />
-        <Checkbox checked={mineOnly} onChange={setMineOnly} label="내 프로젝트만" />
+        {hasProfile && <Checkbox checked={mineOnly} onChange={setMineOnly} label="내 프로젝트만" />}
       </div>
 
       {renderBody()}

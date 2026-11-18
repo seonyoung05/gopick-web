@@ -1,5 +1,6 @@
 // src/pages/profile/ProfilePage.tsx
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Field } from '../../components/common/Field';
 import { FormSection } from '../../components/common/FormSection';
 import { EtcChipGroup } from '../../components/common/EtcChipGroup';
@@ -43,6 +44,7 @@ import { myAvatarSeed, useAuth } from '../../stores/auth';
 type LoadState = 'loading' | 'ready' | 'error';
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const toast = useToast();
   const { status, account, setProfileId, setProfileName } = useAuth();
   const profileId = account?.profileId ?? null;
@@ -483,9 +485,16 @@ export default function ProfilePage() {
                 {notice.text}
               </p>
             )}
-            <Button variant="ghost" onClick={handleCancel} disabled={!isDirty || saving}>
-              취소
-            </Button>
+            {profileId ? (
+              <Button variant="ghost" onClick={handleCancel} disabled={!isDirty || saving}>
+                취소
+              </Button>
+            ) : (
+              // 처음 가입한 사람: 프로필 없이 먼저 둘러볼 수 있어요
+              <Button variant="ghost" onClick={() => navigate('/')} disabled={saving}>
+                나중에 하기
+              </Button>
+            )}
             <Button onClick={handleSave} disabled={saving}>
               {saving ? '저장하는 중…' : profileId ? '프로필 저장' : '프로필 만들기'}
             </Button>

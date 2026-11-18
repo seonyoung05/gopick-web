@@ -25,7 +25,8 @@ export function useProjectFeed() {
 
   useEffect(() => {
     let ignore = false;
-    Promise.all([projectsApi.list(), projectsApi.myScraps()])
+    // 프로필이 없으면 스크랩 목록은 실패할 수 있어서 빈 목록으로
+    Promise.all([projectsApi.list(), projectsApi.myScraps().catch(() => [])])
       .then(([list, scraps]) => {
         if (ignore) return;
         setProjects(list);

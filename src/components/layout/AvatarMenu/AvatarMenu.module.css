@@ -86,3 +86,40 @@
   outline: none;
   background: var(--surface-2);
 }
+/* ---------- 프로필 없는 계정 ---------- */
+.noProfile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--sub);
+}
+
+.todoDot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.noName {
+  color: var(--sub);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.itemAccent {
+  color: var(--blue-deep);
+  font-weight: 700;
+}
+
+.itemAccent svg {
+  color: var(--blue);
+}

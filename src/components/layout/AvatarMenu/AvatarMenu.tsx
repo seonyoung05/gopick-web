@@ -1,7 +1,7 @@
 // src/components/layout/AvatarMenu/AvatarMenu.tsx
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Settings, User } from 'lucide-react';
+import { LogOut, Settings, User, UserRound, UserRoundPlus } from 'lucide-react';
 import { Avatar } from '../../ui/Avatar';
 import { LogoutDialog } from '../../common/LogoutDialog';
 import styles from './AvatarMenu.module.css';
@@ -36,6 +36,7 @@ export function AvatarMenu() {
     navigate(path);
   };
 
+  const hasProfile = Boolean(account?.profileId);
   const displayName = profileName ?? account?.email ?? '?';
 
   return (
@@ -48,20 +49,44 @@ export function AvatarMenu() {
         aria-expanded={open}
         aria-label="계정 메뉴"
       >
-        <Avatar name={displayName} seed={myAvatarSeed(account)} size="top" />
+        {hasProfile ? (
+          <Avatar name={displayName} seed={myAvatarSeed(account)} size="top" />
+        ) : (
+          // 프로필이 없으면 이메일 글자 대신 기본 사람 아이콘 + 파란 점(할 일 있음)
+          <span className={styles.noProfile}>
+            <UserRound size={20} aria-hidden="true" />
+            <span className={styles.todoDot} aria-hidden="true" />
+          </span>
+        )}
       </button>
 
       {open && (
         <div className={styles.menu} role="menu">
           <div className={styles.account}>
-            {profileName && <span className={styles.name}>{profileName}</span>}
+            {hasProfile ? (
+              profileName && <span className={styles.name}>{profileName}</span>
+            ) : (
+              <span className={styles.noName}>아직 프로필이 없어요</span>
+            )}
             <span className={styles.email}>{account?.email}</span>
           </div>
           <hr className={styles.divider} />
-          <button type="button" role="menuitem" className={styles.item} onClick={() => go('/profile')}>
-            <User aria-hidden="true" />
-            내 프로필
-          </button>
+          {hasProfile ? (
+            <button type="button" role="menuitem" className={styles.item} onClick={() => go('/profile')}>
+              <User aria-hidden="true" />
+              내 프로필
+            </button>
+          ) : (
+            <button
+              type="button"
+              role="menuitem"
+              className={`${styles.item} ${styles.itemAccent}`}
+              onClick={() => go('/profile')}
+            >
+              <UserRoundPlus aria-hidden="true" />
+              프로필 만들기
+            </button>
+          )}
           <button type="button" role="menuitem" className={styles.item} onClick={() => go('/settings')}>
             <Settings aria-hidden="true" />
             계정 설정
