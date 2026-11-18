@@ -14,6 +14,7 @@ import { Button } from '../../components/ui/Button';
 import { Chip } from '../../components/ui/Chip';
 import { useAuth } from '../../stores/auth';
 import { LeaveProjectModal } from '../projects/LeaveProjectModal';
+import { DeleteProjectModal } from './DeleteProjectModal';
 import { toLeaveTarget } from '../projects/leaveTarget';
 import { useLeaveProject } from '../projects/useLeaveProject';
 import { BasicInfoSection } from './BasicInfoSection';
@@ -76,6 +77,8 @@ export default function ProjectFormPage() {
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  /** 프로젝트 삭제 확인 모달이 열려 있는지 */
+  const [deleteOpen, setDeleteOpen] = useState(false);
   /** 프로젝트 탈퇴 모달이 열려 있는지 */
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [form, setForm] = useState<ProjectFormValues>(emptyForm);
@@ -162,15 +165,16 @@ export default function ProjectFormPage() {
   /** 프로젝트 삭제 (팀장만) */
   const handleDelete = async () => {
     if (!editing) return;
-    if (!window.confirm(`'${editing.title}' 프로젝트를 삭제할까요? 삭제하면 되돌릴 수 없어요.`)) return;
     setDeleting(true);
     try {
       await projectsApi.remove(editing.projectId);
+      setDeleteOpen(false);
       toast('프로젝트를 삭제했어요');
       select(NEW);
       setReloadKey((k) => k + 1);
     } catch (e) {
-      setNotice({ tone: 'error', text: saveErrorText(e) });
+      setDeleteOpen(false);
+      toast(saveErrorText(e));
     } finally {
       setDeleting(false);
     }
@@ -270,8 +274,8 @@ export default function ProjectFormPage() {
                 <Button variant="ghost" className={s.dangerButton} onClick={() => setLeaveOpen(true)}>
                   프로젝트 탈퇴
                 </Button>
-                <Button variant="ghost" onClick={handleDelete} disabled={deleting}>
-                  {deleting ? '삭제 중…' : '프로젝트 삭제'}
+                <Button variant="ghost" onClick={() => setDeleteOpen(true)} disabled={deleting}>
+                  프로젝트 삭제
                 </Button>
               </div>
             )}
@@ -299,6 +303,21 @@ export default function ProjectFormPage() {
 
         <TeamSummary form={form} />
       </div>
+
+      <DeleteProjectModal
+        target={
+          editing && deleteOpen
+            ? {
+                title: editing.title,
+                status: STATUS_LABEL[editing.lifecycleStatus],
+                memberCount: editing.members.length,
+              }
+            : null
+        }
+        busy={deleting}
+        onClose={() => setDeleteOpen(false)}
+        onDelete={handleDelete}
+      />
 
       <LeaveProjectModal
         target={leaveTarget}
