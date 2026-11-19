@@ -47,11 +47,15 @@ export interface Member {
 }
 
 export interface StageTask {
+  /** 서버 과제 id */
+  id: number;
   text: string;
   done: boolean;
 }
 
 export interface ActivityLog {
+  /** 서버 기록 id */
+  id: number;
   date: string;
   author: string;
   text: string;

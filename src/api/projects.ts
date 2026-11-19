@@ -69,14 +69,36 @@ export interface MyProject extends ProjectListItem {
   myAuthority: 'LEADER' | 'MEMBER';
 }
 
-/** 상세(GET /projects/{id}): 목록 정보 + 경험 조건 · 링크 */
+/** 진행 단계별 세부 과제 */
+export interface ProjectTask {
+  id: number;
+  stage: ProjectStage;
+  text: string;
+  done: boolean;
+}
+
+/** 활동 기록 (작성자·날짜는 서버가 채워요) */
+export interface ProjectActivity {
+  id: number;
+  /** "2026-11-19" */
+  date: string;
+  author: string;
+  text: string;
+}
+
+/** 상세(GET /projects/{id}): 목록 정보 + 경험 조건 · 링크 · 과제 · 활동 기록 */
 export interface ProjectDetail extends ProjectListItem {
   experience: ProjectExperience;
   links: ProjectLink[];
+  /** 단계 순서(기획→배포)대로 항상 5개 배열 */
+  tasks: ProjectTask[][];
+  /** 최신순 */
+  log: ProjectActivity[];
 }
 
-/** 화면에서 다루는 프로젝트: 목록에서 받았으면 경험 조건·링크가 없고, 상세를 받으면 채워져요 */
-export type ProjectData = ProjectListItem & Partial<Pick<ProjectDetail, 'experience' | 'links'>>;
+/** 화면에서 다루는 프로젝트: 목록에서 받았으면 경험 조건·링크·과제·기록이 없고, 상세를 받으면 채워져요 */
+export type ProjectData = ProjectListItem &
+  Partial<Pick<ProjectDetail, 'experience' | 'links' | 'tasks' | 'log'>>;
 
 type ProjectText = Partial<Pick<ProjectSummary, 'description' | 'background' | 'goal' | 'wish' | 'extra'>> & {
   /** 모집글 본문 (지우려면 빈 문자열. null은 보내면 안 됨) */
@@ -143,6 +165,23 @@ export const projectsApi = {
   /** 프로젝트에서 나가기 (204). 준비 중 프로젝트의 팀장이 나가면 프로젝트가 삭제돼요 */
   leave: (id: number) => api.delete<void>(`/projects/${id}/members/me`),
 };
+/* ---------- 진행 중 프로젝트: 세부 과제 · 활동 기록 ---------- */
+// 보기는 누구나, 추가·체크·삭제는 IN_PROGRESS 프로젝트의 팀원만 (그 밖에는 409 / 403)
+
+export const projectWorkApi = {
+  /** 과제 추가 (text 최대 255자) */
+  addTask: (projectId: number, body: { stage: ProjectStage; text: string }) =>
+    api.post<ProjectTask>(`/projects/${projectId}/tasks`, body),
+  /** 완료 체크 / 해제 */
+  setTaskDone: (projectId: number, taskId: number, done: boolean) =>
+    api.patch<ProjectTask>(`/projects/${projectId}/tasks/${taskId}`, { done }),
+  /** 과제 삭제 (204) */
+  removeTask: (projectId: number, taskId: number) => api.delete<void>(`/projects/${projectId}/tasks/${taskId}`),
+  /** 활동 기록 추가 (text 최대 100자) */
+  addActivity: (projectId: number, text: string) =>
+    api.post<ProjectActivity>(`/projects/${projectId}/activities`, { text }),
+};
+
 /* ---------- 모집글 AI 초안 ---------- */
 
 /** POST /projects/recruit-post/draft 에 보내는 폼 내용 (등록 전 새 프로젝트도 가능) */

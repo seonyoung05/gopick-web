@@ -27,6 +27,15 @@ type LoadStatus = 'loading' | 'error' | 'done';
 
 const byNewest = (a: Participation, b: Participation) => b.createdAt.localeCompare(a.createdAt);
 
+/**
+ * 상세를 받아 온 프로필 = 내가 볼 수 있는 프로필 (공개, 또는 수락된 상대라 서버가 열어 준 비공개)
+ * → 화면에서는 공개 프로필처럼 정보 · 프로필 보기 버튼 · 연락처를 보여 줘요
+ */
+const viewable = (res: Parameters<typeof personFromDetail>[0]): PersonSummary => ({
+  ...personFromDetail(res),
+  isPublic: true,
+});
+
 /** id 목록을 중복 없이 한 번씩 불러와서 Map으로 (실패한 것은 빠짐) */
 async function loadMap<T>(ids: number[], load: (id: number) => Promise<T>) {
   const unique = [...new Set(ids)];
@@ -53,8 +62,8 @@ async function loadInbox(): Promise<Participation[]> {
   const personIds = all
     .map(([r, dir]) => counterpartIdOf(r, dir, projects.get(r.projectId)))
     .filter((id): id is number => id !== undefined);
-  // 비공개 프로필은 403이라 빠지고, 아래에서 '비공개 프로필'로 채움
-  const people = await loadMap<PersonSummary>(personIds, async (id) => personFromDetail(await profilesApi.get(id)));
+  // 비공개 프로필은 403이라 빠지고 아래에서 '비공개 프로필'로 채움 (수락된 상대는 비공개여도 서버가 보여 줘요)
+  const people = await loadMap<PersonSummary>(personIds, async (id) => viewable(await profilesApi.get(id)));
 
   const seen = loadSeen();
   return all.map(([r, dir]) => {
@@ -160,11 +169,12 @@ export default function InboxPage() {
       const res = await participationApi.resolve(Number(item.project.id), Number(item.id), next);
       const status = res.status === 'ACCEPTED' ? 'accepted' : res.status === 'REJECTED' ? 'declined' : 'canceled';
       patch(item.id, { status, read: true });
-      // 수락하면 서버가 연락처를 열어 줘요 → 상대 프로필을 다시 불러와 연락처 반영
-      if (status === 'accepted' && item.counterpart.isPublic) {
+      // 수락하면 서버가 연락처를 열어 줘요 (비공개 프로필이어도) → 상대 프로필을 다시 불러와 반영
+      const counterpartId = Number(item.counterpart.id);
+      if (status === 'accepted' && Number.isInteger(counterpartId)) {
         profilesApi
-          .get(Number(item.counterpart.id))
-          .then((res) => patch(item.id, { counterpart: personFromDetail(res) }))
+          .get(counterpartId)
+          .then((res) => patch(item.id, { counterpart: viewable(res) }))
           .catch(() => undefined);
       }
       const seen = loadSeen();

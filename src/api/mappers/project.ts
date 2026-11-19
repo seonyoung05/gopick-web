@@ -68,6 +68,11 @@ const shortDate = (iso: string) => {
   const d = new Date(iso);
   return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
 };
+/** "2026-11-19" → "11/19" (활동 기록 날짜) */
+const dayText = (ymd: string) => {
+  const [, m, d] = ymd.split('-');
+  return m && d ? `${m}/${d}` : ymd;
+};
 /** "2026-11-11T12:00:00" → "2026.11" */
 const monthDate = (iso: string) => {
   const d = new Date(iso);
@@ -174,9 +179,9 @@ export function toTeamProject(
     members: p.members.map((m) => ({ profileId: m.profileId, name: memberName(m.name), role: roleLabel(m.role) })),
     // 목록에는 링크가 없어서, 상세를 불러오기 전에는 비어 있어요
     outputs: p.links && p.links.length > 0 ? p.links.map((l) => ({ label: l.type, url: l.url })) : undefined,
-    // 세부 과제·활동 기록은 아직 서버에 없어서 빈 값 (화면에서만 체크 가능)
-    tasks: STAGES.map(() => []),
-    log: [],
+    // 세부 과제·활동 기록은 상세에만 있어서, 상세를 불러오기 전에는 비어 있어요
+    tasks: STAGES.map((_, i) => (p.tasks?.[i] ?? []).map((t) => ({ id: t.id, text: t.text, done: t.done }))),
+    log: (p.log ?? []).map((l) => ({ id: l.id, date: dayText(l.date), author: l.author, text: l.text })),
   };
 }
 
