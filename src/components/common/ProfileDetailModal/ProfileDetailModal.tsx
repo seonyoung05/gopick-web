@@ -82,9 +82,13 @@ export function ProfileDetailModal({ person, onClose, saved, onToggleSave, onOff
           <dd><Value>{person.intro}</Value></dd>
 
           <dt>연락처</dt>
-          {person.contact ? (
+          {person.contacts && person.contacts.length > 0 ? (
             <dd>
-              {person.contact.platform} · {person.contact.id}
+              {person.contacts.map((c) => (
+                <div key={`${c.platform}-${c.value}`}>
+                  {c.platform} · {c.value}
+                </div>
+              ))}
             </dd>
           ) : (
             <dd className={styles.muted}>제안·지원이 수락되면 서로 공개돼요</dd>

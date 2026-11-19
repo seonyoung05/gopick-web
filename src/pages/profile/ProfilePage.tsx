@@ -1,6 +1,7 @@
 // src/pages/profile/ProfilePage.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Plus, X } from 'lucide-react';
 import { Field } from '../../components/common/Field';
 import { FormSection } from '../../components/common/FormSection';
 import { EtcChipGroup } from '../../components/common/EtcChipGroup';
@@ -28,6 +29,8 @@ import {
 } from '../../constants/options';
 import type { TechLevel } from '../../constants/levels';
 import {
+  MAX_CONTACTS,
+  type ContactEntry,
   EMPTY_PROFILE,
   createEmptyExperience,
   type Experience,
@@ -116,6 +119,23 @@ export default function ProfilePage() {
   /* ---------- 프로젝트 경험 ---------- */
   const addExperience = () =>
     setForm((prev) => ({ ...prev, experiences: [...prev.experiences, createEmptyExperience()] }));
+
+  /* ---------- 연락처 (여러 개) ---------- */
+  const usedContactTypes = new Set(form.contacts.map((c) => c.type));
+  const setContact = (index: number, patch: Partial<ContactEntry>) =>
+    update(
+      'contacts',
+      form.contacts.map((c, i) => (i === index ? { ...c, ...patch } : c)),
+    );
+  const addContact = () => {
+    const next = CONTACT_TYPES.find((t) => !usedContactTypes.has(t)) ?? '기타';
+    update('contacts', [...form.contacts, { type: next, value: '' }]);
+  };
+  const removeContact = (index: number) =>
+    update(
+      'contacts',
+      form.contacts.filter((_, i) => i !== index),
+    );
 
   const updateExperience = (id: string, patch: Partial<Experience>) =>
     setForm((prev) => ({
@@ -288,23 +308,42 @@ export default function ProfilePage() {
             </div>
 
             <Field label="연락처" req="필수" hint="지원·제안이 수락된 상대에게만 공개돼요" error={err('contact')}>
-              <div className={styles.contactRow}>
-                <Select
-                  options={CONTACT_TYPES}
-                  value={form.contactType}
-                  onChange={(e) => {
-                    update('contactType', e.target.value as ContactType);
-                    update('contactValue', '');
-                  }}
-                  style={{ width: 170, flexShrink: 0 }}
-                />
-                <Input
-                  invalid={!!err('contact')}
-                  type={CONTACT_INPUT_TYPE[form.contactType]}
-                  placeholder={CONTACT_PLACEHOLDER[form.contactType]}
-                  value={form.contactValue}
-                  onChange={(e) => update('contactValue', e.target.value)}
-                />
+              <div className={styles.contactList}>
+                {form.contacts.map((c, i) => (
+                  <div key={i} className={styles.contactRow}>
+                    <Select
+                      aria-label={`연락처 ${i + 1} 종류`}
+                      // 다른 줄에서 이미 고른 종류는 빼고 보여 줘요
+                      options={CONTACT_TYPES.filter((t) => t === c.type || !usedContactTypes.has(t))}
+                      value={c.type}
+                      onChange={(e) => setContact(i, { type: e.target.value as ContactType, value: '' })}
+                      style={{ width: 170, flexShrink: 0 }}
+                    />
+                    <Input
+                      aria-label={`연락처 ${i + 1}`}
+                      invalid={!!err('contact') && c.value.trim() === ''}
+                      type={CONTACT_INPUT_TYPE[c.type]}
+                      placeholder={CONTACT_PLACEHOLDER[c.type]}
+                      value={c.value}
+                      onChange={(e) => setContact(i, { value: e.target.value })}
+                    />
+                    {form.contacts.length > 1 && (
+                      <button
+                        type="button"
+                        className={styles.contactRemove}
+                        aria-label={`연락처 ${i + 1} 지우기`}
+                        onClick={() => removeContact(i)}
+                      >
+                        <X size={16} aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {form.contacts.length < MAX_CONTACTS && (
+                  <button type="button" className={styles.contactAdd} onClick={addContact}>
+                    <Plus size={14} aria-hidden="true" /> 연락처 추가 ({form.contacts.length}/{MAX_CONTACTS})
+                  </button>
+                )}
               </div>
             </Field>
 

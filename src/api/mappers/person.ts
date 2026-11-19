@@ -2,7 +2,7 @@
 // 서버 프로필 응답 → 검색·저장함 카드에서 쓰는 PersonSummary
 import { TECH_LEVELS } from '../../constants/levels';
 import type { PersonSummary, Skill } from '../../types/person';
-import type { ProfileDetailResponse, ProfileSearchItem, TechnologyDto } from '../profiles';
+import { contactsOf, type ProfileDetailResponse, type ProfileSearchItem, type TechnologyDto } from '../profiles';
 
 /** 숫자 수준(1~4) → '입문' … '심화 경험' (범위 밖이면 버림) */
 function toSkills(technologies: TechnologyDto[]): Skill[] {
@@ -55,7 +55,7 @@ export function personFromDetail(res: ProfileDetailResponse): PersonSummary {
     collab: prefs('COLLAB'),
     intro: res.intro ?? '',
     teamTendency: res.teamTendency ?? undefined,
-    contact: res.contactId ? { platform: res.contactPlatform || '연락처', id: res.contactId } : undefined,
+    contacts: contactsOf(res),
     experiences,
   };
 }

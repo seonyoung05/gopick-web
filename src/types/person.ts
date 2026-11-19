@@ -20,6 +20,6 @@ export interface PersonSummary {
   intro: string;
   teamTendency?: string;    // Lead / Follow / 상관없음
   experiences?: string[];   // 프로젝트 경험 한 줄 요약
-  /** 연락처 (서버가 볼 권한이 있을 때만 줘요: 본인, 또는 수락된 요청의 상대) */
-  contact?: { platform: string; id: string };
+  /** 연락처 (서버가 볼 권한이 있을 때만 줘요: 본인, 또는 수락된 요청의 상대). 여러 개일 수 있어요 */
+  contacts?: { platform: string; value: string }[];
 }

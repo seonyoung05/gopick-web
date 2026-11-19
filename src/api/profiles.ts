@@ -6,9 +6,24 @@ export interface TechnologyDto {
   level: number; // 1~4
 }
 
+/** 연락처 한 줄 (여러 개 등록 가능, 최대 3개) */
+export interface ContactDto {
+  platform: string;
+  value: string;
+}
+
+/** 응답 → 연락처 목록 (새 형식 contacts가 있으면 그걸, 없으면 예전 한 쌍) */
+export function contactsOf(res: Pick<ProfileDetailResponse, 'contacts' | 'contactPlatform' | 'contactId'>): ContactDto[] {
+  if (res.contacts && res.contacts.length > 0) return res.contacts.filter((c) => c.value);
+  return res.contactId ? [{ platform: res.contactPlatform || '기타', value: res.contactId }] : [];
+}
+
 export interface ProfileRequest {
   name: string;
   major: string;
+  /** 여러 연락처 (서버가 아직 모르면 무시하고 아래 한 쌍을 써요) */
+  contacts: ContactDto[];
+  /** 예전 형식: 첫 번째 연락처 (서버 전환 기간 동안 같이 보내요) */
   contactPlatform: string;
   contactId: string;
   isPublic: boolean;
@@ -41,9 +56,11 @@ export interface ProfileDetailResponse {
   profileId: number;
   name: string;
   major: string;
-  /** 본인 프로필 조회일 때만 옴 */
-  contactPlatform?: string;
-  contactId?: string;
+  /** 본인 · 수락된 참여 요청 상대에게만 옴 (그 외 null) */
+  contacts?: ContactDto[] | null;
+  /** 예전 형식 (한 쌍) */
+  contactPlatform?: string | null;
+  contactId?: string | null;
   isPublic: boolean;
   teamTendency: string | null;
   intro: string | null;
