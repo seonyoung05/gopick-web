@@ -218,6 +218,19 @@ export default function ProjectsPage() {
     };
   }, [projects, scrapIds, myProfileId, mineOnly]);
 
+  // 모집 중 탭에 ?project=번호 로 들어오면(홈 "자세히 보기", 저장함 "프로젝트에서 보기") 그 모집글 모달을 열어요
+  const openProjectId = tab === 'recruit' ? params.get('project') : null;
+  useEffect(() => {
+    if (!openProjectId || status !== 'done') return;
+    const target = lists.recruit.find((p) => p.id === openProjectId);
+    if (target) setViewTarget(target);
+    // 한 번 열었으면(또는 목록에 없으면) 주소에서 지워서 새로고침·닫기 뒤에 다시 열리지 않게
+    const next = new URLSearchParams(params);
+    next.delete('project');
+    setParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openProjectId, status]);
+
   const findProject = (id: string) => projects.find((p) => String(p.projectId) === id);
   const deleteRaw = deleteId ? findProject(deleteId) : undefined;
   const leaveRaw = leaveId ? findProject(leaveId) : undefined;
