@@ -103,7 +103,7 @@ export function ScrapsTab({ onCountChange }: ScrapsTabProps) {
             <h3 className={`t-h3 ${s.title}`}>{p.title}</h3>
             {p.description && <p className={s.desc}>{p.description}</p>}
             <div className={s.actions}>
-              <Button size="sm" variant="ghost" onClick={() => navigate(`/projects?tab=${tab}`)}>
+              <Button size="sm" variant="ghost" onClick={() => navigate(`/projects?tab=${tab}&project=${p.projectId}`)}>
                 프로젝트에서 보기
               </Button>
             </div>

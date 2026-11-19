@@ -140,7 +140,7 @@ export default function HomePage() {
               project={p}
               applied={feed.appliedIds.has(p.id)}
               onToggleScrap={gated('스크랩하려면', () => feed.toggleScrap(p.id))}
-              onDetail={gated('자세히 보려면', () => navigate('/projects?tab=recruit'))}
+              onDetail={gated('자세히 보려면', () => navigate(`/projects?tab=recruit&project=${p.id}`))}
               onApply={gated('지원하려면', () => setApplyTarget(p))}
               onEdit={() => navigate(`/manage?id=${p.id}`)}
               onRecommend={() => navigate(`/recommend?projectId=${p.id}`)}
