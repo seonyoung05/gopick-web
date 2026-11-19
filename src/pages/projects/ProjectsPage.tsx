@@ -6,7 +6,9 @@ import {
   ERROR_CODE,
   participationApi,
   projectsApi,
+  projectWorkApi,
   type ProjectData as ApiProject,
+  type ProjectTask,
 } from '../../api';
 import { participationErrorText } from '../../api/mappers/participation';
 import {
@@ -23,9 +25,8 @@ import { Button } from '../../components/ui/Button';
 import { Tabs, type TabItem } from '../../components/ui/Tabs';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { useAuth } from '../../stores/auth';
-import type { ActivityLog, OutputLink, RecruitProject, StageTask, TeamProject } from '../../types/project';
+import type { OutputLink, RecruitProject } from '../../types/project';
 import { ApplyModal, type ApplyPayload } from './ApplyModal';
-import { monthDay } from './formatDate';
 import { DeleteProjectModal } from '../project-form/DeleteProjectModal';
 import { LeaveProjectModal } from './LeaveProjectModal';
 import { toLeaveTarget } from './leaveTarget';
@@ -41,30 +42,6 @@ type TeamTabKey = Exclude<TabKey, 'recruit'>;
 type LoadStatus = 'loading' | 'error' | 'done';
 
 const TAB_KEYS: readonly TabKey[] = ['recruit', 'ongoing', 'done'];
-
-const TASKS_STORAGE_KEY = 'gopick:stage-tasks';
-
-/** 저장해 둔 세부 과제 (없거나 읽을 수 없으면 빈 값) */
-function loadSavedTasks(): Record<string, StageTask[][]> {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(TASKS_STORAGE_KEY) ?? '{}');
-    return parsed && typeof parsed === 'object' ? (parsed as Record<string, StageTask[][]>) : {};
-  } catch {
-    return {};
-  }
-}
-
-const LOGS_STORAGE_KEY = 'gopick:activity-logs';
-
-/** 저장해 둔 활동 기록 (없거나 읽을 수 없으면 빈 값) */
-function loadSavedLogs(): Record<string, ActivityLog[]> {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(LOGS_STORAGE_KEY) ?? '{}');
-    return parsed && typeof parsed === 'object' ? (parsed as Record<string, ActivityLog[]>) : {};
-  } catch {
-    return {};
-  }
-}
 
 /** 서버 에러 → 안내 문구 */
 function errorText(e: unknown, fallback: string) {
@@ -86,27 +63,6 @@ export default function ProjectsPage() {
   const { account, profileName } = useAuth();
   // 활동 기록에 남길 이름 (프로필이 아직 없으면 '나')
   const author = profileName ?? '나';
-  // 활동 기록 API가 아직 없어서, 새 기록은 이 화면 안에서만 보관해요 (새로고침하면 사라져요)
-  // 서버 API가 아직 없어서, 바뀔 때마다 이 브라우저(localStorage)에 바로 저장해요
-  const [newLogs, setNewLogs] = useState<Record<string, ActivityLog[]>>(loadSavedLogs);
-  const [taskEdits, setTaskEdits] = useState<Record<string, StageTask[][]>>(loadSavedTasks);
-  const persist = (key: string, value: unknown) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-      toast('저장하지 못했어요. 브라우저 저장 공간을 확인해 주세요');
-    }
-  };
-  const editTasks = (base: TeamProject, fn: (tasks: StageTask[][]) => StageTask[][]) => {
-    const next = { ...taskEdits, [base.id]: fn(taskEdits[base.id] ?? base.tasks) };
-    setTaskEdits(next);
-    persist(TASKS_STORAGE_KEY, next);
-  };
-  const addLog = (id: string, text: string) => {
-    const next = { ...newLogs, [id]: [{ date: monthDay(), author, text }, ...(newLogs[id] ?? [])] };
-    setNewLogs(next);
-    persist(LOGS_STORAGE_KEY, next);
-  };
   const myProfileId = account?.profileId;
 
   const [params, setParams] = useSearchParams();
@@ -254,6 +210,64 @@ export default function ProjectsPage() {
     };
   }, [viewingId, viewingNeedsDetail]);
 
+  /* ---------- 세부 과제 · 활동 기록 (누를 때마다 바로 서버에 저장) ---------- */
+
+  /** 한 프로젝트만 바꾸기 */
+  const patchProject = (id: string, fn: (p: ApiProject) => ApiProject) =>
+    setProjects((prev) => prev.map((p) => (String(p.projectId) === id ? fn(p) : p)));
+  const withTasks = (fn: (all: ProjectTask[][]) => ProjectTask[][]) => (p: ApiProject) => ({
+    ...p,
+    tasks: fn(p.tasks ?? API_STAGES.map(() => [])),
+  });
+  const setDone = (taskId: number, done: boolean) =>
+    withTasks((all) => all.map((list) => list.map((t) => (t.id === taskId ? { ...t, done } : t))));
+
+  /** 체크 / 해제: 화면 먼저 바꾸고, 실패하면 되돌려요 */
+  const toggleTask = async (projectId: string, taskId: number, done: boolean) => {
+    patchProject(projectId, setDone(taskId, done));
+    try {
+      await projectWorkApi.setTaskDone(Number(projectId), taskId, done);
+    } catch (e) {
+      patchProject(projectId, setDone(taskId, !done));
+      toast(errorText(e, '과제를 저장하지 못했어요. 잠시 후 다시 시도해 주세요'));
+    }
+  };
+
+  /** 추가: 서버가 준 id로 목록에 붙여요 */
+  const addTask = async (projectId: string, stageIndex: number, text: string) => {
+    try {
+      const task = await projectWorkApi.addTask(Number(projectId), { stage: API_STAGES[stageIndex], text });
+      patchProject(
+        projectId,
+        withTasks((all) => all.map((list, i) => (i === stageIndex ? [...list, task] : list))),
+      );
+    } catch (e) {
+      toast(errorText(e, '과제를 추가하지 못했어요. 잠시 후 다시 시도해 주세요'));
+    }
+  };
+
+  /** 삭제: 화면에서 먼저 빼고, 실패하면 되돌려요 */
+  const removeTask = async (projectId: string, taskId: number) => {
+    const before = findProject(projectId)?.tasks;
+    patchProject(projectId, withTasks((all) => all.map((list) => list.filter((t) => t.id !== taskId))));
+    try {
+      await projectWorkApi.removeTask(Number(projectId), taskId);
+    } catch (e) {
+      patchProject(projectId, (p) => ({ ...p, tasks: before }));
+      toast(errorText(e, '과제를 삭제하지 못했어요. 잠시 후 다시 시도해 주세요'));
+    }
+  };
+
+  /** 활동 기록 남기기 (작성자·날짜는 서버가 채워요) */
+  const addLog = async (projectId: string, text: string) => {
+    try {
+      const entry = await projectWorkApi.addActivity(Number(projectId), text);
+      patchProject(projectId, (p) => ({ ...p, log: [entry, ...(p.log ?? [])] }));
+    } catch (e) {
+      toast(errorText(e, '기록을 남기지 못했어요. 잠시 후 다시 시도해 주세요'));
+    }
+  };
+
   /** 한 프로젝트만 다시 불러와서 교체 (시작·단계 변경·완료 뒤) */
   const refreshOne = async (id: string) => {
     const fresh = await projectsApi.get(Number(id));
@@ -368,7 +382,7 @@ export default function ProjectsPage() {
     }
 
     const base = list.find((p) => p.id === selected[key]) ?? list[0];
-    const current = { ...base, tasks: taskEdits[base.id] ?? base.tasks, log: [...(newLogs[base.id] ?? []), ...base.log] };
+    const current = base;
     const raw = findProject(current.id);
     const { isMember, isLeader } = raw ? myMembership(raw, myProfileId) : { isMember: false, isLeader: false };
     const canEdit = key === 'ongoing' && isMember;
@@ -403,17 +417,9 @@ export default function ProjectsPage() {
             author={author}
             onAddLog={(text) => addLog(current.id, text)}
             onToggleScrap={() => toggleScrap(current.id)}
-            onToggleTask={(stage, ti, done) =>
-              editTasks(current, (all) =>
-                all.map((list, si) => (si === stage ? list.map((t, i) => (i === ti ? { ...t, done } : t)) : list)),
-              )
-            }
-            onAddTask={(stage, text) =>
-              editTasks(current, (all) => all.map((list, si) => (si === stage ? [...list, { text, done: false }] : list)))
-            }
-            onRemoveTask={(stage, ti) =>
-              editTasks(current, (all) => all.map((list, si) => (si === stage ? list.filter((_, i) => i !== ti) : list)))
-            }
+            onToggleTask={(stage, ti, done) => toggleTask(current.id, current.tasks[stage][ti].id, done)}
+            onAddTask={(stage, text) => addTask(current.id, stage, text)}
+            onRemoveTask={(stage, ti) => removeTask(current.id, current.tasks[stage][ti].id)}
             onChangeStage={canEdit ? (index) => changeStage(current.id, index) : undefined}
             onComplete={canEdit && isLeader ? (outputs) => completeProject(current.id, outputs) : undefined}
             onLeave={key === 'ongoing' && isMember ? () => setLeaveId(current.id) : undefined}
