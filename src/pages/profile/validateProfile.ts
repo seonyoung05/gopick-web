@@ -30,12 +30,21 @@ export function validateProfile(form: ProfileForm): ProfileErrors {
   if (isBlank(form.name)) errors.name = '이름을 입력해 주세요.';
   if (isBlank(form.major)) errors.major = '전공을 입력해 주세요.';
 
-  if (isBlank(form.contactValue)) {
-    errors.contact = '연락처를 입력해 주세요.';
-  } else if (form.contactType === '이메일' && !EMAIL_RE.test(form.contactValue.trim())) {
-    errors.contact = '이메일 형식을 확인해 주세요. (예: name@example.com)';
-  } else if (form.contactType === '링크드인' && !form.contactValue.includes('linkedin.com')) {
-    errors.contact = '링크드인 프로필 주소를 입력해 주세요.';
+  // 연락처: 하나 이상, 줄마다 형식 확인 (첫 번째로 걸린 줄의 문구를 보여 줘요)
+  const filled = form.contacts.filter((c) => !isBlank(c.value));
+  if (filled.length === 0) {
+    errors.contact = '연락처를 하나 이상 입력해 주세요.';
+  } else {
+    for (const c of form.contacts) {
+      if (isBlank(c.value)) {
+        errors.contact = `${c.type} 칸이 비어 있어요. 입력하거나 줄을 지워 주세요.`;
+      } else if (c.type === '이메일' && !EMAIL_RE.test(c.value.trim())) {
+        errors.contact = '이메일 형식을 확인해 주세요. (예: name@example.com)';
+      } else if (c.type === '링크드인' && !c.value.includes('linkedin.com')) {
+        errors.contact = '링크드인 프로필 주소를 입력해 주세요.';
+      }
+      if (errors.contact) break;
+    }
   }
 
   if (form.parts.length === 0) errors.parts = '소속 파트를 하나 이상 골라 주세요.';

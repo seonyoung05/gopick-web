@@ -23,12 +23,20 @@ export interface CollabPreference {
   communication: string[]; // 커뮤니케이션
 }
 
+export interface ContactEntry {
+  type: ContactType;
+  value: string;
+}
+
+/** 연락처 최대 개수 */
+export const MAX_CONTACTS = 3;
+
 export interface ProfileForm {
   // 기본 정보
   name: string;
   major: string;
-  contactType: ContactType;
-  contactValue: string;
+  /** 연락처 (최소 1개, 최대 MAX_CONTACTS개, 같은 종류는 한 번씩) */
+  contacts: ContactEntry[];
   isPublic: boolean;
   parts: string[];
 
@@ -59,8 +67,7 @@ export interface ProfileForm {
 export const EMPTY_PROFILE: ProfileForm = {
   name: '',
   major: '',
-  contactType: '디스코드',
-  contactValue: '',
+  contacts: [{ type: '디스코드', value: '' }],
   isPublic: true,
   parts: [],
   stacks: [],

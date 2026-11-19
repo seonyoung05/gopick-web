@@ -29,10 +29,49 @@
   gap: 16px;
 }
 
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 580px;
+}
+
 .contactRow {
   display: flex;
+  align-items: center;
   gap: 8px;
-  max-width: 540px;
+}
+
+.contactRemove {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--sub);
+  cursor: pointer;
+}
+
+.contactRemove:hover {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.contactAdd {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: var(--blue-deep);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* ---------- 왼쪽 진행도 카드 ---------- */

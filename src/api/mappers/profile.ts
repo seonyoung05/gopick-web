@@ -7,7 +7,7 @@ import {
   type CollabPreference,
   type ProfileForm,
 } from '../../types/profile';
-import type { PreferenceCategory, ProfileDetailResponse, ProfileRequest } from '../profiles';
+import { contactsOf, type PreferenceCategory, type ProfileDetailResponse, type ProfileRequest } from '../profiles';
 
 const ETC = '기타';
 
@@ -38,11 +38,16 @@ export function toProfileRequest(form: ProfileForm): ProfileRequest {
     return name && level ? [{ technology: name, level: levelToNumber(level) }] : [];
   });
 
+  const contacts = form.contacts
+    .filter((c) => c.value.trim() !== '')
+    .map((c) => ({ platform: c.type, value: c.value.trim() }));
+
   return {
     name: form.name.trim(),
     major: form.major.trim(),
-    contactPlatform: form.contactType,
-    contactId: form.contactValue.trim(),
+    contacts,
+    contactPlatform: contacts[0]?.platform ?? '',
+    contactId: contacts[0]?.value ?? '',
     isPublic: form.isPublic,
     parts: form.parts,
     technologies,
@@ -81,16 +86,15 @@ export function fromProfileDetail(res: ProfileDetailResponse): ProfileForm {
   }
 
   // 연락처 종류: 모르는 값이면 '기타'
-  const contactType = (CONTACT_TYPES as readonly string[]).includes(res.contactPlatform ?? '')
-    ? (res.contactPlatform as ContactType)
-    : '기타';
+  const toType = (platform: string): ContactType =>
+    (CONTACT_TYPES as readonly string[]).includes(platform) ? (platform as ContactType) : '기타';
+  const contacts = contactsOf(res).map((c) => ({ type: toType(c.platform), value: c.value }));
 
   return {
     ...EMPTY_PROFILE,
     name: res.name,
     major: res.major,
-    contactType,
-    contactValue: res.contactId ?? '',
+    contacts: contacts.length > 0 ? contacts : EMPTY_PROFILE.contacts,
     isPublic: res.isPublic,
     parts: res.parts,
     stacks: res.technologies.map((t) => t.technology), // 선택지에 없는 기술도 그대로 (칩으로 표시)

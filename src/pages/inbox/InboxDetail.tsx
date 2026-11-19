@@ -47,11 +47,10 @@ export function InboxDetail({
   const canRespond = isPending && item.direction === 'received';
   const canCancel = isPending && item.direction === 'sent';
 
-  const copyContact = async () => {
-    const contact = item.counterpart.contact;
-    if (!contact) return;
+  const contacts = item.counterpart.contacts ?? [];
+  const copyContact = async (value: string) => {
     try {
-      await navigator.clipboard.writeText(contact.id);
+      await navigator.clipboard.writeText(value);
       toast('연락처를 복사했어요', 'success');
     } catch {
       toast('복사하지 못했어요. 직접 선택해서 복사해 주세요', 'error');
@@ -119,17 +118,25 @@ export function InboxDetail({
       </div>
 
       {/* ---------- 연락처 (수락됐을 때만) ---------- */}
-      {item.status === 'accepted' && item.counterpart.contact && (
+      {item.status === 'accepted' && contacts.length > 0 && (
         <div className={styles.contact}>
-          <div>
-            <strong>연락처가 공개됐어요</strong>
-            <p>
-              {item.counterpart.contact.platform} · {item.counterpart.contact.id}
-            </p>
-          </div>
-          <Button variant="ghost" size="sm" icon={<Copy />} onClick={copyContact}>
-            복사
-          </Button>
+          <strong>연락처가 공개됐어요</strong>
+          {contacts.map((c) => (
+            <div key={`${c.platform}-${c.value}`} className={styles.contactLine}>
+              <p>
+                {c.platform} · {c.value}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<Copy />}
+                aria-label={`${c.platform} 복사`}
+                onClick={() => copyContact(c.value)}
+              >
+                복사
+              </Button>
+            </div>
+          ))}
         </div>
       )}
 
